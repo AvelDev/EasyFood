@@ -25,6 +25,5 @@ export type Order = {
 export type User = {
   uid: string;
   name: string;
-  email: string;
   role: "admin" | "user";
 };

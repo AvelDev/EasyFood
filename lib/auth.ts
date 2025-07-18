@@ -22,7 +22,6 @@ export const authOptions: NextAuthOptions = {
             const newUser: User = {
               uid: user.id,
               name: user.name || "Unknown",
-              email: user.email || "",
               role: "user", // default role
             };
             await setDoc(userRef, newUser);
