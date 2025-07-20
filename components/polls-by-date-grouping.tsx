@@ -16,6 +16,7 @@ import {
 
 interface PollsByDateGroupingProps {
   polls: Poll[];
+  onPollDeleted?: () => void;
 }
 
 type GroupedPolls = {
@@ -30,6 +31,7 @@ type GroupedPolls = {
 
 export default function PollsByDateGrouping({
   polls,
+  onPollDeleted,
 }: PollsByDateGroupingProps) {
   const [expandedArchive, setExpandedArchive] = useState(false);
   const [expandedFuture, setExpandedFuture] = useState(false);
@@ -220,7 +222,7 @@ export default function PollsByDateGrouping({
                           }}
                           layout
                         >
-                          <PollCard poll={poll} />
+                          <PollCard poll={poll} onPollDeleted={onPollDeleted} />
                         </motion.div>
                       ))}
                     </AnimatePresence>
@@ -285,7 +287,7 @@ export default function PollsByDateGrouping({
                           }}
                           layout
                         >
-                          <PollCard poll={poll} />
+                          <PollCard poll={poll} onPollDeleted={onPollDeleted} />
                         </motion.div>
                       ))}
                     </AnimatePresence>
@@ -396,7 +398,10 @@ export default function PollsByDateGrouping({
                                     duration: 0.2,
                                   }}
                                 >
-                                  <PollCard poll={poll} />
+                                  <PollCard
+                                    poll={poll}
+                                    onPollDeleted={onPollDeleted}
+                                  />
                                 </motion.div>
                               ))}
                             </motion.div>
@@ -509,7 +514,10 @@ export default function PollsByDateGrouping({
                                   }}
                                 >
                                   <div className="opacity-80 hover:opacity-100 transition-opacity">
-                                    <PollCard poll={poll} />
+                                    <PollCard
+                                      poll={poll}
+                                      onPollDeleted={onPollDeleted}
+                                    />
                                   </div>
                                 </motion.div>
                               ))}

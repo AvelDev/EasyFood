@@ -23,8 +23,10 @@ import AnimatedCounter from "@/components/animated-counter";
 import AnimatedProgressBar from "@/components/animated-progress-bar";
 import CountdownTimer from "@/components/countdown-timer";
 import VotingStatus from "@/components/voting-status";
+import DeletePollDialog from "@/components/delete-poll-dialog";
 import { pollAutoCloser } from "@/lib/poll-auto-closer";
 import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
 
 interface PollPageProps {
   params: {
@@ -35,6 +37,7 @@ interface PollPageProps {
 export default function PollPage({ params }: PollPageProps) {
   const { user, loading: authLoading, isProtected } = usePrivacyProtection();
   const router = useRouter();
+  const { toast } = useToast();
   const [poll, setPoll] = useState<Poll | null>(null);
   const [votes, setVotes] = useState<Vote[]>([]);
   const [userVote, setUserVote] = useState<Vote | null>(null);
@@ -49,6 +52,17 @@ export default function PollPage({ params }: PollPageProps) {
 
     // Set up real-time poll listener
     const unsubscribePoll = subscribeToPoll(params.id, (pollData) => {
+      if (pollData === null) {
+        // Głosowanie zostało usunięte
+        toast({
+          title: "Głosowanie usunięte",
+          description: "To głosowanie zostało usunięte przez administratora.",
+          variant: "destructive",
+        });
+        router.push("/");
+        return;
+      }
+
       setPoll(pollData);
 
       // Schedule auto-close for active polls
@@ -92,7 +106,7 @@ export default function PollPage({ params }: PollPageProps) {
       // Cancel auto-close timer when component unmounts
       pollAutoCloser.cancelPollClosure(params.id);
     };
-  }, [params.id, user?.uid]);
+  }, [params.id, user?.uid, router, toast]);
 
   const handleVote = async () => {
     if (!user?.uid || !poll || !selectedRestaurant) return;
@@ -245,15 +259,18 @@ export default function PollPage({ params }: PollPageProps) {
               className="flex items-center gap-2"
             />
 
-            {user?.role === "admin" && isActive && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleClosePoll}
-                className="ml-2"
-              >
-                Zamknij głosowanie
-              </Button>
+            {user?.role === "admin" && (
+              <div className="flex items-center gap-2">
+                {isActive && (
+                  <Button variant="outline" size="sm" onClick={handleClosePoll}>
+                    Zamknij głosowanie
+                  </Button>
+                )}
+                <DeletePollDialog
+                  poll={poll}
+                  onPollDeleted={() => router.push("/")}
+                />
+              </div>
             )}
           </div>
         </div>

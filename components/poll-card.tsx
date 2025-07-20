@@ -12,13 +12,17 @@ import AnimatedCounter from "./animated-counter";
 import CountdownTimer from "./countdown-timer";
 import VotingStatus from "./voting-status";
 import DateDisplay from "./date-display";
+import DeletePollDialog from "./delete-poll-dialog";
+import { useAuthContext } from "@/contexts/auth-context";
 
 interface PollCardProps {
   poll: Poll;
+  onPollDeleted?: () => void;
 }
 
-export default function PollCard({ poll }: PollCardProps) {
+export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
   const router = useRouter();
+  const { user } = useAuthContext();
 
   const { isActive, isEnded } = useMemo(() => {
     const now = new Date();
@@ -39,7 +43,16 @@ export default function PollCard({ poll }: PollCardProps) {
             <CardTitle className="text-xl font-semibold text-slate-800">
               {poll.title}
             </CardTitle>
-            <VotingStatus poll={poll} />
+            <div className="flex items-center gap-2">
+              <VotingStatus poll={poll} />
+              {user?.role === "admin" && (
+                <DeletePollDialog
+                  poll={poll}
+                  onPollDeleted={onPollDeleted}
+                  className="h-auto p-2"
+                />
+              )}
+            </div>
           </div>
         </CardHeader>
 

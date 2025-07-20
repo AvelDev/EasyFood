@@ -43,7 +43,7 @@ export const getPolls = async (): Promise<Poll[]> => {
 // Real-time polls listener
 export const subscribeToPolls = (callback: (polls: Poll[]) => void) => {
   const q = query(collection(db, "polls"), orderBy("votingEndsAt", "desc"));
-  
+
   return onSnapshot(q, (querySnapshot: QuerySnapshot<DocumentData>) => {
     const polls = querySnapshot.docs.map((doc) => ({
       id: doc.id,
@@ -69,9 +69,12 @@ export const getPoll = async (id: string): Promise<Poll | null> => {
 };
 
 // Real-time poll listener
-export const subscribeToPoll = (id: string, callback: (poll: Poll | null) => void) => {
+export const subscribeToPoll = (
+  id: string,
+  callback: (poll: Poll | null) => void
+) => {
   const docRef = doc(db, "polls", id);
-  
+
   return onSnapshot(docRef, (docSnap: DocumentSnapshot<DocumentData>) => {
     if (docSnap.exists()) {
       const poll = {
@@ -122,9 +125,12 @@ export const getVotes = async (pollId: string): Promise<Vote[]> => {
 };
 
 // Real-time votes listener
-export const subscribeToVotes = (pollId: string, callback: (votes: Vote[]) => void) => {
+export const subscribeToVotes = (
+  pollId: string,
+  callback: (votes: Vote[]) => void
+) => {
   const votesRef = collection(db, "polls", pollId, "votes");
-  
+
   return onSnapshot(votesRef, (querySnapshot: QuerySnapshot<DocumentData>) => {
     const votes = querySnapshot.docs.map((doc) => ({
       ...doc.data(),
@@ -174,9 +180,12 @@ export const getOrders = async (pollId: string): Promise<Order[]> => {
 };
 
 // Real-time orders listener
-export const subscribeToOrders = (pollId: string, callback: (orders: Order[]) => void) => {
+export const subscribeToOrders = (
+  pollId: string,
+  callback: (orders: Order[]) => void
+) => {
   const ordersRef = collection(db, "polls", pollId, "orders");
-  
+
   return onSnapshot(ordersRef, (querySnapshot: QuerySnapshot<DocumentData>) => {
     const orders = querySnapshot.docs.map((doc) => ({
       ...doc.data(),
@@ -220,4 +229,9 @@ export const getUser = async (uid: string): Promise<User | null> => {
 export const updateUserRole = async (uid: string, role: "admin" | "user") => {
   const docRef = doc(db, "users", uid);
   await updateDoc(docRef, { role });
+};
+
+export const deletePoll = async (id: string) => {
+  const docRef = doc(db, "polls", id);
+  await deleteDoc(docRef);
 };

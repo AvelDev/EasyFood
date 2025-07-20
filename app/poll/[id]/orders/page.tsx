@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePrivacyProtection } from "@/hooks/use-privacy-protection";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -39,6 +40,7 @@ interface OrdersPageProps {
 export default function OrdersPage({ params }: OrdersPageProps) {
   const { user, loading: authLoading, isProtected } = usePrivacyProtection();
   const router = useRouter();
+  const { toast } = useToast();
   const [poll, setPoll] = useState<Poll | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [userOrder, setUserOrder] = useState<Order | null>(null);
@@ -62,6 +64,17 @@ export default function OrdersPage({ params }: OrdersPageProps) {
     const fetchInitialData = async () => {
       try {
         const pollData = await getPoll(params.id);
+        if (!pollData) {
+          // Głosowanie zostało usunięte
+          toast({
+            title: "Głosowanie usunięte",
+            description: "To głosowanie zostało usunięte przez administratora.",
+            variant: "destructive",
+          });
+          router.push("/");
+          return;
+        }
+
         if (pollData) {
           setPoll(pollData);
 
@@ -93,7 +106,7 @@ export default function OrdersPage({ params }: OrdersPageProps) {
     return () => {
       unsubscribeOrders();
     };
-  }, [params.id, user?.uid, setValue]);
+  }, [params.id, user?.uid, setValue, router, toast]);
 
   const onSubmit = async (data: OrderFormData) => {
     if (!user?.uid || !poll) return;

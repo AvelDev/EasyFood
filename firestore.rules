@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Funkcja pomocnicza do sprawdzania czy użytkownik jest administratorem
+    function isAdmin() {
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Dostęp do danych użytkowników tylko dla zalogowanych
+    match /users/{userId} {
+      allow read, create, update: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Dostęp do głosowań (polls)
+    match /polls/{pollId} {
+      // Czytanie i tworzenie dla wszystkich zalogowanych użytkowników
+      allow read, create, update: if request.auth != null;
+      
+      // Usuwanie tylko dla administratorów
+      allow delete: if isAdmin();
+
+      // Dostęp do głosów w ramach danego głosowania
+      match /votes/{voteId} {
+        allow read, create: if request.auth != null;
+        // Głosy są automatycznie usuwane wraz z głosowaniem
+      }
+
+      // Dostęp do zamówień w ramach danego głosowania
+      match /orders/{orderId} {
+        allow read, create, update: if request.auth != null;
+        // Zamówienia są automatycznie usuwane wraz z głosowaniem
+      }
+    }
+  }
+}

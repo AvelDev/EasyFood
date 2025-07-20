@@ -53,6 +53,11 @@ export default function Home() {
     fetchPolls();
   };
 
+  const handlePollDeleted = () => {
+    // Odśwież listę głosowań po usunięciu
+    fetchPolls();
+  };
+
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -145,7 +150,7 @@ export default function Home() {
           </p>
         </div>
       ) : (
-        <PollsByDateGrouping polls={polls} />
+        <PollsByDateGrouping polls={polls} onPollDeleted={handlePollDeleted} />
       )}
     </div>
   );
