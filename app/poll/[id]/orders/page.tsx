@@ -17,9 +17,9 @@ import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, DollarSign, User, Clock } from "lucide-react";
 
 const orderSchema = z.object({
-  dish: z.string().min(1, "Dish name is required"),
+  dish: z.string().min(1, "Nazwa dania jest wymagana"),
   notes: z.string().optional(),
-  cost: z.number().min(0, "Cost must be positive"),
+  cost: z.number().min(0, "Koszt musi być dodatni"),
 });
 
 type OrderFormData = z.infer<typeof orderSchema>;
@@ -118,9 +118,9 @@ export default function OrdersPage({ params }: OrdersPageProps) {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-semibold text-slate-600 mb-4">
-          Poll not found
+          Głosowanie nie zostało znalezione
         </h2>
-        <Button onClick={() => router.push("/")}>Go back to home</Button>
+        <Button onClick={() => router.push("/")}>Powrót do strony głównej</Button>
       </div>
     );
   }
@@ -129,13 +129,13 @@ export default function OrdersPage({ params }: OrdersPageProps) {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-semibold text-slate-600 mb-4">
-          Poll is still active
+          Głosowanie jest nadal aktywne
         </h2>
         <p className="text-slate-500 mb-6">
-          Wait for the poll to close before placing orders
+          Poczekaj na zakończenie głosowania przed składaniem zamówień
         </p>
         <Button onClick={() => router.push(`/poll/${poll.id}`)}>
-          Go to poll
+          Przejdź do głosowania
         </Button>
       </div>
     );
@@ -151,28 +151,28 @@ export default function OrdersPage({ params }: OrdersPageProps) {
           onClick={() => router.push(`/poll/${poll.id}`)}
           className="mb-4 text-slate-600"
         >
-          ← Back to poll
+          ← Powrót do głosowania
         </Button>
 
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-bold text-slate-800 mb-2">
-              Orders for {poll.title}
+              Zamówienia dla {poll.title}
             </h1>
             <div className="flex items-center gap-4 text-slate-600">
               <div className="flex items-center gap-2">
                 <ShoppingCart className="w-4 h-4" />
-                <span>Restaurant: {poll.selectedRestaurant}</span>
+                <span>Restauracja: {poll.selectedRestaurant}</span>
               </div>
               <div className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
-                <span>Total: ${totalCost.toFixed(2)}</span>
+                <span>Łącznie: {totalCost.toFixed(2)} zł</span>
               </div>
             </div>
           </div>
 
           <Badge className="bg-green-100 text-green-700">
-            {orders.length} orders
+            {orders.length} zamówień
           </Badge>
         </div>
       </div>
@@ -182,7 +182,7 @@ export default function OrdersPage({ params }: OrdersPageProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ShoppingCart className="w-5 h-5" />
-              {userOrder ? "Your Order" : "Place Your Order"}
+              {userOrder ? "Twoje zamówienie" : "Złóż zamówienie"}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -190,25 +190,25 @@ export default function OrdersPage({ params }: OrdersPageProps) {
               <div className="space-y-4">
                 <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                   <h3 className="font-semibold text-green-800 mb-2">
-                    Order Submitted!
+                    Zamówienie złożone!
                   </h3>
                   <div className="space-y-2 text-sm">
                     <div>
-                      <strong>Dish:</strong> {userOrder.dish}
+                      <strong>Danie:</strong> {userOrder.dish}
                     </div>
                     <div>
-                      <strong>Cost:</strong> ${userOrder.cost.toFixed(2)}
+                      <strong>Koszt:</strong> {userOrder.cost.toFixed(2)} zł
                     </div>
                     {userOrder.notes && (
                       <div>
-                        <strong>Notes:</strong> {userOrder.notes}
+                        <strong>Uwagi:</strong> {userOrder.notes}
                       </div>
                     )}
                     <div className="flex items-center gap-2 text-slate-600">
                       <Clock className="w-4 h-4" />
                       <span>
-                        Ordered on {userOrder.createdAt.toLocaleDateString()} at{" "}
-                        {userOrder.createdAt.toLocaleTimeString([], {
+                        Zamówione {userOrder.createdAt.toLocaleDateString('pl-PL')} o{" "}
+                        {userOrder.createdAt.toLocaleTimeString('pl-PL', {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
@@ -218,16 +218,16 @@ export default function OrdersPage({ params }: OrdersPageProps) {
                 </div>
 
                 <p className="text-sm text-slate-600">
-                  Contact an admin if you need to modify your order.
+                  Skontaktuj się z administratorem, jeśli chcesz zmodyfikować swoje zamówienie.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="dish">Dish Name</Label>
+                  <Label htmlFor="dish">Nazwa dania</Label>
                   <Input
                     id="dish"
-                    placeholder="e.g., Chicken Teriyaki Bowl"
+                    placeholder="np. Kurczak Teriyaki"
                     {...register("dish")}
                   />
                   {errors.dish && (
@@ -238,7 +238,7 @@ export default function OrdersPage({ params }: OrdersPageProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="cost">Cost ($)</Label>
+                  <Label htmlFor="cost">Koszt (zł)</Label>
                   <Input
                     id="cost"
                     type="number"
@@ -254,10 +254,10 @@ export default function OrdersPage({ params }: OrdersPageProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="notes">Notes (optional)</Label>
+                  <Label htmlFor="notes">Uwagi (opcjonalne)</Label>
                   <Textarea
                     id="notes"
-                    placeholder="Any special instructions or modifications..."
+                    placeholder="Specjalne instrukcje lub modyfikacje..."
                     {...register("notes")}
                   />
                 </div>
@@ -267,7 +267,7 @@ export default function OrdersPage({ params }: OrdersPageProps) {
                   disabled={submitting}
                   className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
                 >
-                  {submitting ? "Submitting..." : "Submit Order"}
+                  {submitting ? "Wysyłanie..." : "Złóż zamówienie"}
                 </Button>
               </form>
             )}
@@ -278,13 +278,13 @@ export default function OrdersPage({ params }: OrdersPageProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="w-5 h-5" />
-              All Orders ({orders.length})
+              Wszystkie zamówienia ({orders.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
             {orders.length === 0 ? (
               <p className="text-slate-500 text-center py-8">
-                No orders yet. Be the first to place an order!
+                Brak zamówień. Bądź pierwszy i złóż zamówienie!
               </p>
             ) : (
               <div className="space-y-4">
@@ -302,7 +302,7 @@ export default function OrdersPage({ params }: OrdersPageProps) {
                         {order.dish}
                       </h3>
                       <Badge variant="outline" className="text-green-600">
-                        ${order.cost.toFixed(2)}
+                        {order.cost.toFixed(2)} zł
                       </Badge>
                     </div>
 
@@ -315,15 +315,15 @@ export default function OrdersPage({ params }: OrdersPageProps) {
                     <div className="flex items-center gap-2 text-xs text-slate-500">
                       <Clock className="w-3 h-3" />
                       <span>
-                        {order.createdAt.toLocaleDateString()} at{" "}
-                        {order.createdAt.toLocaleTimeString([], {
+                        {order.createdAt.toLocaleDateString('pl-PL')} o{" "}
+                        {order.createdAt.toLocaleTimeString('pl-PL', {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
                       </span>
                       {order.userId === user?.uid && (
                         <Badge className="bg-blue-100 text-blue-700 ml-auto">
-                          Your order
+                          Twoje zamówienie
                         </Badge>
                       )}
                     </div>
@@ -332,14 +332,13 @@ export default function OrdersPage({ params }: OrdersPageProps) {
 
                 <div className="pt-4 border-t">
                   <div className="flex justify-between items-center text-lg font-semibold">
-                    <span>Total Cost:</span>
+                    <span>Łączny koszt:</span>
                     <span className="text-green-600">
-                      ${totalCost.toFixed(2)}
+                      {totalCost.toFixed(2)} zł
                     </span>
                   </div>
                   <p className="text-sm text-slate-600 mt-1">
-                    Average per person: $
-                    {(totalCost / Math.max(orders.length, 1)).toFixed(2)}
+                    Średnio na osobę: {(totalCost / Math.max(orders.length, 1)).toFixed(2)} zł
                   </p>
                 </div>
               </div>

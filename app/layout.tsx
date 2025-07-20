@@ -7,8 +7,8 @@ import Navbar from "@/components/navbar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Restaurant Voting App",
-  description: "Vote for restaurants and place orders with your team",
+  title: "Aplikacja do głosowania na restauracje",
+  description: "Głosuj na restauracje i składaj zamówienia ze swoim zespołem",
 };
 
 export default function RootLayout({
@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="pl">
       <body className={inter.className}>
         <Providers>
           <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">

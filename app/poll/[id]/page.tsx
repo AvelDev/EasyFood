@@ -124,9 +124,11 @@ export default function PollPage({ params }: PollPageProps) {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-semibold text-slate-600 mb-4">
-          Poll not found
+          Głosowanie nie zostało znalezione
         </h2>
-        <Button onClick={() => router.push("/")}>Go back to home</Button>
+        <Button onClick={() => router.push("/")}>
+          Powrót do strony głównej
+        </Button>
       </div>
     );
   }
@@ -146,7 +148,7 @@ export default function PollPage({ params }: PollPageProps) {
           onClick={() => router.push("/")}
           className="mb-4 text-slate-600"
         >
-          ← Back to polls
+          ← Powrót do głosowań
         </Button>
 
         <div className="flex items-start justify-between">
@@ -158,8 +160,8 @@ export default function PollPage({ params }: PollPageProps) {
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
                 <span>
-                  Ends {poll.votingEndsAt.toLocaleDateString()} at{" "}
-                  {poll.votingEndsAt.toLocaleTimeString([], {
+                  Kończy się {poll.votingEndsAt.toLocaleDateString("pl-PL")} o{" "}
+                  {poll.votingEndsAt.toLocaleTimeString("pl-PL", {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
@@ -167,7 +169,7 @@ export default function PollPage({ params }: PollPageProps) {
               </div>
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                <span>{votes.length} votes</span>
+                <span>{votes.length} głosów</span>
               </div>
             </div>
           </div>
@@ -176,17 +178,17 @@ export default function PollPage({ params }: PollPageProps) {
             {poll.closed ? (
               <Badge className="bg-green-100 text-green-700">
                 <CheckCircle className="w-3 h-3 mr-1" />
-                Closed
+                Zamknięte
               </Badge>
             ) : isActive ? (
               <Badge className="bg-blue-100 text-blue-700">
                 <Clock className="w-3 h-3 mr-1" />
-                Active
+                Aktywne
               </Badge>
             ) : (
               <Badge className="bg-slate-100 text-slate-700">
                 <Clock className="w-3 h-3 mr-1" />
-                Ended
+                Zakończone
               </Badge>
             )}
 
@@ -197,7 +199,7 @@ export default function PollPage({ params }: PollPageProps) {
                 onClick={handleClosePoll}
                 className="ml-2"
               >
-                Close Poll
+                Zamknij głosowanie
               </Button>
             )}
           </div>
@@ -208,10 +210,10 @@ export default function PollPage({ params }: PollPageProps) {
         <Card className="bg-white/80 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              Restaurant Options
+              Opcje restauracji
               {poll.selectedRestaurant && (
                 <Badge className="bg-green-100 text-green-700">
-                  Winner: {poll.selectedRestaurant}
+                  Zwycięzca: {poll.selectedRestaurant}
                 </Badge>
               )}
             </CardTitle>
@@ -244,7 +246,7 @@ export default function PollPage({ params }: PollPageProps) {
                   disabled={!selectedRestaurant || voting}
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
                 >
-                  {voting ? "Voting..." : "Submit Vote"}
+                  {voting ? "Głosowanie..." : "Oddaj głos"}
                 </Button>
               </div>
             ) : (
@@ -264,14 +266,14 @@ export default function PollPage({ params }: PollPageProps) {
                       <span className="font-medium">{restaurant}</span>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">
-                          {voteCounts[restaurant] || 0} votes
+                          {voteCounts[restaurant] || 0} głosów
                         </Badge>
                         {poll.selectedRestaurant === restaurant && (
                           <CheckCircle className="w-4 h-4 text-green-600" />
                         )}
                         {userVote?.restaurant === restaurant && (
                           <Badge className="bg-blue-100 text-blue-700">
-                            Your vote
+                            Twój głos
                           </Badge>
                         )}
                       </div>
@@ -285,7 +287,7 @@ export default function PollPage({ params }: PollPageProps) {
 
         <Card className="bg-white/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle>Voting Results</CardTitle>
+            <CardTitle>Wyniki głosowania</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -299,7 +301,7 @@ export default function PollPage({ params }: PollPageProps) {
                     <div className="flex justify-between items-center">
                       <span className="font-medium">{restaurant}</span>
                       <span className="text-sm text-slate-600">
-                        {count} votes ({percentage.toFixed(1)}%)
+                        {count} głosów ({percentage.toFixed(1)}%)
                       </span>
                     </div>
                     <div className="w-full bg-slate-200 rounded-full h-2">
@@ -319,7 +321,7 @@ export default function PollPage({ params }: PollPageProps) {
                   onClick={() => router.push(`/poll/${poll.id}/orders`)}
                   className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
                 >
-                  View Orders
+                  Zobacz zamówienia
                 </Button>
               </div>
             )}

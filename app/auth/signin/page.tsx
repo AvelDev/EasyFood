@@ -103,7 +103,7 @@ export default function SignIn() {
               <Vote className="w-12 h-12 text-blue-600" />
             </div>
             <CardTitle className="text-2xl font-bold text-slate-800">
-              Zaloguj się do Restaurant Voting
+              Zaloguj się do systemu głosowania na restauracje
             </CardTitle>
             <p className="text-slate-600 mt-2">
               Dołącz do swojego zespołu w głosowaniu na restauracje i składaniu

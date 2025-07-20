@@ -1,27 +1,27 @@
-# Restaurant Voting App
+# Aplikacja do głosowania na restauracje
 
-A Next.js application for team restaurant voting and order management with Discord authentication and Firebase backend.
+Aplikacja Next.js do zespołowego głosowania na restauracje i zarządzania zamówieniami z uwierzytelnianiem Discord i backendem Firebase.
 
-## Features
+## Funkcje
 
-- **Discord Authentication**: Secure login with Discord OAuth2
-- **Role-based Access**: Admin and user roles with different permissions
-- **Restaurant Voting**: Create polls, vote on restaurants, and view results
-- **Order Management**: Place orders after voting closes
-- **Real-time Updates**: Live voting results and order tracking
-- **Responsive Design**: Works on desktop and mobile devices
+- **Uwierzytelnianie Discord**: Bezpieczne logowanie z Discord OAuth2
+- **Dostęp oparty na rolach**: Role administratora i użytkownika z różnymi uprawnieniami  
+- **Głosowanie na restauracje**: Tworzenie głosowań, głosowanie na restauracje i przeglądanie wyników
+- **Zarządzanie zamówieniami**: Składanie zamówień po zakończeniu głosowania
+- **Aktualizacje na żywo**: Wyniki głosowania i śledzenie zamówień w czasie rzeczywistym
+- **Responsywny design**: Działa na komputerach i urządzeniach mobilnych
 
-## Tech Stack
+## Stos technologiczny
 
 - **Frontend**: Next.js 13 (App Router), TypeScript, Tailwind CSS
-- **Authentication**: NextAuth.js with Discord provider
-- **Database**: Firebase Firestore
-- **UI Components**: Radix UI components with shadcn/ui
-- **Forms**: React Hook Form with Zod validation
+- **Uwierzytelnianie**: NextAuth.js z providerem Discord
+- **Baza danych**: Firebase Firestore
+- **Komponenty UI**: Komponenty Radix UI z shadcn/ui
+- **Formularze**: React Hook Form z walidacją Zod
 
-## Setup Instructions
+## Instrukcje konfiguracji
 
-### 1. Clone and Install
+### 1. Klonowanie i instalacja
 
 ```bash
 git clone <repository-url>
@@ -29,28 +29,28 @@ cd restaurant-voting-app
 npm install
 ```
 
-### 2. Discord OAuth Setup
+### 2. Konfiguracja Discord OAuth
 
-1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
-2. Create a new application
-3. Go to OAuth2 settings
-4. Add redirect URI: `http://localhost:3000/api/auth/callback/discord`
-5. Copy Client ID and Client Secret
+1. Przejdź do [Discord Developer Portal](https://discord.com/developers/applications)
+2. Utwórz nową aplikację
+3. Przejdź do ustawień OAuth2
+4. Dodaj URI przekierowania: `http://localhost:3000/api/auth/callback/discord`
+5. Skopiuj Client ID i Client Secret
 
-### 3. Firebase Setup
+### 3. Konfiguracja Firebase
 
-1. Create a new Firebase project
-2. Enable Firestore Database
-3. Get your Firebase config from Project Settings
-4. Create the following collections in Firestore:
-   - `users` - User profiles and roles
-   - `polls` - Restaurant voting polls
-   - `votes` - User votes (subcollection under polls)
-   - `orders` - User orders (subcollection under polls)
+1. Utwórz nowy projekt Firebase
+2. Włącz bazę danych Firestore
+3. Pobierz konfigurację Firebase z ustawień projektu
+4. Utwórz następujące kolekcje w Firestore:
+   - `users` - Profile użytkowników i role
+   - `polls` - Głosowania na restauracje
+   - `votes` - Głosy użytkowników (podkolekcja pod polls)
+   - `orders` - Zamówienia użytkowników (podkolekcja pod polls)
 
-### 4. Environment Variables
+### 4. Zmienne środowiskowe
 
-Create a `.env.local` file and add:
+Utwórz plik `.env.local` i dodaj:
 
 ```env
 # Discord OAuth
@@ -70,39 +70,39 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 ```
 
-### 5. Run the Application
+### 5. Uruchomienie aplikacji
 
 ```bash
 npm run dev
 ```
 
-Visit `http://localhost:3000` to see the application.
+Odwiedź `http://localhost:3000` aby zobaczyć aplikację.
 
-## User Roles
+## Role użytkowników
 
-### Admin Users
-- Can create new restaurant polls
-- Can close polls manually
-- Can view all orders and calculate totals
+### Administratorzy
+- Mogą tworzyć nowe głosowania na restauracje
+- Mogą ręcznie zamykać głosowania
+- Mogą przeglądać wszystkie zamówienia i obliczać sumy
 
-### Regular Users
-- Can vote on active polls
-- Can place orders after polls close
-- Can view voting results
+### Zwykli użytkownicy
+- Mogą głosować w aktywnych głosowaniach
+- Mogą składać zamówienia po zamknięciu głosowań
+- Mogą przeglądać wyniki głosowań
 
-## How It Works
+## Jak to działa
 
-1. **Authentication**: Users sign in with Discord
-2. **User Creation**: First-time users are automatically added to Firestore with 'user' role
-3. **Poll Creation**: Admins create polls with restaurant options and end times
-4. **Voting**: Users vote for their preferred restaurant
-5. **Results**: Real-time voting results with percentage breakdown
-6. **Orders**: After poll closes, users can place their food orders
-7. **Summary**: View all orders and total costs
+1. **Uwierzytelnianie**: Użytkownicy logują się przez Discord
+2. **Tworzenie użytkownika**: Nowi użytkownicy są automatycznie dodawani do Firestore z rolą 'user'
+3. **Tworzenie głosowania**: Administratorzy tworzą głosowania z opcjami restauracji i czasem zakończenia
+4. **Głosowanie**: Użytkownicy głosują na preferowaną restaurację
+5. **Wyniki**: Wyniki głosowania w czasie rzeczywistym z podziałem procentowym
+6. **Zamówienia**: Po zamknięciu głosowania użytkownicy mogą składać zamówienia na jedzenie
+7. **Podsumowanie**: Przeglądanie wszystkich zamówień i łącznych kosztów
 
-## Database Structure
+## Struktura bazy danych
 
-### Users Collection
+### Kolekcja Users
 ```typescript
 {
   uid: string
@@ -112,7 +112,7 @@ Visit `http://localhost:3000` to see the application.
 }
 ```
 
-### Polls Collection
+### Kolekcja Polls
 ```typescript
 {
   id: string
@@ -125,7 +125,7 @@ Visit `http://localhost:3000` to see the application.
 }
 ```
 
-### Votes Subcollection
+### Podkolekcja Votes
 ```typescript
 {
   userId: string
@@ -134,7 +134,7 @@ Visit `http://localhost:3000` to see the application.
 }
 ```
 
-### Orders Subcollection
+### Podkolekcja Orders
 ```typescript
 {
   userId: string
@@ -145,22 +145,22 @@ Visit `http://localhost:3000` to see the application.
 }
 ```
 
-## Deployment
+## Wdrożenie
 
-This app can be deployed to Vercel, Netlify, or any other platform that supports Next.js.
+Ta aplikacja może być wdrożona na Vercel, Netlify lub innej platformie obsługującej Next.js.
 
-1. Build the application: `npm run build`
-2. Deploy to your preferred platform
-3. Update environment variables in production
-4. Update Discord OAuth redirect URI for production domain
+1. Zbuduj aplikację: `npm run build`
+2. Wdróż na preferowaną platformę
+3. Zaktualizuj zmienne środowiskowe w produkcji
+4. Zaktualizuj URI przekierowania Discord OAuth dla domeny produkcyjnej
 
-## Contributing
+## Współpraca
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+1. Zrób fork repozytorium
+2. Utwórz branch z funkcją
+3. Wprowadź swoje zmiany
+4. Prześlij pull request
 
-## License
+## Licencja
 
-MIT License
+Licencja MIT

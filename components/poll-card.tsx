@@ -27,17 +27,17 @@ export default function PollCard({ poll }: PollCardProps) {
             {poll.closed ? (
               <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
                 <CheckCircle className="w-3 h-3 mr-1" />
-                Closed
+                Zamknięte
               </Badge>
             ) : isActive ? (
               <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">
                 <Clock className="w-3 h-3 mr-1" />
-                Active
+                Aktywne
               </Badge>
             ) : (
               <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-100">
                 <Clock className="w-3 h-3 mr-1" />
-                Ended
+                Zakończone
               </Badge>
             )}
           </div>
@@ -47,7 +47,7 @@ export default function PollCard({ poll }: PollCardProps) {
       <CardContent className="pt-0">
         <div className="space-y-4">
           <div>
-            <p className="text-sm text-slate-600 mb-2">Restaurant Options:</p>
+            <p className="text-sm text-slate-600 mb-2">Opcje restauracji:</p>
             <div className="flex flex-wrap gap-2">
               {poll.restaurantOptions.map((restaurant, index) => (
                 <Badge
@@ -71,13 +71,13 @@ export default function PollCard({ poll }: PollCardProps) {
           <div className="flex items-center justify-between text-sm text-slate-600">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4" />
-              <span>{poll.restaurantOptions.length} options</span>
+              <span>{poll.restaurantOptions.length} opcji</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
               <span>
-                {poll.votingEndsAt.toLocaleDateString()} at{' '}
-                {poll.votingEndsAt.toLocaleTimeString([], {
+                {poll.votingEndsAt.toLocaleDateString('pl-PL')} o{' '}
+                {poll.votingEndsAt.toLocaleTimeString('pl-PL', {
                   hour: '2-digit',
                   minute: '2-digit',
                 })}
@@ -90,7 +90,7 @@ export default function PollCard({ poll }: PollCardProps) {
               onClick={() => router.push(`/poll/${poll.id}`)}
               className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
             >
-              {isActive ? 'Vote Now' : poll.closed ? 'View Results' : 'View Poll'}
+              {isActive ? 'Głosuj teraz' : poll.closed ? 'Zobacz wyniki' : 'Zobacz głosowanie'}
             </Button>
             {poll.closed && (
               <Button
@@ -98,7 +98,7 @@ export default function PollCard({ poll }: PollCardProps) {
                 variant="outline"
                 className="flex-1 border-green-200 text-green-700 hover:bg-green-50"
               >
-                View Orders
+                Zobacz zamówienia
               </Button>
             )}
           </div>

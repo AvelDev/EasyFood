@@ -20,11 +20,11 @@ import { useAuthContext } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
 
 const pollSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  title: z.string().min(1, "Tytuł jest wymagany"),
   restaurants: z
-    .array(z.object({ name: z.string().min(1, "Restaurant name is required") }))
-    .min(2, "At least 2 restaurants are required"),
-  votingEndsAt: z.string().min(1, "End date is required"),
+    .array(z.object({ name: z.string().min(1, "Nazwa restauracji jest wymagana") }))
+    .min(2, "Wymagane są co najmniej 2 restauracje"),
+  votingEndsAt: z.string().min(1, "Data zakończenia jest wymagana"),
 });
 
 type PollFormData = z.infer<typeof pollSchema>;
@@ -84,19 +84,19 @@ export default function CreatePollDialog() {
       <DialogTrigger asChild>
         <Button className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white">
           <Plus className="w-4 h-4 mr-2" />
-          Create Poll
+          Utwórz głosowanie
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create New Poll</DialogTitle>
+          <DialogTitle>Utwórz nowe głosowanie</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="title">Poll Title</Label>
+            <Label htmlFor="title">Tytuł głosowania</Label>
             <Input
               id="title"
-              placeholder="e.g., Lunch for Friday"
+              placeholder="np. Lunch na piątek"
               {...register("title")}
             />
             {errors.title && (
@@ -106,7 +106,7 @@ export default function CreatePollDialog() {
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label>Restaurant Options</Label>
+              <Label>Opcje restauracji</Label>
               <Button
                 type="button"
                 variant="outline"
@@ -114,14 +114,14 @@ export default function CreatePollDialog() {
                 onClick={() => append({ name: "" })}
               >
                 <Plus className="w-4 h-4 mr-1" />
-                Add Restaurant
+                Dodaj restaurację
               </Button>
             </div>
 
             {fields.map((field, index) => (
               <div key={field.id} className="flex gap-2">
                 <Input
-                  placeholder={`Restaurant ${index + 1}`}
+                  placeholder={`Restauracja ${index + 1}`}
                   {...register(`restaurants.${index}.name`)}
                 />
                 {fields.length > 2 && (
@@ -145,7 +145,7 @@ export default function CreatePollDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="votingEndsAt">Voting Ends At</Label>
+            <Label htmlFor="votingEndsAt">Głosowanie kończy się</Label>
             <Input
               id="votingEndsAt"
               type="datetime-local"
@@ -165,14 +165,14 @@ export default function CreatePollDialog() {
               onClick={() => setOpen(false)}
               className="flex-1"
             >
-              Cancel
+              Anuluj
             </Button>
             <Button
               type="submit"
               disabled={isLoading}
               className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
             >
-              {isLoading ? "Creating..." : "Create Poll"}
+              {isLoading ? "Tworzenie..." : "Utwórz głosowanie"}
             </Button>
           </div>
         </form>
