@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuthContext } from "@/contexts/auth-context";
-import { usePrivacyProtection } from "@/hooks/use-privacy-protection";
 import { useEffect, useState } from "react";
 import { Poll } from "@/types";
 import { getPolls, subscribeToPolls } from "@/lib/firestore";
@@ -12,9 +11,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Vote, Clock, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import PollsByDateGrouping from "@/components/polls-by-date-grouping";
+import LandingPage from "@/components/landing-page";
 
 export default function Home() {
-  const { user, loading: authLoading, isProtected } = usePrivacyProtection();
+  const { user, loading: authLoading } = useAuthContext();
   const [polls, setPolls] = useState<Poll[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +31,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (user && isProtected) {
+    if (user && user.privacyPolicyAccepted) {
       // Initial load
       fetchPolls();
 
@@ -46,7 +46,7 @@ export default function Home() {
         unsubscribe();
       };
     }
-  }, [user, isProtected]);
+  }, [user]);
 
   const handlePollCreated = () => {
     // Odśwież listę głosowań po utworzeniu nowego
@@ -66,57 +66,8 @@ export default function Home() {
     );
   }
 
-  if (!user || !isProtected) {
-    return (
-      <div className="max-w-4xl mx-auto text-center py-12">
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl">
-          <Vote className="w-16 h-16 mx-auto text-blue-600 mb-4" />
-          <h1 className="text-4xl font-bold text-slate-800 mb-4">
-            Witaj w systemie głosowania na restauracje
-          </h1>
-          <p className="text-xl text-slate-600 mb-8">
-            Głosuj na restauracje i składaj zamówienia ze swoim zespołem
-          </p>
-          <div className="grid md:grid-cols-3 gap-6 text-left">
-            <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
-              <CardContent className="p-6">
-                <Vote className="w-8 h-8 text-blue-600 mb-3" />
-                <h3 className="font-semibold text-slate-800 mb-2">
-                  Głosuj na restauracje
-                </h3>
-                <p className="text-sm text-slate-600">
-                  Wybierz spośród wielu opcji restauracji w głosowaniach
-                  zespołowych
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-green-50 to-teal-50 border-green-200">
-              <CardContent className="p-6">
-                <Users className="w-8 h-8 text-green-600 mb-3" />
-                <h3 className="font-semibold text-slate-800 mb-2">
-                  Składaj zamówienia
-                </h3>
-                <p className="text-sm text-slate-600">
-                  Dodaj swoje zamówienia po zakończeniu głosowania
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-orange-50 to-red-50 border-orange-200">
-              <CardContent className="p-6">
-                <Clock className="w-8 h-8 text-orange-600 mb-3" />
-                <h3 className="font-semibold text-slate-800 mb-2">
-                  Aktualizacje na żywo
-                </h3>
-                <p className="text-sm text-slate-600">
-                  Zobacz wyniki głosowania i status zamówień w czasie
-                  rzeczywistym
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    );
+  if (!user || !user.privacyPolicyAccepted) {
+    return <LandingPage />;
   }
 
   return (
