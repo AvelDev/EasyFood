@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Providers from "./providers";
 import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,9 +21,10 @@ export default function RootLayout({
     <html lang="pl">
       <body className={inter.className}>
         <Providers>
-          <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+          <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col">
             <Navbar />
-            <main className="container mx-auto px-4 py-8">{children}</main>
+            <main className="container mx-auto px-4 py-8 flex-grow">{children}</main>
+            <Footer />
           </div>
         </Providers>
       </body>
