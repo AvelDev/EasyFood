@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { usePrivacyProtection } from "@/hooks/use-privacy-protection";
 import { useRouter } from "next/navigation";
 import { Poll, Vote } from "@/types";
@@ -21,6 +21,9 @@ import { Label } from "@/components/ui/label";
 import { Clock, Users, CheckCircle, Crown } from "lucide-react";
 import AnimatedCounter from "@/components/animated-counter";
 import AnimatedProgressBar from "@/components/animated-progress-bar";
+import CountdownTimer from "@/components/countdown-timer";
+import VotingStatus from "@/components/voting-status";
+import { pollAutoCloser } from "@/lib/poll-auto-closer";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface PollPageProps {
@@ -47,6 +50,18 @@ export default function PollPage({ params }: PollPageProps) {
     // Set up real-time poll listener
     const unsubscribePoll = subscribeToPoll(params.id, (pollData) => {
       setPoll(pollData);
+
+      // Schedule auto-close for active polls
+      if (pollData && !pollData.closed) {
+        pollAutoCloser.schedulePollClosure(
+          pollData.id,
+          pollData.votingEndsAt,
+          () => {
+            // This callback will be called when poll is auto-closed
+            console.log("Poll was automatically closed by timer");
+          }
+        );
+      }
     });
 
     // Set up real-time votes listener
@@ -74,6 +89,8 @@ export default function PollPage({ params }: PollPageProps) {
     return () => {
       unsubscribePoll();
       unsubscribeVotes();
+      // Cancel auto-close timer when component unmounts
+      pollAutoCloser.cancelPollClosure(params.id);
     };
   }, [params.id, user?.uid]);
 
@@ -103,6 +120,16 @@ export default function PollPage({ params }: PollPageProps) {
     if (!poll || user?.role !== "admin") return;
 
     try {
+      await closePollAutomatically();
+    } catch (error) {
+      console.error("Error closing poll:", error);
+    }
+  };
+
+  const closePollAutomatically = useCallback(async () => {
+    if (!poll) return;
+
+    try {
       // Calculate the winner
       const voteCounts = votes.reduce((acc, vote) => {
         acc[vote.restaurant] = (acc[vote.restaurant] || 0) + 1;
@@ -120,9 +147,29 @@ export default function PollPage({ params }: PollPageProps) {
 
       setPoll({ ...poll, closed: true, selectedRestaurant: winner });
     } catch (error) {
-      console.error("Error closing poll:", error);
+      console.error("Error closing poll automatically:", error);
     }
-  };
+  }, [poll, votes, params.id]);
+
+  const handleTimeExpired = useCallback(() => {
+    // Auto-close poll when countdown reaches zero
+    if (!poll?.closed) {
+      closePollAutomatically();
+    }
+  }, [poll?.closed, closePollAutomatically]);
+
+  // Memoized calculations
+  const voteCounts = useMemo(() => {
+    return votes.reduce((acc, vote) => {
+      acc[vote.restaurant] = (acc[vote.restaurant] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+  }, [votes]);
+
+  const isActive = poll
+    ? !poll.closed && poll.votingEndsAt > new Date()
+    : false;
+  const canVote = poll ? isActive && !userVote : false;
 
   if (loading) {
     return (
@@ -145,13 +192,6 @@ export default function PollPage({ params }: PollPageProps) {
     );
   }
 
-  const isActive = !poll.closed && poll.votingEndsAt > new Date();
-  const canVote = isActive && !userVote;
-  const voteCounts = votes.reduce((acc, vote) => {
-    acc[vote.restaurant] = (acc[vote.restaurant] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
@@ -169,20 +209,28 @@ export default function PollPage({ params }: PollPageProps) {
               {poll.title}
             </h1>
             <div className="flex items-center gap-4 text-slate-600">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                <span>
-                  Kończy się {poll.votingEndsAt.toLocaleDateString("pl-PL")} o{" "}
-                  {poll.votingEndsAt.toLocaleTimeString("pl-PL", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              </div>
+              {isActive ? (
+                <CountdownTimer
+                  endTime={poll.votingEndsAt}
+                  onTimeExpired={handleTimeExpired}
+                  className="font-medium"
+                />
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  <span>
+                    Kończy się {poll.votingEndsAt.toLocaleDateString("pl-PL")} o{" "}
+                    {poll.votingEndsAt.toLocaleTimeString("pl-PL", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                <AnimatedCounter 
-                  value={votes.length} 
+                <AnimatedCounter
+                  value={votes.length}
                   suffix=" głosów"
                   className="font-medium"
                 />
@@ -191,22 +239,11 @@ export default function PollPage({ params }: PollPageProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            {poll.closed ? (
-              <Badge className="bg-green-100 text-green-700">
-                <CheckCircle className="w-3 h-3 mr-1" />
-                Zamknięte
-              </Badge>
-            ) : isActive ? (
-              <Badge className="bg-blue-100 text-blue-700">
-                <Clock className="w-3 h-3 mr-1" />
-                Aktywne
-              </Badge>
-            ) : (
-              <Badge className="bg-slate-100 text-slate-700">
-                <Clock className="w-3 h-3 mr-1" />
-                Zakończone
-              </Badge>
-            )}
+            <VotingStatus
+              poll={poll}
+              onTimeExpired={handleTimeExpired}
+              className="flex items-center gap-2"
+            />
 
             {user?.role === "admin" && isActive && (
               <Button
@@ -250,17 +287,21 @@ export default function PollPage({ params }: PollPageProps) {
                           ? "border-blue-500 bg-blue-50 shadow-lg shadow-blue-100 scale-[1.02]"
                           : "border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 hover:shadow-md"
                       }`}
-                      whileHover={{ scale: selectedRestaurant === restaurant ? 1.02 : 1.01 }}
+                      whileHover={{
+                        scale: selectedRestaurant === restaurant ? 1.02 : 1.01,
+                      }}
                       whileTap={{ scale: 0.98 }}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           {/* Custom radio indicator */}
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                            selectedRestaurant === restaurant
-                              ? "border-blue-500 bg-blue-500"
-                              : "border-slate-300 bg-white"
-                          }`}>
+                          <div
+                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                              selectedRestaurant === restaurant
+                                ? "border-blue-500 bg-blue-500"
+                                : "border-slate-300 bg-white"
+                            }`}
+                          >
                             {selectedRestaurant === restaurant && (
                               <motion.div
                                 initial={{ scale: 0 }}
@@ -270,9 +311,11 @@ export default function PollPage({ params }: PollPageProps) {
                               />
                             )}
                           </div>
-                          <span className="font-medium text-slate-800">{restaurant}</span>
+                          <span className="font-medium text-slate-800">
+                            {restaurant}
+                          </span>
                         </div>
-                        
+
                         {selectedRestaurant === restaurant && (
                           <motion.div
                             initial={{ scale: 0, rotate: -180 }}
@@ -303,7 +346,11 @@ export default function PollPage({ params }: PollPageProps) {
                       <div className="flex items-center gap-2">
                         <motion.div
                           animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          transition={{
+                            duration: 1,
+                            repeat: Infinity,
+                            ease: "linear",
+                          }}
                           className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
                         />
                         Głosowanie...
@@ -335,13 +382,13 @@ export default function PollPage({ params }: PollPageProps) {
                         <span className="font-medium">{restaurant}</span>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="relative">
-                            <AnimatedCounter 
-                              value={voteCounts[restaurant] || 0} 
+                            <AnimatedCounter
+                              value={voteCounts[restaurant] || 0}
                               suffix=" głosów"
                               className="font-semibold"
                             />
                           </Badge>
-                          
+
                           <AnimatePresence>
                             {poll.selectedRestaurant === restaurant && (
                               <motion.div
@@ -354,12 +401,16 @@ export default function PollPage({ params }: PollPageProps) {
                               </motion.div>
                             )}
                           </AnimatePresence>
-                          
+
                           {userVote?.restaurant === restaurant && (
                             <motion.div
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
-                              transition={{ type: "spring", stiffness: 500, delay: 0.2 }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 500,
+                                delay: 0.2,
+                              }}
                             >
                               <Badge className="bg-blue-100 text-blue-700">
                                 Twój głos
@@ -389,8 +440,8 @@ export default function PollPage({ params }: PollPageProps) {
                 const isWinner = poll.selectedRestaurant === restaurant;
 
                 return (
-                  <motion.div 
-                    key={restaurant} 
+                  <motion.div
+                    key={restaurant}
                     className="space-y-2"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -398,38 +449,52 @@ export default function PollPage({ params }: PollPageProps) {
                   >
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
-                        <span className={`font-medium ${isWinner ? 'text-green-700' : ''}`}>
+                        <span
+                          className={`font-medium ${
+                            isWinner ? "text-green-700" : ""
+                          }`}
+                        >
                           {restaurant}
                         </span>
                         {isWinner && (
                           <motion.div
                             initial={{ scale: 0, rotate: -180 }}
                             animate={{ scale: 1, rotate: 0 }}
-                            transition={{ type: "spring", stiffness: 500, delay: 0.5 }}
+                            transition={{
+                              type: "spring",
+                              stiffness: 500,
+                              delay: 0.5,
+                            }}
                           >
                             <Crown className="w-4 h-4 text-yellow-500" />
                           </motion.div>
                         )}
                       </div>
                       <div className="text-sm text-slate-600 flex items-center gap-1">
-                        <AnimatedCounter 
-                          value={count} 
+                        <AnimatedCounter
+                          value={count}
                           suffix=" głosów"
                           className="font-semibold"
                         />
                         <span>
-                          (<AnimatedCounter 
-                            value={Math.round(percentage * 10) / 10} 
+                          (
+                          <AnimatedCounter
+                            value={Math.round(percentage * 10) / 10}
                             suffix="%"
-                          />)
+                          />
+                          )
                         </span>
                       </div>
                     </div>
-                    
-                    <AnimatedProgressBar 
+
+                    <AnimatedProgressBar
                       percentage={percentage}
                       isWinner={isWinner}
-                      color={isWinner ? 'from-green-500 to-emerald-500' : 'from-blue-500 to-purple-500'}
+                      color={
+                        isWinner
+                          ? "from-green-500 to-emerald-500"
+                          : "from-blue-500 to-purple-500"
+                      }
                     />
                   </motion.div>
                 );
