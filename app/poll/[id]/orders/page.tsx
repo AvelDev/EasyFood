@@ -7,7 +7,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Poll, Order } from "@/types";
-import { getPoll, getOrders, getUserOrder, addOrder } from "@/lib/firestore";
+import {
+  getPoll,
+  getOrders,
+  getUserOrder,
+  addOrder,
+  subscribeToOrders,
+} from "@/lib/firestore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,13 +55,15 @@ export default function OrdersPage({ params }: OrdersPageProps) {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
+    if (!user?.uid || !params.id) return;
+
+    setLoading(true);
+
+    const fetchInitialData = async () => {
       try {
         const pollData = await getPoll(params.id);
         if (pollData) {
           setPoll(pollData);
-          const ordersData = await getOrders(params.id);
-          setOrders(ordersData);
 
           if (user?.uid) {
             const userOrderData = await getUserOrder(params.id, user.uid);
@@ -69,16 +77,23 @@ export default function OrdersPage({ params }: OrdersPageProps) {
           }
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
+        console.error("Error fetching initial data:", error);
       }
     };
 
-    if (user && params.id) {
-      fetchData();
-    }
-  }, [params.id, user, setValue]);
+    fetchInitialData();
+
+    // Set up real-time orders listener
+    const unsubscribeOrders = subscribeToOrders(params.id, (ordersData) => {
+      setOrders(ordersData);
+      setLoading(false);
+    });
+
+    // Cleanup function
+    return () => {
+      unsubscribeOrders();
+    };
+  }, [params.id, user?.uid, setValue]);
 
   const onSubmit = async (data: OrderFormData) => {
     if (!user?.uid || !poll) return;
@@ -96,9 +111,7 @@ export default function OrdersPage({ params }: OrdersPageProps) {
       await addOrder(params.id, orderData);
       setUserOrder(orderData);
 
-      // Refresh orders
-      const updatedOrders = await getOrders(params.id);
-      setOrders(updatedOrders);
+      // Orders will be updated automatically via the real-time listener
     } catch (error) {
       console.error("Error submitting order:", error);
     } finally {
@@ -120,7 +133,9 @@ export default function OrdersPage({ params }: OrdersPageProps) {
         <h2 className="text-2xl font-semibold text-slate-600 mb-4">
           Głosowanie nie zostało znalezione
         </h2>
-        <Button onClick={() => router.push("/")}>Powrót do strony głównej</Button>
+        <Button onClick={() => router.push("/")}>
+          Powrót do strony głównej
+        </Button>
       </div>
     );
   }
@@ -207,8 +222,9 @@ export default function OrdersPage({ params }: OrdersPageProps) {
                     <div className="flex items-center gap-2 text-slate-600">
                       <Clock className="w-4 h-4" />
                       <span>
-                        Zamówione {userOrder.createdAt.toLocaleDateString('pl-PL')} o{" "}
-                        {userOrder.createdAt.toLocaleTimeString('pl-PL', {
+                        Zamówione{" "}
+                        {userOrder.createdAt.toLocaleDateString("pl-PL")} o{" "}
+                        {userOrder.createdAt.toLocaleTimeString("pl-PL", {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
@@ -218,7 +234,8 @@ export default function OrdersPage({ params }: OrdersPageProps) {
                 </div>
 
                 <p className="text-sm text-slate-600">
-                  Skontaktuj się z administratorem, jeśli chcesz zmodyfikować swoje zamówienie.
+                  Skontaktuj się z administratorem, jeśli chcesz zmodyfikować
+                  swoje zamówienie.
                 </p>
               </div>
             ) : (
@@ -315,8 +332,8 @@ export default function OrdersPage({ params }: OrdersPageProps) {
                     <div className="flex items-center gap-2 text-xs text-slate-500">
                       <Clock className="w-3 h-3" />
                       <span>
-                        {order.createdAt.toLocaleDateString('pl-PL')} o{" "}
-                        {order.createdAt.toLocaleTimeString('pl-PL', {
+                        {order.createdAt.toLocaleDateString("pl-PL")} o{" "}
+                        {order.createdAt.toLocaleTimeString("pl-PL", {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
@@ -338,7 +355,8 @@ export default function OrdersPage({ params }: OrdersPageProps) {
                     </span>
                   </div>
                   <p className="text-sm text-slate-600 mt-1">
-                    Średnio na osobę: {(totalCost / Math.max(orders.length, 1)).toFixed(2)} zł
+                    Średnio na osobę:{" "}
+                    {(totalCost / Math.max(orders.length, 1)).toFixed(2)} zł
                   </p>
                 </div>
               </div>

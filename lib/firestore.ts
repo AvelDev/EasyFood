@@ -10,6 +10,10 @@ import {
   where,
   orderBy,
   Timestamp,
+  onSnapshot,
+  DocumentData,
+  QuerySnapshot,
+  DocumentSnapshot,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { Poll, Vote, Order, User } from "@/types";
@@ -36,6 +40,20 @@ export const getPolls = async (): Promise<Poll[]> => {
   })) as Poll[];
 };
 
+// Real-time polls listener
+export const subscribeToPolls = (callback: (polls: Poll[]) => void) => {
+  const q = query(collection(db, "polls"), orderBy("votingEndsAt", "desc"));
+  
+  return onSnapshot(q, (querySnapshot: QuerySnapshot<DocumentData>) => {
+    const polls = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+      votingEndsAt: doc.data().votingEndsAt.toDate(),
+    })) as Poll[];
+    callback(polls);
+  });
+};
+
 export const getPoll = async (id: string): Promise<Poll | null> => {
   const docRef = doc(db, "polls", id);
   const docSnap = await getDoc(docRef);
@@ -48,6 +66,24 @@ export const getPoll = async (id: string): Promise<Poll | null> => {
     } as Poll;
   }
   return null;
+};
+
+// Real-time poll listener
+export const subscribeToPoll = (id: string, callback: (poll: Poll | null) => void) => {
+  const docRef = doc(db, "polls", id);
+  
+  return onSnapshot(docRef, (docSnap: DocumentSnapshot<DocumentData>) => {
+    if (docSnap.exists()) {
+      const poll = {
+        id: docSnap.id,
+        ...docSnap.data(),
+        votingEndsAt: docSnap.data().votingEndsAt.toDate(),
+      } as Poll;
+      callback(poll);
+    } else {
+      callback(null);
+    }
+  });
 };
 
 export const updatePoll = async (
@@ -83,6 +119,19 @@ export const getVotes = async (pollId: string): Promise<Vote[]> => {
     ...doc.data(),
     createdAt: doc.data().createdAt.toDate(),
   })) as Vote[];
+};
+
+// Real-time votes listener
+export const subscribeToVotes = (pollId: string, callback: (votes: Vote[]) => void) => {
+  const votesRef = collection(db, "polls", pollId, "votes");
+  
+  return onSnapshot(votesRef, (querySnapshot: QuerySnapshot<DocumentData>) => {
+    const votes = querySnapshot.docs.map((doc) => ({
+      ...doc.data(),
+      createdAt: doc.data().createdAt.toDate(),
+    })) as Vote[];
+    callback(votes);
+  });
 };
 
 export const getUserVote = async (
@@ -122,6 +171,19 @@ export const getOrders = async (pollId: string): Promise<Order[]> => {
     ...doc.data(),
     createdAt: doc.data().createdAt.toDate(),
   })) as Order[];
+};
+
+// Real-time orders listener
+export const subscribeToOrders = (pollId: string, callback: (orders: Order[]) => void) => {
+  const ordersRef = collection(db, "polls", pollId, "orders");
+  
+  return onSnapshot(ordersRef, (querySnapshot: QuerySnapshot<DocumentData>) => {
+    const orders = querySnapshot.docs.map((doc) => ({
+      ...doc.data(),
+      createdAt: doc.data().createdAt.toDate(),
+    })) as Order[];
+    callback(orders);
+  });
 };
 
 export const getUserOrder = async (

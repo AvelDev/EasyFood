@@ -10,6 +10,8 @@ import {
   getUserVote,
   addVote,
   updatePoll,
+  subscribeToPoll,
+  subscribeToVotes,
 } from "@/lib/firestore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +19,9 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Clock, Users, CheckCircle, Crown } from "lucide-react";
+import AnimatedCounter from "@/components/animated-counter";
+import AnimatedProgressBar from "@/components/animated-progress-bar";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface PollPageProps {
   params: {
@@ -35,33 +40,42 @@ export default function PollPage({ params }: PollPageProps) {
   const [voting, setVoting] = useState(false);
 
   useEffect(() => {
-    const fetchPollData = async () => {
-      try {
-        const pollData = await getPoll(params.id);
-        if (pollData) {
-          setPoll(pollData);
-          const votesData = await getVotes(params.id);
-          setVotes(votesData);
+    if (!user?.uid || !params.id) return;
 
-          if (user?.uid) {
-            const userVoteData = await getUserVote(params.id, user.uid);
-            setUserVote(userVoteData);
-            if (userVoteData) {
-              setSelectedRestaurant(userVoteData.restaurant);
-            }
-          }
+    setLoading(true);
+
+    // Set up real-time poll listener
+    const unsubscribePoll = subscribeToPoll(params.id, (pollData) => {
+      setPoll(pollData);
+    });
+
+    // Set up real-time votes listener
+    const unsubscribeVotes = subscribeToVotes(params.id, (votesData) => {
+      setVotes(votesData);
+      setLoading(false);
+    });
+
+    // Get initial user vote
+    const fetchUserVote = async () => {
+      try {
+        const userVoteData = await getUserVote(params.id, user.uid);
+        setUserVote(userVoteData);
+        if (userVoteData) {
+          setSelectedRestaurant(userVoteData.restaurant);
         }
       } catch (error) {
-        console.error("Error fetching poll data:", error);
-      } finally {
-        setLoading(false);
+        console.error("Error fetching user vote:", error);
       }
     };
 
-    if (user && params.id) {
-      fetchPollData();
-    }
-  }, [params.id, user]);
+    fetchUserVote();
+
+    // Cleanup function
+    return () => {
+      unsubscribePoll();
+      unsubscribeVotes();
+    };
+  }, [params.id, user?.uid]);
 
   const handleVote = async () => {
     if (!user?.uid || !poll || !selectedRestaurant) return;
@@ -77,9 +91,7 @@ export default function PollPage({ params }: PollPageProps) {
       await addVote(params.id, voteData);
       setUserVote(voteData);
 
-      // Refresh votes
-      const updatedVotes = await getVotes(params.id);
-      setVotes(updatedVotes);
+      // Votes will be updated automatically via the real-time listener
     } catch (error) {
       console.error("Error voting:", error);
     } finally {
@@ -169,7 +181,11 @@ export default function PollPage({ params }: PollPageProps) {
               </div>
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                <span>{votes.length} głosów</span>
+                <AnimatedCounter 
+                  value={votes.length} 
+                  suffix=" głosów"
+                  className="font-medium"
+                />
               </div>
             </div>
           </div>
@@ -221,66 +237,141 @@ export default function PollPage({ params }: PollPageProps) {
           <CardContent>
             {canVote ? (
               <div className="space-y-4">
-                <RadioGroup
-                  value={selectedRestaurant}
-                  onValueChange={setSelectedRestaurant}
-                >
-                  {poll.restaurantOptions.map((restaurant) => (
-                    <div
+                <div className="space-y-3">
+                  {poll.restaurantOptions.map((restaurant, index) => (
+                    <motion.div
                       key={restaurant}
-                      className="flex items-center space-x-2"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      onClick={() => setSelectedRestaurant(restaurant)}
+                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-300 ${
+                        selectedRestaurant === restaurant
+                          ? "border-blue-500 bg-blue-50 shadow-lg shadow-blue-100 scale-[1.02]"
+                          : "border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 hover:shadow-md"
+                      }`}
+                      whileHover={{ scale: selectedRestaurant === restaurant ? 1.02 : 1.01 }}
+                      whileTap={{ scale: 0.98 }}
                     >
-                      <RadioGroupItem value={restaurant} id={restaurant} />
-                      <Label
-                        htmlFor={restaurant}
-                        className="flex-1 cursor-pointer"
-                      >
-                        {restaurant}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-
-                <Button
-                  onClick={handleVote}
-                  disabled={!selectedRestaurant || voting}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-                >
-                  {voting ? "Głosowanie..." : "Oddaj głos"}
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {poll.restaurantOptions.map((restaurant) => (
-                  <div
-                    key={restaurant}
-                    className={`p-4 rounded-lg border-2 transition-colors ${
-                      poll.selectedRestaurant === restaurant
-                        ? "border-green-500 bg-green-50"
-                        : userVote?.restaurant === restaurant
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-slate-200 bg-slate-50"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{restaurant}</span>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline">
-                          {voteCounts[restaurant] || 0} głosów
-                        </Badge>
-                        {poll.selectedRestaurant === restaurant && (
-                          <CheckCircle className="w-4 h-4 text-green-600" />
-                        )}
-                        {userVote?.restaurant === restaurant && (
-                          <Badge className="bg-blue-100 text-blue-700">
-                            Twój głos
-                          </Badge>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {/* Custom radio indicator */}
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                            selectedRestaurant === restaurant
+                              ? "border-blue-500 bg-blue-500"
+                              : "border-slate-300 bg-white"
+                          }`}>
+                            {selectedRestaurant === restaurant && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: "spring", stiffness: 500 }}
+                                className="w-2 h-2 bg-white rounded-full"
+                              />
+                            )}
+                          </div>
+                          <span className="font-medium text-slate-800">{restaurant}</span>
+                        </div>
+                        
+                        {selectedRestaurant === restaurant && (
+                          <motion.div
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ type: "spring", stiffness: 500 }}
+                            className="text-blue-600"
+                          >
+                            <CheckCircle className="w-5 h-5" />
+                          </motion.div>
                         )}
                       </div>
-                    </div>
-                  </div>
-                ))}
+                    </motion.div>
+                  ))}
+                </div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Button
+                    onClick={handleVote}
+                    disabled={!selectedRestaurant || voting}
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                    size="lg"
+                  >
+                    {voting ? (
+                      <div className="flex items-center gap-2">
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                        />
+                        Głosowanie...
+                      </div>
+                    ) : (
+                      "Oddaj głos"
+                    )}
+                  </Button>
+                </motion.div>
               </div>
+            ) : (
+              <AnimatePresence>
+                <div className="space-y-3">
+                  {poll.restaurantOptions.map((restaurant, index) => (
+                    <motion.div
+                      key={restaurant}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className={`p-4 rounded-lg border-2 transition-all duration-300 ${
+                        poll.selectedRestaurant === restaurant
+                          ? "border-green-500 bg-green-50 shadow-lg shadow-green-100"
+                          : userVote?.restaurant === restaurant
+                          ? "border-blue-500 bg-blue-50 shadow-lg shadow-blue-100"
+                          : "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">{restaurant}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="relative">
+                            <AnimatedCounter 
+                              value={voteCounts[restaurant] || 0} 
+                              suffix=" głosów"
+                              className="font-semibold"
+                            />
+                          </Badge>
+                          
+                          <AnimatePresence>
+                            {poll.selectedRestaurant === restaurant && (
+                              <motion.div
+                                initial={{ scale: 0, rotate: -180 }}
+                                animate={{ scale: 1, rotate: 0 }}
+                                exit={{ scale: 0, rotate: 180 }}
+                                transition={{ type: "spring", stiffness: 500 }}
+                              >
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                          
+                          {userVote?.restaurant === restaurant && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ type: "spring", stiffness: 500, delay: 0.2 }}
+                            >
+                              <Badge className="bg-blue-100 text-blue-700">
+                                Twój głos
+                              </Badge>
+                            </motion.div>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </AnimatePresence>
             )}
           </CardContent>
         </Card>
@@ -290,27 +381,57 @@ export default function PollPage({ params }: PollPageProps) {
             <CardTitle>Wyniki głosowania</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {poll.restaurantOptions.map((restaurant) => {
+            <div className="space-y-4">
+              {poll.restaurantOptions.map((restaurant, index) => {
                 const count = voteCounts[restaurant] || 0;
                 const percentage =
                   votes.length > 0 ? (count / votes.length) * 100 : 0;
+                const isWinner = poll.selectedRestaurant === restaurant;
 
                 return (
-                  <div key={restaurant} className="space-y-2">
+                  <motion.div 
+                    key={restaurant} 
+                    className="space-y-2"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1, duration: 0.3 }}
+                  >
                     <div className="flex justify-between items-center">
-                      <span className="font-medium">{restaurant}</span>
-                      <span className="text-sm text-slate-600">
-                        {count} głosów ({percentage.toFixed(1)}%)
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`font-medium ${isWinner ? 'text-green-700' : ''}`}>
+                          {restaurant}
+                        </span>
+                        {isWinner && (
+                          <motion.div
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ type: "spring", stiffness: 500, delay: 0.5 }}
+                          >
+                            <Crown className="w-4 h-4 text-yellow-500" />
+                          </motion.div>
+                        )}
+                      </div>
+                      <div className="text-sm text-slate-600 flex items-center gap-1">
+                        <AnimatedCounter 
+                          value={count} 
+                          suffix=" głosów"
+                          className="font-semibold"
+                        />
+                        <span>
+                          (<AnimatedCounter 
+                            value={Math.round(percentage * 10) / 10} 
+                            suffix="%"
+                          />)
+                        </span>
+                      </div>
                     </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2">
-                      <div
-                        className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${percentage}%` }}
-                      />
-                    </div>
-                  </div>
+                    
+                    <AnimatedProgressBar 
+                      percentage={percentage}
+                      isWinner={isWinner}
+                      color={isWinner ? 'from-green-500 to-emerald-500' : 'from-blue-500 to-purple-500'}
+                    />
+                  </motion.div>
                 );
               })}
             </div>

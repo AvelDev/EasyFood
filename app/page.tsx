@@ -4,11 +4,13 @@ import { useAuthContext } from "@/contexts/auth-context";
 import { usePrivacyProtection } from "@/hooks/use-privacy-protection";
 import { useEffect, useState } from "react";
 import { Poll } from "@/types";
-import { getPolls } from "@/lib/firestore";
+import { getPolls, subscribeToPolls } from "@/lib/firestore";
 import PollCard from "@/components/poll-card";
 import CreatePollDialog from "@/components/create-poll-dialog";
+import LoadingSkeleton from "@/components/loading-skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Vote, Clock, Users } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
   const { user, loading: authLoading, isProtected } = usePrivacyProtection();
@@ -29,7 +31,19 @@ export default function Home() {
 
   useEffect(() => {
     if (user && isProtected) {
+      // Initial load
       fetchPolls();
+
+      // Set up real-time listener
+      const unsubscribe = subscribeToPolls((pollsData) => {
+        setPolls(pollsData);
+        setLoading(false);
+      });
+
+      // Cleanup function
+      return () => {
+        unsubscribe();
+      };
     }
   }, [user, isProtected]);
 
@@ -116,17 +130,7 @@ export default function Home() {
       </div>
 
       {loading ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <Card key={index} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="h-6 bg-slate-200 rounded mb-4"></div>
-                <div className="h-4 bg-slate-200 rounded mb-2"></div>
-                <div className="h-4 bg-slate-200 rounded w-3/4"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <LoadingSkeleton />
       ) : polls.length === 0 ? (
         <div className="text-center py-12">
           <Vote className="w-16 h-16 mx-auto text-slate-400 mb-4" />
@@ -140,11 +144,32 @@ export default function Home() {
           </p>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {polls.map((poll) => (
-            <PollCard key={poll.id} poll={poll} />
-          ))}
-        </div>
+        <motion.div
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <AnimatePresence>
+            {polls.map((poll, index) => (
+              <motion.div
+                key={poll.id}
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                transition={{
+                  delay: index * 0.1,
+                  duration: 0.3,
+                  type: "spring",
+                  stiffness: 300,
+                }}
+                layout
+              >
+                <PollCard poll={poll} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       )}
     </div>
   );
