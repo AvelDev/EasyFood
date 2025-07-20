@@ -9,9 +9,15 @@ service cloud.firestore {
              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // Dostęp do danych użytkowników tylko dla zalogowanych
+    // Dostęp do danych użytkowników
     match /users/{userId} {
-      allow read, create, update: if request.auth != null && request.auth.uid == userId;
+      // Pozwól wszystkim zalogowanym użytkownikom czytać podstawowe informacje (name, uid)
+      // potrzebne do wyświetlania nicków przy głosach i zamówieniach
+      allow read: if request.auth != null;
+      
+      // Tworzenie i aktualizacja tylko własnych danych
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+      
       // Pozwól użytkownikowi usunąć własne konto
       allow delete: if request.auth != null && request.auth.uid == userId;
     }

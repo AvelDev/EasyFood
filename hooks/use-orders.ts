@@ -12,6 +12,7 @@ import {
   subscribeToOrders,
   subscribeToPoll,
   updatePoll,
+  getUsers,
 } from "@/lib/firestore";
 
 export function useOrders(pollId: string, userId?: string) {
@@ -22,6 +23,20 @@ export function useOrders(pollId: string, userId?: string) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const previousOrderingEndsAt = useRef<Date | undefined>(undefined);
+
+  // Function to enrich orders with user names
+  const enrichOrdersWithUserNames = async (ordersData: Order[]) => {
+    const userIds = Array.from(
+      new Set(ordersData.map((order) => order.userId))
+    );
+    const users = await getUsers(userIds);
+    const userMap = new Map(users.map((user) => [user.uid, user.name]));
+
+    return ordersData.map((order) => ({
+      ...order,
+      userName: userMap.get(order.userId) || "Nieznany użytkownik",
+    }));
+  };
 
   useEffect(() => {
     if (!userId || !pollId) return;
@@ -54,8 +69,9 @@ export function useOrders(pollId: string, userId?: string) {
     fetchInitialData();
 
     // Set up real-time orders listener
-    const unsubscribeOrders = subscribeToOrders(pollId, (ordersData) => {
-      setOrders(ordersData);
+    const unsubscribeOrders = subscribeToOrders(pollId, async (ordersData) => {
+      const enrichedOrders = await enrichOrdersWithUserNames(ordersData);
+      setOrders(enrichedOrders);
       setLoading(false);
     });
 

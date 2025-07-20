@@ -21,6 +21,7 @@ export type Order = {
   notes: string;
   cost: number;
   createdAt: Date;
+  userName?: string; // Nazwa użytkownika
 };
 
 export type User = {

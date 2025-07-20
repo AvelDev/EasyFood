@@ -195,45 +195,47 @@ function VotingResults({ poll, userVote, voteCounts }: VotingResultsProps) {
                 : "border-slate-200 bg-slate-50 hover:bg-slate-100"
             }`}
           >
-            <div className="flex items-center justify-between">
-              <span className="font-medium">{restaurant}</span>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="relative">
-                  <AnimatedCounter
-                    value={voteCounts[restaurant] || 0}
-                    suffix=" głosów"
-                    className="font-semibold"
-                  />
-                </Badge>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-medium">{restaurant}</span>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="relative">
+                    <AnimatedCounter
+                      value={voteCounts[restaurant] || 0}
+                      suffix=" głosów"
+                      className="font-semibold"
+                    />
+                  </Badge>
 
-                <AnimatePresence>
-                  {poll.selectedRestaurant === restaurant && (
+                  <AnimatePresence>
+                    {poll.selectedRestaurant === restaurant && (
+                      <motion.div
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        exit={{ scale: 0, rotate: 180 }}
+                        transition={{ type: "spring", stiffness: 500 }}
+                      >
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {userVote?.restaurant === restaurant && (
                     <motion.div
-                      initial={{ scale: 0, rotate: -180 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      exit={{ scale: 0, rotate: 180 }}
-                      transition={{ type: "spring", stiffness: 500 }}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        delay: 0.2,
+                      }}
                     >
-                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <Badge className="bg-blue-100 text-blue-700">
+                        Twój głos
+                      </Badge>
                     </motion.div>
                   )}
-                </AnimatePresence>
-
-                {userVote?.restaurant === restaurant && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 500,
-                      delay: 0.2,
-                    }}
-                  >
-                    <Badge className="bg-blue-100 text-blue-700">
-                      Twój głos
-                    </Badge>
-                  </motion.div>
-                )}
+                </div>
               </div>
             </div>
           </motion.div>

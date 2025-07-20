@@ -54,10 +54,37 @@ export function OrdersList({
               }`}
             >
               <div className="flex justify-between items-start mb-2">
-                <h3 className="font-semibold text-slate-800">{order.dish}</h3>
-                <Badge variant="outline" className="text-green-600">
-                  {order.cost.toFixed(2)} zł
-                </Badge>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-slate-800">
+                      {order.dish}
+                    </h3>
+                    <Badge variant="outline" className="text-green-600">
+                      {order.cost.toFixed(2)} zł
+                    </Badge>
+                  </div>
+
+                  {/* Show user name as badge */}
+                  <div className="flex items-center gap-2">
+                    {order.userName && (
+                      <Badge
+                        variant="secondary"
+                        className={`text-xs ${
+                          order.userId === currentUserId
+                            ? "bg-blue-100 text-blue-700 border-blue-200"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {order.userName}
+                      </Badge>
+                    )}
+                    {order.userId === currentUserId && (
+                      <Badge className="bg-blue-100 text-blue-700 text-xs">
+                        Twoje zamówienie
+                      </Badge>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {order.notes && (
@@ -73,11 +100,6 @@ export function OrdersList({
                     minute: "2-digit",
                   })}
                 </span>
-                {order.userId === currentUserId && (
-                  <Badge className="bg-blue-100 text-blue-700 ml-auto">
-                    Twoje zamówienie
-                  </Badge>
-                )}
               </div>
             </div>
           ))}

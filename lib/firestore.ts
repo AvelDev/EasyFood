@@ -14,6 +14,7 @@ import {
   DocumentData,
   QuerySnapshot,
   DocumentSnapshot,
+  documentId,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { Poll, Vote, Order, User } from "@/types";
@@ -324,6 +325,34 @@ export const getUser = async (uid: string): Promise<User | null> => {
     return docSnap.data() as User;
   }
   return null;
+};
+
+// Get multiple users by their UIDs
+export const getUsers = async (uids: string[]): Promise<User[]> => {
+  if (uids.length === 0) return [];
+
+  const users: User[] = [];
+
+  // Firebase doesn't support 'in' queries with more than 10 items,
+  // so we need to batch the requests
+  const batches: string[][] = [];
+  for (let i = 0; i < uids.length; i += 10) {
+    batches.push(uids.slice(i, i + 10));
+  }
+
+  for (const batch of batches) {
+    const q = query(collection(db, "users"), where(documentId(), "in", batch));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.docs.forEach((doc) => {
+      const userData = doc.data() as User;
+      users.push({
+        ...userData,
+        uid: doc.id, // Ensure uid is set from document ID
+      });
+    });
+  }
+
+  return users;
 };
 
 export const updateUserRole = async (uid: string, role: "admin" | "user") => {
