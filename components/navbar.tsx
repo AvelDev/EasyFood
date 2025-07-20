@@ -70,6 +70,15 @@ export default function Navbar() {
                       <Settings className="w-4 h-4" />
                       Ustawienia
                     </DropdownMenuItem>
+                    {user.role === "admin" && (
+                      <DropdownMenuItem
+                        onClick={() => router.push("/settings/general")}
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        <Crown className="w-4 h-4" />
+                        Ustawienia ogólne
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={handleSignOut}

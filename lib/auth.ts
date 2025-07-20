@@ -72,13 +72,14 @@ export const acceptPrivacyPolicy = async (user: User): Promise<void> => {
       role: "user",
       privacyPolicyAccepted: true,
       privacyPolicyAcceptedAt: new Date(),
+      createdAt: new Date(),
     };
 
     if (!userDoc.exists()) {
       // Utwórz nowy dokument użytkownika
       await setDoc(userRef, userData);
     } else {
-      // Zaktualizuj istniejący dokument
+      // Zaktualizuj istniejący dokument (nie zmieniaj createdAt jeśli już istnieje)
       await updateDoc(userRef, {
         privacyPolicyAccepted: true,
         privacyPolicyAcceptedAt: new Date(),

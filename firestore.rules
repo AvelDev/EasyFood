@@ -25,6 +25,7 @@ service cloud.firestore {
     match /users/{userId} {
       // Pozwól wszystkim zalogowanym użytkownikom czytać podstawowe informacje (name, uid)
       // potrzebne do wyświetlania nicków przy głosach i zamówieniach
+      // Administratorzy mogą czytać wszystkie dane użytkowników (w tym daty utworzenia)
       allow read: if request.auth != null;
       
       // Tworzenie i aktualizacja tylko własnych danych
@@ -32,6 +33,27 @@ service cloud.firestore {
       
       // Pozwól użytkownikowi usunąć własne konto
       allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Dostęp do szablonów głosowań (poll templates)
+    match /pollTemplates/{templateId} {
+      // Czytanie dla wszystkich zalogowanych użytkowników
+      allow read: if request.auth != null;
+      
+      // Tworzenie, aktualizacja i usuwanie tylko dla administratorów
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Dostęp do ustawień aplikacji (app settings)
+    match /appSettings/main {
+      // Czytanie tylko dla administratorów
+      allow read: if isAdmin();
+      
+      // Aktualizacja tylko dla administratorów
+      allow update: if isAdmin();
+      
+      // Tworzenie tylko dla administratorów (przy pierwszym uruchomieniu)
+      allow create: if isAdmin();
     }
 
     // Dostęp do głosowań (polls)

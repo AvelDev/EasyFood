@@ -14,10 +14,19 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Calendar, Clock } from "lucide-react";
+import { Plus, Trash2, Calendar, Clock, FileText } from "lucide-react";
 import { createPoll } from "@/lib/firestore";
 import { useAuthContext } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
+import { PollTemplate } from "@/types";
+import { getActivePollTemplates } from "@/lib/admin-settings";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const pollSchema = z.object({
   title: z.string().min(1, "Tytuł jest wymagany"),
@@ -42,6 +51,8 @@ export default function CreatePollDialog({
 }: CreatePollDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [templates, setTemplates] = useState<PollTemplate[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const { user } = useAuthContext();
   const router = useRouter();
 
@@ -104,6 +115,61 @@ export default function CreatePollDialog({
     }
   }, [watchedVotingTime, setValue]);
 
+  // Wczytaj szablony przy otwieraniu dialogu
+  useEffect(() => {
+    if (open) {
+      loadTemplates();
+    }
+  }, [open]);
+
+  const loadTemplates = async () => {
+    try {
+      const activeTemplates = await getActivePollTemplates();
+      setTemplates(activeTemplates);
+    } catch (error) {
+      console.error("Error loading templates:", error);
+    }
+  };
+
+  const handleTemplateSelect = (templateId: string) => {
+    setSelectedTemplate(templateId);
+
+    if (templateId === "") {
+      // Reset to default values
+      reset({
+        title: "",
+        restaurants: [{ name: "" }, { name: "" }],
+        votingDate: getTodayDate(),
+        votingTime: "",
+        orderingTime: "",
+      });
+      return;
+    }
+
+    const template = templates.find((t) => t.id === templateId);
+    if (!template) return;
+
+    // Calculate end times based on template duration
+    const now = new Date();
+    const votingEndTime = new Date(
+      now.getTime() + template.votingDurationHours * 60 * 60 * 1000
+    );
+    const orderingEndTime = new Date(
+      votingEndTime.getTime() +
+        (template.orderingDurationHours || 0) * 60 * 60 * 1000
+    );
+
+    // Apply template values
+    setValue("title", template.name);
+    setValue(
+      "restaurants",
+      template.restaurantOptions.map((name) => ({ name }))
+    );
+    setValue("votingDate", votingEndTime.toISOString().split("T")[0]);
+    setValue("votingTime", votingEndTime.toTimeString().slice(0, 5));
+    setValue("orderingTime", orderingEndTime.toTimeString().slice(0, 5));
+  };
+
   const onSubmit = async (data: PollFormData) => {
     if (!user?.uid) return;
 
@@ -126,6 +192,7 @@ export default function CreatePollDialog({
       });
 
       setOpen(false);
+      setSelectedTemplate("");
       reset();
 
       // Wywołaj callback aby odświeżyć listę głosowań
@@ -154,6 +221,46 @@ export default function CreatePollDialog({
           <DialogTitle>Utwórz nowe głosowanie</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Template Selection */}
+          {templates.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="template">Użyj szablonu (opcjonalne)</Label>
+              <Select
+                value={selectedTemplate}
+                onValueChange={handleTemplateSelect}
+              >
+                <SelectTrigger>
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    <SelectValue placeholder="Wybierz szablon lub utwórz od zera" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">
+                    <div className="flex items-center gap-2">
+                      <Plus className="w-4 h-4" />
+                      Utwórz od zera
+                    </div>
+                  </SelectItem>
+                  {templates.map((template) => (
+                    <SelectItem key={template.id} value={template.id}>
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4" />
+                        <div>
+                          <div className="font-medium">{template.name}</div>
+                          <div className="text-xs text-slate-500">
+                            {template.restaurantOptions.length} restauracji,
+                            {template.votingDurationHours}h głosowania
+                          </div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="title">Tytuł głosowania</Label>
             <Input

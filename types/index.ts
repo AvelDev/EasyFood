@@ -35,4 +35,23 @@ export type User = {
   role: "admin" | "user";
   privacyPolicyAccepted?: boolean;
   privacyPolicyAcceptedAt?: Date;
+  createdAt?: Date;
+};
+
+export type PollTemplate = {
+  id: string;
+  name: string;
+  restaurantOptions: string[];
+  votingDurationHours: number;
+  orderingDurationHours?: number;
+  createdBy: string;
+  createdAt: Date;
+  isActive: boolean;
+};
+
+export type AppSettings = {
+  discordWebhookUrl?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  updatedBy: string;
 };
