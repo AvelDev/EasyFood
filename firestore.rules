@@ -12,6 +12,8 @@ service cloud.firestore {
     // Dostęp do danych użytkowników tylko dla zalogowanych
     match /users/{userId} {
       allow read, create, update: if request.auth != null && request.auth.uid == userId;
+      // Pozwól użytkownikowi usunąć własne konto
+      allow delete: if request.auth != null && request.auth.uid == userId;
     }
 
     // Dostęp do głosowań (polls)
@@ -25,12 +27,18 @@ service cloud.firestore {
       // Dostęp do głosów w ramach danego głosowania
       match /votes/{voteId} {
         allow read, create: if request.auth != null;
+        // Pozwól użytkownikowi usunąć własne głosy (np. przy usuwaniu konta)
+        allow delete: if request.auth != null && 
+                      resource.data.userId == request.auth.uid;
         // Głosy są automatycznie usuwane wraz z głosowaniem
       }
 
       // Dostęp do zamówień w ramach danego głosowania
       match /orders/{orderId} {
         allow read, create, update: if request.auth != null;
+        // Pozwól użytkownikowi usunąć własne zamówienia (np. przy usuwaniu konta)
+        allow delete: if request.auth != null && 
+                      resource.data.userId == request.auth.uid;
         // Zamówienia są automatycznie usuwane wraz z głosowaniem
       }
     }

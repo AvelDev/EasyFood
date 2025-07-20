@@ -1,11 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { User, LogOut, Crown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { User, LogOut, Crown, Settings, ChevronDown } from "lucide-react";
 import { useAuthContext } from "@/contexts/auth-context";
 import { signOut } from "@/lib/auth";
 import { useRouter } from "next/navigation";
-import UserProviderInfo from "./user-provider-info";
 
 export default function Navbar() {
   const { user, loading } = useAuthContext();
@@ -29,7 +35,10 @@ export default function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1
+              className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => router.push("/")}
+            >
               EasyFood
             </h1>
           </div>
@@ -39,27 +48,38 @@ export default function Navbar() {
               <div className="animate-pulse bg-slate-200 h-8 w-20 rounded"></div>
             ) : user ? (
               <div className="flex items-center gap-3">
-                <div className="flex flex-col items-end gap-1">
-                  <div className="flex items-center gap-2">
-                    <User className="w-5 h-5 text-slate-600" />
-                    <span className="font-medium text-slate-700">
-                      {user.displayName}
-                    </span>
-                    {user.role === "admin" && (
-                      <Crown className="w-4 h-4 text-yellow-500" />
-                    )}
-                  </div>
-                  <UserProviderInfo user={user} />
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleSignOut}
-                  className="text-slate-600 hover:text-slate-900"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Wyloguj
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="flex items-center gap-2 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                    >
+                      <User className="w-5 h-5" />
+                      <span className="font-medium">{user.displayName}</span>
+                      {user.role === "admin" && (
+                        <Crown className="w-4 h-4 text-yellow-500" />
+                      )}
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem
+                      onClick={() => router.push("/settings")}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <Settings className="w-4 h-4" />
+                      Ustawienia
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={handleSignOut}
+                      className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Wyloguj się
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             ) : (
               <Button
