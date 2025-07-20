@@ -22,14 +22,22 @@ import { useRouter } from "next/navigation";
 const pollSchema = z.object({
   title: z.string().min(1, "Tytuł jest wymagany"),
   restaurants: z
-    .array(z.object({ name: z.string().min(1, "Nazwa restauracji jest wymagana") }))
+    .array(
+      z.object({ name: z.string().min(1, "Nazwa restauracji jest wymagana") })
+    )
     .min(2, "Wymagane są co najmniej 2 restauracje"),
   votingEndsAt: z.string().min(1, "Data zakończenia jest wymagana"),
 });
 
 type PollFormData = z.infer<typeof pollSchema>;
 
-export default function CreatePollDialog() {
+interface CreatePollDialogProps {
+  onPollCreated?: () => void;
+}
+
+export default function CreatePollDialog({
+  onPollCreated,
+}: CreatePollDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuthContext();
@@ -71,6 +79,12 @@ export default function CreatePollDialog() {
 
       setOpen(false);
       reset();
+
+      // Wywołaj callback aby odświeżyć listę głosowań
+      if (onPollCreated) {
+        onPollCreated();
+      }
+
       router.refresh();
     } catch (error) {
       console.error("Error creating poll:", error);
