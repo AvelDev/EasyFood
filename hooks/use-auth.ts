@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { User as FirebaseUser, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, onSnapshot, Unsubscribe } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { User } from "@/types";
 
@@ -16,42 +16,66 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    let firestoreUnsubscribe: Unsubscribe | null = null;
+
+    const authUnsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      // Cleanup previous Firestore listener if exists
+      if (firestoreUnsubscribe) {
+        firestoreUnsubscribe();
+        firestoreUnsubscribe = null;
+      }
+
       if (firebaseUser) {
         try {
-          // Check if user exists in Firestore
+          // Listen to real-time changes in user document
           const userRef = doc(db, "users", firebaseUser.uid);
-          const userDoc = await getDoc(userRef);
 
-          if (!userDoc.exists()) {
-            // Nowy użytkownik - nie ustawiaj jako zalogowanego dopóki nie zaakceptuje polityki
-            setUser(null);
-          } else {
-            // Get existing user data
-            const userData = userDoc.data() as User;
+          firestoreUnsubscribe = onSnapshot(
+            userRef,
+            (userDoc) => {
+              if (!userDoc.exists()) {
+                // Nowy użytkownik - nie ustawiaj jako zalogowanego dopóki nie zaakceptuje polityki
+                setUser(null);
+              } else {
+                // Get existing user data
+                const userData = userDoc.data() as User;
 
-            // Sprawdź czy zaakceptował politykę prywatności
-            if (!userData.privacyPolicyAccepted) {
+                // Sprawdź czy zaakceptował politykę prywatności
+                if (!userData.privacyPolicyAccepted) {
+                  setUser(null);
+                } else {
+                  setUser({
+                    ...firebaseUser,
+                    role: userData.role,
+                    privacyPolicyAccepted: userData.privacyPolicyAccepted,
+                  });
+                }
+              }
+              setLoading(false);
+            },
+            (error) => {
+              console.error("Error listening to user document:", error);
               setUser(null);
-            } else {
-              setUser({
-                ...firebaseUser,
-                role: userData.role,
-                privacyPolicyAccepted: userData.privacyPolicyAccepted,
-              });
+              setLoading(false);
             }
-          }
+          );
         } catch (error) {
-          console.error("Error handling user data:", error);
+          console.error("Error setting up user listener:", error);
           setUser(null);
+          setLoading(false);
         }
       } else {
         setUser(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      authUnsubscribe();
+      if (firestoreUnsubscribe) {
+        firestoreUnsubscribe();
+      }
+    };
   }, []);
 
   return { user, loading };

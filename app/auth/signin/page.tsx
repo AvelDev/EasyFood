@@ -38,7 +38,7 @@ export default function SignIn() {
         setShowPrivacyDialog(true);
       } else {
         // Użytkownik już zaakceptował politykę prywatności
-        router.push("/");
+        // useEffect obsłuży przekierowanie gdy kontekst auth zostanie zaktualizowany
       }
     } catch (error: any) {
       console.error(`Error signing in with ${provider}:`, error);
@@ -56,7 +56,8 @@ export default function SignIn() {
       await acceptPrivacyPolicy(pendingUser);
       setShowPrivacyDialog(false);
       setPendingUser(null);
-      router.push("/");
+      // Nie przekierowujemy tutaj - useEffect obsłuży przekierowanie
+      // gdy kontekst auth zostanie zaktualizowany
     } catch (error: any) {
       console.error("Error accepting privacy policy:", error);
       setError("Wystąpił błąd podczas akceptacji polityki prywatności");
