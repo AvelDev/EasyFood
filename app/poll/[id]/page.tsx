@@ -1,16 +1,22 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { Poll, Vote } from '@/types';
-import { getPoll, getVotes, getUserVote, addVote, updatePoll } from '@/lib/firestore';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Clock, Users, CheckCircle, Crown } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useAuthContext } from "@/contexts/auth-context";
+import { useRouter } from "next/navigation";
+import { Poll, Vote } from "@/types";
+import {
+  getPoll,
+  getVotes,
+  getUserVote,
+  addVote,
+  updatePoll,
+} from "@/lib/firestore";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Clock, Users, CheckCircle, Crown } from "lucide-react";
 
 interface PollPageProps {
   params: {
@@ -19,12 +25,12 @@ interface PollPageProps {
 }
 
 export default function PollPage({ params }: PollPageProps) {
-  const { data: session } = useSession();
+  const { user } = useAuthContext();
   const router = useRouter();
   const [poll, setPoll] = useState<Poll | null>(null);
   const [votes, setVotes] = useState<Vote[]>([]);
   const [userVote, setUserVote] = useState<Vote | null>(null);
-  const [selectedRestaurant, setSelectedRestaurant] = useState<string>('');
+  const [selectedRestaurant, setSelectedRestaurant] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [voting, setVoting] = useState(false);
 
@@ -36,9 +42,9 @@ export default function PollPage({ params }: PollPageProps) {
           setPoll(pollData);
           const votesData = await getVotes(params.id);
           setVotes(votesData);
-          
-          if (session?.user?.id) {
-            const userVoteData = await getUserVote(params.id, session.user.id);
+
+          if (user?.uid) {
+            const userVoteData = await getUserVote(params.id, user.uid);
             setUserVote(userVoteData);
             if (userVoteData) {
               setSelectedRestaurant(userVoteData.restaurant);
@@ -46,43 +52,43 @@ export default function PollPage({ params }: PollPageProps) {
           }
         }
       } catch (error) {
-        console.error('Error fetching poll data:', error);
+        console.error("Error fetching poll data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    if (session && params.id) {
+    if (user && params.id) {
       fetchPollData();
     }
-  }, [params.id, session]);
+  }, [params.id, user]);
 
   const handleVote = async () => {
-    if (!session?.user?.id || !poll || !selectedRestaurant) return;
+    if (!user?.uid || !poll || !selectedRestaurant) return;
 
     setVoting(true);
     try {
       const voteData: Vote = {
-        userId: session.user.id,
+        userId: user.uid,
         restaurant: selectedRestaurant,
         createdAt: new Date(),
       };
 
       await addVote(params.id, voteData);
       setUserVote(voteData);
-      
+
       // Refresh votes
       const updatedVotes = await getVotes(params.id);
       setVotes(updatedVotes);
     } catch (error) {
-      console.error('Error voting:', error);
+      console.error("Error voting:", error);
     } finally {
       setVoting(false);
     }
   };
 
   const handleClosePoll = async () => {
-    if (!poll || session?.user?.role !== 'admin') return;
+    if (!poll || user?.role !== "admin") return;
 
     try {
       // Calculate the winner
@@ -91,7 +97,7 @@ export default function PollPage({ params }: PollPageProps) {
         return acc;
       }, {} as Record<string, number>);
 
-      const winner = Object.entries(voteCounts).reduce((a, b) => 
+      const winner = Object.entries(voteCounts).reduce((a, b) =>
         voteCounts[a[0]] > voteCounts[b[0]] ? a : b
       )[0];
 
@@ -102,7 +108,7 @@ export default function PollPage({ params }: PollPageProps) {
 
       setPoll({ ...poll, closed: true, selectedRestaurant: winner });
     } catch (error) {
-      console.error('Error closing poll:', error);
+      console.error("Error closing poll:", error);
     }
   };
 
@@ -117,8 +123,10 @@ export default function PollPage({ params }: PollPageProps) {
   if (!poll) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-slate-600 mb-4">Poll not found</h2>
-        <Button onClick={() => router.push('/')}>Go back to home</Button>
+        <h2 className="text-2xl font-semibold text-slate-600 mb-4">
+          Poll not found
+        </h2>
+        <Button onClick={() => router.push("/")}>Go back to home</Button>
       </div>
     );
   }
@@ -135,23 +143,25 @@ export default function PollPage({ params }: PollPageProps) {
       <div className="mb-8">
         <Button
           variant="ghost"
-          onClick={() => router.push('/')}
+          onClick={() => router.push("/")}
           className="mb-4 text-slate-600"
         >
           ← Back to polls
         </Button>
-        
+
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-800 mb-2">{poll.title}</h1>
+            <h1 className="text-3xl font-bold text-slate-800 mb-2">
+              {poll.title}
+            </h1>
             <div className="flex items-center gap-4 text-slate-600">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
                 <span>
-                  Ends {poll.votingEndsAt.toLocaleDateString()} at{' '}
+                  Ends {poll.votingEndsAt.toLocaleDateString()} at{" "}
                   {poll.votingEndsAt.toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
+                    hour: "2-digit",
+                    minute: "2-digit",
                   })}
                 </span>
               </div>
@@ -161,7 +171,7 @@ export default function PollPage({ params }: PollPageProps) {
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             {poll.closed ? (
               <Badge className="bg-green-100 text-green-700">
@@ -179,8 +189,8 @@ export default function PollPage({ params }: PollPageProps) {
                 Ended
               </Badge>
             )}
-            
-            {session?.user?.role === 'admin' && isActive && (
+
+            {user?.role === "admin" && isActive && (
               <Button
                 variant="outline"
                 size="sm"
@@ -209,23 +219,32 @@ export default function PollPage({ params }: PollPageProps) {
           <CardContent>
             {canVote ? (
               <div className="space-y-4">
-                <RadioGroup value={selectedRestaurant} onValueChange={setSelectedRestaurant}>
+                <RadioGroup
+                  value={selectedRestaurant}
+                  onValueChange={setSelectedRestaurant}
+                >
                   {poll.restaurantOptions.map((restaurant) => (
-                    <div key={restaurant} className="flex items-center space-x-2">
+                    <div
+                      key={restaurant}
+                      className="flex items-center space-x-2"
+                    >
                       <RadioGroupItem value={restaurant} id={restaurant} />
-                      <Label htmlFor={restaurant} className="flex-1 cursor-pointer">
+                      <Label
+                        htmlFor={restaurant}
+                        className="flex-1 cursor-pointer"
+                      >
                         {restaurant}
                       </Label>
                     </div>
                   ))}
                 </RadioGroup>
-                
+
                 <Button
                   onClick={handleVote}
                   disabled={!selectedRestaurant || voting}
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
                 >
-                  {voting ? 'Voting...' : 'Submit Vote'}
+                  {voting ? "Voting..." : "Submit Vote"}
                 </Button>
               </div>
             ) : (
@@ -235,10 +254,10 @@ export default function PollPage({ params }: PollPageProps) {
                     key={restaurant}
                     className={`p-4 rounded-lg border-2 transition-colors ${
                       poll.selectedRestaurant === restaurant
-                        ? 'border-green-500 bg-green-50'
+                        ? "border-green-500 bg-green-50"
                         : userVote?.restaurant === restaurant
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-slate-200 bg-slate-50'
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-slate-200 bg-slate-50"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -251,7 +270,9 @@ export default function PollPage({ params }: PollPageProps) {
                           <CheckCircle className="w-4 h-4 text-green-600" />
                         )}
                         {userVote?.restaurant === restaurant && (
-                          <Badge className="bg-blue-100 text-blue-700">Your vote</Badge>
+                          <Badge className="bg-blue-100 text-blue-700">
+                            Your vote
+                          </Badge>
                         )}
                       </div>
                     </div>
@@ -270,8 +291,9 @@ export default function PollPage({ params }: PollPageProps) {
             <div className="space-y-3">
               {poll.restaurantOptions.map((restaurant) => {
                 const count = voteCounts[restaurant] || 0;
-                const percentage = votes.length > 0 ? (count / votes.length) * 100 : 0;
-                
+                const percentage =
+                  votes.length > 0 ? (count / votes.length) * 100 : 0;
+
                 return (
                   <div key={restaurant} className="space-y-2">
                     <div className="flex justify-between items-center">
@@ -290,7 +312,7 @@ export default function PollPage({ params }: PollPageProps) {
                 );
               })}
             </div>
-            
+
             {poll.closed && (
               <div className="mt-6 pt-6 border-t">
                 <Button

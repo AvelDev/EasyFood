@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useAuthContext } from '@/contexts/auth-context';
 import { useEffect, useState } from 'react';
 import { Poll } from '@/types';
 import { getPolls } from '@/lib/firestore';
@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Vote, Clock, Users } from 'lucide-react';
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { user, loading: authLoading } = useAuthContext();
   const [polls, setPolls] = useState<Poll[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,12 +26,12 @@ export default function Home() {
       }
     };
 
-    if (session) {
+    if (user) {
       fetchPolls();
     }
-  }, [session]);
+  }, [user]);
 
-  if (status === 'loading') {
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -39,7 +39,7 @@ export default function Home() {
     );
   }
 
-  if (!session) {
+  if (!user) {
     return (
       <div className="max-w-4xl mx-auto text-center py-12">
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl">
@@ -93,7 +93,7 @@ export default function Home() {
             Vote for restaurants and place your orders
           </p>
         </div>
-        {session.user?.role === 'admin' && <CreatePollDialog />}
+        {user.role === 'admin' && <CreatePollDialog />}
       </div>
 
       {loading ? (
@@ -113,7 +113,7 @@ export default function Home() {
           <Vote className="w-16 h-16 mx-auto text-slate-400 mb-4" />
           <h2 className="text-2xl font-semibold text-slate-600 mb-2">No polls yet</h2>
           <p className="text-slate-500">
-            {session.user?.role === 'admin' 
+            {user.role === 'admin' 
               ? 'Create your first poll to get started!' 
               : 'Ask an admin to create a poll.'
             }

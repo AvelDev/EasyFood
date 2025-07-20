@@ -1,11 +1,28 @@
 'use client';
 
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { User, LogOut, Crown } from 'lucide-react';
+import { useAuthContext } from '@/contexts/auth-context';
+import { auth } from '@/lib/firebase';
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuthContext();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      router.push('/auth/signin');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  const handleSignIn = () => {
+    router.push('/auth/signin');
+  };
 
   return (
     <nav className="bg-white shadow-sm border-b border-slate-200">
@@ -18,23 +35,23 @@ export default function Navbar() {
           </div>
           
           <div className="flex items-center gap-4">
-            {status === 'loading' ? (
+            {loading ? (
               <div className="animate-pulse bg-slate-200 h-8 w-20 rounded"></div>
-            ) : session ? (
+            ) : user ? (
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
                   <User className="w-5 h-5 text-slate-600" />
                   <span className="font-medium text-slate-700">
-                    {session.user?.name}
+                    {user.displayName}
                   </span>
-                  {session.user?.role === 'admin' && (
+                  {user.role === 'admin' && (
                     <Crown className="w-4 h-4 text-yellow-500" />
                   )}
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => signOut()}
+                  onClick={handleSignOut}
                   className="text-slate-600 hover:text-slate-900"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
@@ -43,10 +60,10 @@ export default function Navbar() {
               </div>
             ) : (
               <Button
-                onClick={() => signIn('discord')}
-                className="bg-[#5865F2] hover:bg-[#4752C4] text-white"
+                onClick={handleSignIn}
+                className="bg-[#4285f4] hover:bg-[#3367d6] text-white"
               >
-                Sign in with Discord
+                Sign in with Google
               </Button>
             )}
           </div>
