@@ -281,7 +281,7 @@ export const getUserOrder = async (
 export const updateUserOrder = async (
   pollId: string,
   userId: string,
-  orderData: { dish: string; notes?: string; cost: number }
+  orderData: Partial<Order> & { dish?: string; notes?: string; cost?: number }
 ) => {
   const q = query(
     collection(db, "polls", pollId, "orders"),
@@ -291,11 +291,32 @@ export const updateUserOrder = async (
 
   if (!querySnapshot.empty) {
     const docRef = querySnapshot.docs[0].ref;
-    await updateDoc(docRef, {
-      ...orderData,
-      notes: orderData.notes || "",
-      createdAt: Timestamp.fromDate(new Date()),
-    });
+
+    // Prepare update data, handling undefined values
+    const updateData: any = {};
+
+    if (orderData.dish !== undefined) updateData.dish = orderData.dish;
+    if (orderData.notes !== undefined) updateData.notes = orderData.notes || "";
+    if (orderData.cost !== undefined) updateData.cost = orderData.cost;
+    if (orderData.adminNotes !== undefined)
+      updateData.adminNotes = orderData.adminNotes;
+    if (orderData.costAdjustment !== undefined)
+      updateData.costAdjustment = orderData.costAdjustment;
+    if (orderData.paymentStatus !== undefined)
+      updateData.paymentStatus = orderData.paymentStatus;
+    if (orderData.orderConfirmed !== undefined)
+      updateData.orderConfirmed = orderData.orderConfirmed;
+
+    // Update createdAt only if basic order data is being updated
+    if (
+      orderData.dish !== undefined ||
+      orderData.notes !== undefined ||
+      orderData.cost !== undefined
+    ) {
+      updateData.createdAt = Timestamp.fromDate(new Date());
+    }
+
+    await updateDoc(docRef, updateData);
   } else {
     throw new Error("Order not found");
   }

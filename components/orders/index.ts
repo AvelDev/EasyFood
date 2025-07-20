@@ -2,6 +2,7 @@ export { OrderForm } from "./order-form";
 export { OrdersList } from "./orders-list";
 export { OrderSummary } from "./order-summary";
 export { AdminControls } from "./admin-controls";
+export { AdminOrderManagement } from "./admin-order-management";
 export { PollNotFound } from "./poll-not-found";
 export { PollStillActive } from "./poll-still-active";
 export { LoadingSpinner } from "./loading-spinner";

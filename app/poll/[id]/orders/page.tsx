@@ -9,6 +9,7 @@ import {
   OrdersList,
   OrderSummary,
   AdminControls,
+  AdminOrderManagement,
   PollNotFound,
   PollStillActive,
   LoadingSpinner,
@@ -35,6 +36,7 @@ export default function OrdersPage({ params }: OrdersPageProps) {
     submitOrder,
     closeOrdering,
     deleteOrder,
+    updateOrder,
   } = useOrders(params.id, user?.uid);
 
   if (loading) {
@@ -94,6 +96,18 @@ export default function OrdersPage({ params }: OrdersPageProps) {
           totalCost={totalCost}
         />
       </div>
+
+      {/* Admin Order Management Panel */}
+      {user?.role === "admin" && orderingEnded && (
+        <div className="mt-8">
+          <AdminOrderManagement
+            orders={orders}
+            isAdmin={user?.role === "admin"}
+            orderingEnded={orderingEnded}
+            onUpdateOrder={updateOrder}
+          />
+        </div>
+      )}
     </div>
   );
 }

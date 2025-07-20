@@ -22,6 +22,11 @@ export type Order = {
   cost: number;
   createdAt: Date;
   userName?: string; // Nazwa użytkownika
+  // Admin fields
+  adminNotes?: string; // Uwagi administratora
+  costAdjustment?: number; // Korekta kosztów
+  paymentStatus?: "pending" | "paid" | "unpaid"; // Status płatności
+  orderConfirmed?: boolean; // Czy zamówienie zostało potwierdzone
 };
 
 export type User = {

@@ -9,6 +9,18 @@ service cloud.firestore {
              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    // Funkcja walidująca pola zamówienia
+    function isValidOrderUpdate(data) {
+      // Sprawdź czy admin fields są ustawiane tylko przez administratorów
+      let adminFieldsPresent = 'adminNotes' in data.keys() || 
+                              'costAdjustment' in data.keys() || 
+                              'paymentStatus' in data.keys() || 
+                              'orderConfirmed' in data.keys();
+      
+      // Jeśli są admin fields, musi być admin
+      return !adminFieldsPresent || isAdmin();
+    }
+
     // Dostęp do danych użytkowników
     match /users/{userId} {
       // Pozwól wszystkim zalogowanym użytkownikom czytać podstawowe informacje (name, uid)
@@ -41,9 +53,17 @@ service cloud.firestore {
       // Dostęp do zamówień w ramach danego głosowania
       match /orders/{orderId} {
         allow read, create: if request.auth != null;
+        
         // Pozwól użytkownikowi aktualizować i usuwać własne zamówienia
-        allow update, delete: if request.auth != null && 
-                              resource.data.userId == request.auth.uid;
+        // oraz administratorom aktualizować wszystkie zamówienia
+        // Dodatowa walidacja dla pól administratora
+        allow update: if request.auth != null && 
+                      (resource.data.userId == request.auth.uid || isAdmin()) &&
+                      isValidOrderUpdate(request.resource.data);
+        
+        // Usuwanie tylko własnych zamówień
+        allow delete: if request.auth != null && 
+                      resource.data.userId == request.auth.uid;
       }
     }
   }

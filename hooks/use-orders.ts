@@ -222,6 +222,33 @@ export function useOrders(pollId: string, userId?: string) {
     }
   };
 
+  const updateOrder = async (orderIndex: number, updates: Partial<Order>) => {
+    if (!poll || orderIndex < 0 || orderIndex >= orders.length) return;
+
+    const orderToUpdate = orders[orderIndex];
+
+    try {
+      // Update order in Firestore with admin fields
+      await updateUserOrder(pollId, orderToUpdate.userId, {
+        ...orderToUpdate,
+        ...updates,
+      });
+
+      toast({
+        title: "Zamówienie zaktualizowane",
+        description:
+          "Zamówienie zostało pomyślnie zaktualizowane przez administratora.",
+      });
+    } catch (error) {
+      console.error("Error updating order:", error);
+      toast({
+        title: "Błąd",
+        description: "Nie udało się zaktualizować zamówienia.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const orderingEnded =
     poll?.orderingEndsAt &&
     poll.orderingEndsAt instanceof Date &&
@@ -240,5 +267,6 @@ export function useOrders(pollId: string, userId?: string) {
     submitOrder,
     closeOrdering,
     deleteOrder,
+    updateOrder,
   };
 }
