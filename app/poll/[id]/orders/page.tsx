@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { usePrivacyProtection } from "@/hooks/use-privacy-protection";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +14,8 @@ import {
   getUserOrder,
   addOrder,
   subscribeToOrders,
+  subscribeToPoll,
+  updatePoll,
 } from "@/lib/firestore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +23,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, DollarSign, User, Clock } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { ShoppingCart, DollarSign, User, Clock, X } from "lucide-react";
 
 const orderSchema = z.object({
   dish: z.string().min(1, "Nazwa dania jest wymagana"),
@@ -46,6 +59,7 @@ export default function OrdersPage({ params }: OrdersPageProps) {
   const [userOrder, setUserOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const previousOrderingEndsAt = useRef<Date | undefined>(undefined);
 
   const {
     register,
@@ -102,14 +116,54 @@ export default function OrdersPage({ params }: OrdersPageProps) {
       setLoading(false);
     });
 
+    // Set up real-time poll listener to catch changes in orderingEndsAt
+    const unsubscribePoll = subscribeToPoll(params.id, (pollData) => {
+      if (pollData) {
+        const now = new Date();
+        const currentOrderingEnded =
+          pollData.orderingEndsAt && pollData.orderingEndsAt <= now;
+        const previousOrderingEnded =
+          previousOrderingEndsAt.current &&
+          previousOrderingEndsAt.current <= now;
+
+        // Sprawdź czy zamówienia zostały właśnie zakończone
+        if (currentOrderingEnded && !previousOrderingEnded) {
+          toast({
+            title: "Zamówienia zakończone",
+            description: "Administrator zakończył przyjmowanie zamówień.",
+            variant: "destructive",
+          });
+        }
+
+        // Zaktualizuj referencję
+        previousOrderingEndsAt.current = pollData.orderingEndsAt;
+        setPoll(pollData);
+      }
+    });
+
     // Cleanup function
     return () => {
       unsubscribeOrders();
+      unsubscribePoll();
     };
   }, [params.id, user?.uid, setValue, router, toast]);
 
   const onSubmit = async (data: OrderFormData) => {
     if (!user?.uid || !poll) return;
+
+    // Sprawdź czy czas na składanie zamówień nie minął (sprawdzenie w czasie rzeczywistym)
+    const now = new Date();
+    const orderingEnded = poll.orderingEndsAt && poll.orderingEndsAt <= now;
+
+    if (orderingEnded) {
+      toast({
+        title: "Czas minął",
+        description:
+          "Nie można już składać zamówień - czas składania zamówień dobiegł końca.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -124,11 +178,49 @@ export default function OrdersPage({ params }: OrdersPageProps) {
       await addOrder(params.id, orderData);
       setUserOrder(orderData);
 
+      toast({
+        title: "Zamówienie złożone",
+        description: "Twoje zamówienie zostało pomyślnie złożone.",
+      });
+
       // Orders will be updated automatically via the real-time listener
     } catch (error) {
       console.error("Error submitting order:", error);
+      toast({
+        title: "Błąd",
+        description: "Nie udało się złożyć zamówienia. Spróbuj ponownie.",
+        variant: "destructive",
+      });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleCloseOrdering = async () => {
+    if (!poll || !user?.uid || user.role !== "admin") return;
+
+    try {
+      // Ustaw czas zakończenia zamówień na teraz
+      const now = new Date();
+      await updatePoll(params.id, {
+        orderingEndsAt: now,
+      });
+
+      // Aktualizuj lokalny stan
+      setPoll({ ...poll, orderingEndsAt: now });
+
+      toast({
+        title: "Zamówienia zakończone",
+        description:
+          "Składanie zamówień zostało zakończone przez administratora.",
+      });
+    } catch (error) {
+      console.error("Error closing ordering:", error);
+      toast({
+        title: "Błąd",
+        description: "Nie udało się zakończyć składania zamówień.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -169,6 +261,13 @@ export default function OrdersPage({ params }: OrdersPageProps) {
     );
   }
 
+  // Sprawdź czy czas na składanie zamówień już minął
+  const orderingEnded =
+    poll.orderingEndsAt &&
+    poll.orderingEndsAt instanceof Date &&
+    poll.orderingEndsAt <= new Date();
+  const canOrder = !orderingEnded;
+
   const totalCost = orders.reduce((sum, order) => sum + order.cost, 0);
 
   return (
@@ -196,12 +295,72 @@ export default function OrdersPage({ params }: OrdersPageProps) {
                 <DollarSign className="w-4 h-4" />
                 <span>Łącznie: {totalCost.toFixed(2)} zł</span>
               </div>
+              {poll.orderingEndsAt && poll.orderingEndsAt instanceof Date && (
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  <span>
+                    Zamówienia do{" "}
+                    {poll.orderingEndsAt.toLocaleDateString("pl-PL")} o{" "}
+                    {poll.orderingEndsAt.toLocaleTimeString("pl-PL", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
-          <Badge className="bg-green-100 text-green-700">
-            {orders.length} zamówień
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge className="bg-green-100 text-green-700">
+              {orders.length} zamówień
+            </Badge>
+            {orderingEnded ? (
+              <Badge className="bg-red-100 text-red-700">
+                Zamówienia zakończone
+              </Badge>
+            ) : (
+              <Badge className="bg-blue-100 text-blue-700">
+                Można składać zamówienia
+              </Badge>
+            )}
+            {user?.role === "admin" && !orderingEnded && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-red-200 text-red-700 hover:bg-red-50"
+                  >
+                    <X className="w-4 h-4 mr-1" />
+                    Zakończ zamówienia
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Zakończyć składanie zamówień?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Ta akcja natychmiast zakończy możliwość składania nowych
+                      zamówień. Użytkownicy nie będą mogli już dodawać swoich
+                      zamówień do tego głosowania. Czy na pewno chcesz
+                      kontynuować?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Anuluj</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleCloseOrdering}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      Tak, zakończ zamówienia
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
         </div>
       </div>
 
@@ -214,7 +373,17 @@ export default function OrdersPage({ params }: OrdersPageProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {userOrder ? (
+            {orderingEnded && !userOrder ? (
+              <div className="text-center py-8">
+                <Clock className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-slate-700 mb-2">
+                  Czas na składanie zamówień minął
+                </h3>
+                <p className="text-slate-500">
+                  Nie można już składać nowych zamówień dla tego głosowania.
+                </p>
+              </div>
+            ) : userOrder ? (
               <div className="space-y-4">
                 <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                   <h3 className="font-semibold text-green-800 mb-2">
@@ -252,7 +421,20 @@ export default function OrdersPage({ params }: OrdersPageProps) {
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className={`space-y-4 ${
+                  orderingEnded ? "opacity-50 pointer-events-none" : ""
+                }`}
+              >
+                {orderingEnded && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-sm text-red-700 font-medium">
+                      Czas na składanie zamówień minął. Nie można już składać
+                      nowych zamówień.
+                    </p>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="dish">Nazwa dania</Label>
                   <Input
@@ -294,10 +476,14 @@ export default function OrdersPage({ params }: OrdersPageProps) {
 
                 <Button
                   type="submit"
-                  disabled={submitting}
-                  className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+                  disabled={submitting || orderingEnded}
+                  className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {submitting ? "Wysyłanie..." : "Złóż zamówienie"}
+                  {submitting
+                    ? "Wysyłanie..."
+                    : orderingEnded
+                    ? "Czas składania zamówień minął"
+                    : "Złóż zamówienie"}
                 </Button>
               </form>
             )}

@@ -24,6 +24,9 @@ export const createPoll = async (poll: Omit<Poll, "id">) => {
   const pollData = {
     ...poll,
     votingEndsAt: Timestamp.fromDate(poll.votingEndsAt),
+    orderingEndsAt: poll.orderingEndsAt
+      ? Timestamp.fromDate(poll.orderingEndsAt)
+      : null,
   };
   const docRef = await addDoc(collection(db, "polls"), pollData);
   return docRef.id;
@@ -37,6 +40,9 @@ export const getPolls = async (): Promise<Poll[]> => {
     id: doc.id,
     ...doc.data(),
     votingEndsAt: doc.data().votingEndsAt.toDate(),
+    orderingEndsAt: doc.data().orderingEndsAt
+      ? doc.data().orderingEndsAt.toDate()
+      : undefined,
   })) as Poll[];
 };
 
@@ -49,6 +55,9 @@ export const subscribeToPolls = (callback: (polls: Poll[]) => void) => {
       id: doc.id,
       ...doc.data(),
       votingEndsAt: doc.data().votingEndsAt.toDate(),
+      orderingEndsAt: doc.data().orderingEndsAt
+        ? doc.data().orderingEndsAt.toDate()
+        : undefined,
     })) as Poll[];
     callback(polls);
   });
@@ -63,6 +72,9 @@ export const getPoll = async (id: string): Promise<Poll | null> => {
       id: docSnap.id,
       ...docSnap.data(),
       votingEndsAt: docSnap.data().votingEndsAt.toDate(),
+      orderingEndsAt: docSnap.data().orderingEndsAt
+        ? docSnap.data().orderingEndsAt.toDate()
+        : undefined,
     } as Poll;
   }
   return null;
@@ -81,6 +93,9 @@ export const subscribeToPoll = (
         id: docSnap.id,
         ...docSnap.data(),
         votingEndsAt: docSnap.data().votingEndsAt.toDate(),
+        orderingEndsAt: docSnap.data().orderingEndsAt
+          ? docSnap.data().orderingEndsAt.toDate()
+          : undefined,
       } as Poll;
       callback(poll);
     } else {
@@ -92,7 +107,10 @@ export const subscribeToPoll = (
 export const updatePoll = async (
   id: string,
   updates: Partial<
-    Omit<Poll, "votingEndsAt"> & { votingEndsAt?: Date | TimestampType }
+    Omit<Poll, "votingEndsAt" | "orderingEndsAt"> & {
+      votingEndsAt?: Date | TimestampType;
+      orderingEndsAt?: Date | TimestampType;
+    }
   >
 ) => {
   const docRef = doc(db, "polls", id);
@@ -102,6 +120,13 @@ export const updatePoll = async (
       updateData.votingEndsAt = Timestamp.fromDate(updates.votingEndsAt);
     } else {
       updateData.votingEndsAt = updates.votingEndsAt;
+    }
+  }
+  if (updates.orderingEndsAt) {
+    if (updates.orderingEndsAt instanceof Date) {
+      updateData.orderingEndsAt = Timestamp.fromDate(updates.orderingEndsAt);
+    } else {
+      updateData.orderingEndsAt = updates.orderingEndsAt;
     }
   }
   await updateDoc(docRef, updateData);

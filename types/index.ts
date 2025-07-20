@@ -4,6 +4,7 @@ export type Poll = {
   restaurantOptions: string[];
   createdBy: string;
   votingEndsAt: Date;
+  orderingEndsAt?: Date;
   closed: boolean;
   selectedRestaurant: string | null;
 };

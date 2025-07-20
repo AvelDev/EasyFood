@@ -98,9 +98,31 @@ export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
                       className="text-sm"
                     />
                     <DateDisplay date={poll.votingEndsAt} className="text-sm" />
+                    {poll.orderingEndsAt &&
+                      poll.orderingEndsAt instanceof Date && (
+                        <div className="text-xs text-slate-500">
+                          Zamówienia do:{" "}
+                          {poll.orderingEndsAt.toLocaleTimeString("pl-PL", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </div>
+                      )}
                   </div>
                 ) : (
-                  <DateDisplay date={poll.votingEndsAt} className="text-sm" />
+                  <div className="flex flex-col gap-1">
+                    <DateDisplay date={poll.votingEndsAt} className="text-sm" />
+                    {poll.orderingEndsAt &&
+                      poll.orderingEndsAt instanceof Date && (
+                        <div className="text-xs text-slate-500">
+                          Zamówienia do:{" "}
+                          {poll.orderingEndsAt.toLocaleTimeString("pl-PL", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </div>
+                      )}
+                  </div>
                 )}
               </div>
             </div>

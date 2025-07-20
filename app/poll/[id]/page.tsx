@@ -222,33 +222,49 @@ export default function PollPage({ params }: PollPageProps) {
             <h1 className="text-3xl font-bold text-slate-800 mb-2">
               {poll.title}
             </h1>
-            <div className="flex items-center gap-4 text-slate-600">
-              {isActive ? (
-                <CountdownTimer
-                  endTime={poll.votingEndsAt}
-                  onTimeExpired={handleTimeExpired}
-                  className="font-medium"
-                />
-              ) : (
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-slate-600">
+              <div className="flex items-center gap-4">
+                {isActive ? (
+                  <CountdownTimer
+                    endTime={poll.votingEndsAt}
+                    onTimeExpired={handleTimeExpired}
+                    className="font-medium"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span>
+                      Kończy się {poll.votingEndsAt.toLocaleDateString("pl-PL")}{" "}
+                      o{" "}
+                      {poll.votingEndsAt.toLocaleTimeString("pl-PL", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  <AnimatedCounter
+                    value={votes.length}
+                    suffix=" głosów"
+                    className="font-medium"
+                  />
+                </div>
+              </div>
+              {poll.orderingEndsAt && poll.orderingEndsAt instanceof Date && (
+                <div className="flex items-center gap-2 text-sm">
                   <Clock className="w-4 h-4" />
                   <span>
-                    Kończy się {poll.votingEndsAt.toLocaleDateString("pl-PL")} o{" "}
-                    {poll.votingEndsAt.toLocaleTimeString("pl-PL", {
+                    Zamówienia do{" "}
+                    {poll.orderingEndsAt.toLocaleDateString("pl-PL")} o{" "}
+                    {poll.orderingEndsAt.toLocaleTimeString("pl-PL", {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
                   </span>
                 </div>
               )}
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                <AnimatedCounter
-                  value={votes.length}
-                  suffix=" głosów"
-                  className="font-medium"
-                />
-              </div>
             </div>
           </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Calendar, Clock } from "lucide-react";
 import { createPoll } from "@/lib/firestore";
 import { useAuthContext } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
@@ -26,7 +26,9 @@ const pollSchema = z.object({
       z.object({ name: z.string().min(1, "Nazwa restauracji jest wymagana") })
     )
     .min(2, "Wymagane są co najmniej 2 restauracje"),
-  votingEndsAt: z.string().min(1, "Data zakończenia jest wymagana"),
+  votingDate: z.string().min(1, "Data głosowania jest wymagana"),
+  votingTime: z.string().min(1, "Godzina zakończenia głosowania jest wymagana"),
+  orderingTime: z.string().min(1, "Godzina zakończenia zamówień jest wymagana"),
 });
 
 type PollFormData = z.infer<typeof pollSchema>;
@@ -43,18 +45,39 @@ export default function CreatePollDialog({
   const { user } = useAuthContext();
   const router = useRouter();
 
+  // Funkcja do uzyskania dzisiejszej daty w formacie YYYY-MM-DD
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  };
+
+  // Funkcja do uzyskania minimalnej godziny (obecna + 1 godzina jeśli to dzisiaj)
+  const getMinTime = (selectedDate: string) => {
+    const today = getTodayDate();
+    if (selectedDate === today) {
+      const now = new Date();
+      now.setHours(now.getHours() + 1); // Minimum 1 godzina od teraz
+      return now.toTimeString().slice(0, 5); // HH:MM format
+    }
+    return "00:00";
+  };
+
   const {
     register,
     control,
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
+    setValue,
   } = useForm<PollFormData>({
     resolver: zodResolver(pollSchema),
     defaultValues: {
       title: "",
       restaurants: [{ name: "" }, { name: "" }],
-      votingEndsAt: "",
+      votingDate: getTodayDate(),
+      votingTime: "",
+      orderingTime: "",
     },
   });
 
@@ -63,16 +86,41 @@ export default function CreatePollDialog({
     name: "restaurants",
   });
 
+  const watchedVotingDate = watch("votingDate");
+  const watchedVotingTime = watch("votingTime");
+
+  // Automatyczne ustawienie minimalnej godziny zakończenia zamówień
+  useEffect(() => {
+    if (watchedVotingTime) {
+      const [hours, minutes] = watchedVotingTime.split(":");
+      const votingEndTime = new Date();
+      votingEndTime.setHours(parseInt(hours), parseInt(minutes));
+
+      // Dodaj 30 minut do czasu zakończenia głosowania
+      votingEndTime.setMinutes(votingEndTime.getMinutes() + 30);
+
+      const orderingTime = votingEndTime.toTimeString().slice(0, 5);
+      setValue("orderingTime", orderingTime);
+    }
+  }, [watchedVotingTime, setValue]);
+
   const onSubmit = async (data: PollFormData) => {
     if (!user?.uid) return;
 
     setIsLoading(true);
     try {
+      // Tworzenie obiektów Date z wybranych dat i godzin
+      const votingEndsAt = new Date(`${data.votingDate}T${data.votingTime}`);
+      const orderingEndsAt = new Date(
+        `${data.votingDate}T${data.orderingTime}`
+      );
+
       const pollId = await createPoll({
         title: data.title,
         restaurantOptions: data.restaurants.map((r) => r.name),
         createdBy: user.uid,
-        votingEndsAt: new Date(data.votingEndsAt),
+        votingEndsAt: votingEndsAt,
+        orderingEndsAt: orderingEndsAt,
         closed: false,
         selectedRestaurant: null,
       });
@@ -158,18 +206,77 @@ export default function CreatePollDialog({
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="votingEndsAt">Głosowanie kończy się</Label>
-            <Input
-              id="votingEndsAt"
-              type="datetime-local"
-              {...register("votingEndsAt")}
-            />
-            {errors.votingEndsAt && (
-              <p className="text-sm text-red-600">
-                {errors.votingEndsAt.message}
-              </p>
-            )}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="votingDate" className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Data głosowania
+              </Label>
+              <Input
+                id="votingDate"
+                type="date"
+                min={getTodayDate()}
+                {...register("votingDate")}
+              />
+              {errors.votingDate && (
+                <p className="text-sm text-red-600">
+                  {errors.votingDate.message}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="votingTime" className="flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  Głosowanie kończy się o
+                </Label>
+                <Input
+                  id="votingTime"
+                  type="time"
+                  min={
+                    watchedVotingDate === getTodayDate()
+                      ? getMinTime(watchedVotingDate)
+                      : "00:00"
+                  }
+                  {...register("votingTime")}
+                />
+                {errors.votingTime && (
+                  <p className="text-sm text-red-600">
+                    {errors.votingTime.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="orderingTime"
+                  className="flex items-center gap-2"
+                >
+                  <Clock className="w-4 h-4" />
+                  Zamówienia kończą się o
+                </Label>
+                <div className="space-y-1">
+                  <Input
+                    id="orderingTime"
+                    type="time"
+                    min={watchedVotingTime || "00:00"}
+                    {...register("orderingTime")}
+                  />
+                </div>
+                {errors.orderingTime && (
+                  <p className="text-sm text-red-600">
+                    {errors.orderingTime.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="text-xs text-slate-500 bg-blue-50 p-3 rounded-lg">
+              <strong>Informacja:</strong> Zamówienia automatycznie kończą się
+              30 minut po zakończeniu głosowania. Możesz dostosować ten czas
+              według potrzeb.
+            </div>
           </div>
 
           <div className="flex gap-2">
