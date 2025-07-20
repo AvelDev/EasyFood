@@ -103,15 +103,6 @@ export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm text-slate-600">
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                <AnimatedCounter
-                  value={poll.restaurantOptions.length}
-                  suffix=" opcji"
-                  showPulse={false}
-                />
-              </div>
-
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 {isActive ? (
                   <div className="flex flex-col gap-2">
@@ -162,6 +153,16 @@ export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
                 : "Zobacz głosowanie"}
             </Button>
 
+            {poll.closed && (
+              <Button
+                onClick={() => router.push(`/poll/${poll.id}/orders`)}
+                variant="outline"
+                className="flex-1 border-green-200 text-green-700 hover:bg-green-50 text-xs sm:text-sm whitespace-nowrap overflow-hidden"
+              >
+                <span className="block">Zamówienia</span>
+              </Button>
+            )}
+
             <Button
               onClick={handleShareLink}
               variant="outline"
@@ -175,17 +176,6 @@ export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
                 <Share2 className="w-4 h-4" />
               )}
             </Button>
-
-            {poll.closed && (
-              <Button
-                onClick={() => router.push(`/poll/${poll.id}/orders`)}
-                variant="outline"
-                className="flex-1 border-green-200 text-green-700 hover:bg-green-50 text-xs sm:text-sm whitespace-nowrap overflow-hidden"
-              >
-                <span className="block sm:hidden">Zamówienia</span>
-                <span className="hidden sm:block">Zobacz zamówienia</span>
-              </Button>
-            )}
           </div>
         </CardContent>
       </Card>
