@@ -34,6 +34,7 @@ export default function OrdersPage({ params }: OrdersPageProps) {
     totalCost,
     submitOrder,
     closeOrdering,
+    deleteOrder,
   } = useOrders(params.id, user?.uid);
 
   if (loading) {
@@ -84,6 +85,7 @@ export default function OrdersPage({ params }: OrdersPageProps) {
           orderingEnded={orderingEnded}
           submitting={submitting}
           onSubmit={submitOrder}
+          onDelete={deleteOrder}
         />
 
         <OrdersList

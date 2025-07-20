@@ -6,6 +6,8 @@ import {
   getVotes,
   getUserVote,
   addVote,
+  updateUserVote,
+  deleteUserVote,
   updatePoll,
   subscribeToPoll,
   subscribeToVotes,
@@ -92,21 +94,39 @@ export function usePoll({ pollId, userId }: UsePollProps) {
 
     setVoting(true);
     try {
-      const voteData: Vote = {
-        userId,
-        restaurant,
-        createdAt: new Date(),
-      };
+      if (userVote) {
+        // Update existing vote
+        await updateUserVote(pollId, userId, restaurant);
+        setUserVote({ ...userVote, restaurant, createdAt: new Date() });
 
-      await addVote(pollId, voteData);
-      setUserVote(voteData);
+        toast({
+          title: "Głos zaktualizowany",
+          description: "Twój głos został pomyślnie zaktualizowany.",
+        });
+      } else {
+        // Add new vote
+        const voteData: Vote = {
+          userId,
+          restaurant,
+          createdAt: new Date(),
+        };
+
+        await addVote(pollId, voteData);
+        setUserVote(voteData);
+
+        toast({
+          title: "Głos oddany",
+          description: "Twój głos został pomyślnie oddany.",
+        });
+      }
 
       // Votes will be updated automatically via the real-time listener
     } catch (error) {
       console.error("Error voting:", error);
       toast({
         title: "Błąd głosowania",
-        description: "Nie udało się oddać głosu. Spróbuj ponownie.",
+        description:
+          "Nie udało się oddać/zaktualizować głosu. Spróbuj ponownie.",
         variant: "destructive",
       });
     } finally {
@@ -173,7 +193,7 @@ export function usePoll({ pollId, userId }: UsePollProps) {
   const isActive = poll
     ? !poll.closed && poll.votingEndsAt > new Date()
     : false;
-  const canVote = poll ? isActive && !userVote : false;
+  const canVote = poll ? isActive : false; // Allow voting even if user already voted
 
   return {
     poll,

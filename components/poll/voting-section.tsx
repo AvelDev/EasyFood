@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Poll, Vote } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,11 @@ export default function VotingSection({
     userVote?.restaurant || ""
   );
 
+  // Update selected restaurant when userVote changes
+  useEffect(() => {
+    setSelectedRestaurant(userVote?.restaurant || "");
+  }, [userVote?.restaurant]);
+
   const voteCounts = votes.reduce((acc, vote) => {
     acc[vote.restaurant] = (acc[vote.restaurant] || 0) + 1;
     return acc;
@@ -55,6 +60,16 @@ export default function VotingSection({
       <CardContent>
         {canVote ? (
           <div className="space-y-4">
+            {userVote && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-700">
+                  <strong>Aktualny głos:</strong> {userVote.restaurant}
+                </p>
+                <p className="text-xs text-blue-600 mt-1">
+                  Możesz zmienić swój głos wybierając inną opcję poniżej
+                </p>
+              </div>
+            )}
             <div className="space-y-3">
               {poll.restaurantOptions.map((restaurant, index) => (
                 <motion.div
@@ -134,8 +149,10 @@ export default function VotingSection({
                       }}
                       className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
                     />
-                    Głosowanie...
+                    {userVote ? "Aktualizowanie..." : "Głosowanie..."}
                   </div>
+                ) : userVote ? (
+                  "Zmień głos"
                 ) : (
                   "Oddaj głos"
                 )}

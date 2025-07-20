@@ -185,6 +185,43 @@ export const getUserVote = async (
   return null;
 };
 
+export const updateUserVote = async (
+  pollId: string,
+  userId: string,
+  newRestaurant: string
+) => {
+  const q = query(
+    collection(db, "polls", pollId, "votes"),
+    where("userId", "==", userId)
+  );
+  const querySnapshot = await getDocs(q);
+
+  if (!querySnapshot.empty) {
+    const docRef = querySnapshot.docs[0].ref;
+    await updateDoc(docRef, {
+      restaurant: newRestaurant,
+      createdAt: Timestamp.fromDate(new Date()),
+    });
+  } else {
+    throw new Error("Vote not found");
+  }
+};
+
+export const deleteUserVote = async (pollId: string, userId: string) => {
+  const q = query(
+    collection(db, "polls", pollId, "votes"),
+    where("userId", "==", userId)
+  );
+  const querySnapshot = await getDocs(q);
+
+  if (!querySnapshot.empty) {
+    const docRef = querySnapshot.docs[0].ref;
+    await deleteDoc(docRef);
+  } else {
+    throw new Error("Vote not found");
+  }
+};
+
 // Orders
 export const addOrder = async (pollId: string, order: Order) => {
   const orderData = {
@@ -238,6 +275,44 @@ export const getUserOrder = async (
     } as Order;
   }
   return null;
+};
+
+export const updateUserOrder = async (
+  pollId: string,
+  userId: string,
+  orderData: { dish: string; notes?: string; cost: number }
+) => {
+  const q = query(
+    collection(db, "polls", pollId, "orders"),
+    where("userId", "==", userId)
+  );
+  const querySnapshot = await getDocs(q);
+
+  if (!querySnapshot.empty) {
+    const docRef = querySnapshot.docs[0].ref;
+    await updateDoc(docRef, {
+      ...orderData,
+      notes: orderData.notes || "",
+      createdAt: Timestamp.fromDate(new Date()),
+    });
+  } else {
+    throw new Error("Order not found");
+  }
+};
+
+export const deleteUserOrder = async (pollId: string, userId: string) => {
+  const q = query(
+    collection(db, "polls", pollId, "orders"),
+    where("userId", "==", userId)
+  );
+  const querySnapshot = await getDocs(q);
+
+  if (!querySnapshot.empty) {
+    const docRef = querySnapshot.docs[0].ref;
+    await deleteDoc(docRef);
+  } else {
+    throw new Error("Order not found");
+  }
 };
 
 // Users

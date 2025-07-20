@@ -27,19 +27,17 @@ service cloud.firestore {
       // Dostęp do głosów w ramach danego głosowania
       match /votes/{voteId} {
         allow read, create: if request.auth != null;
-        // Pozwól użytkownikowi usunąć własne głosy (np. przy usuwaniu konta)
-        allow delete: if request.auth != null && 
-                      resource.data.userId == request.auth.uid;
-        // Głosy są automatycznie usuwane wraz z głosowaniem
+        // Pozwól użytkownikowi aktualizować i usuwać własne głosy
+        allow update, delete: if request.auth != null && 
+                              resource.data.userId == request.auth.uid;
       }
 
       // Dostęp do zamówień w ramach danego głosowania
       match /orders/{orderId} {
-        allow read, create, update: if request.auth != null;
-        // Pozwól użytkownikowi usunąć własne zamówienia (np. przy usuwaniu konta)
-        allow delete: if request.auth != null && 
-                      resource.data.userId == request.auth.uid;
-        // Zamówienia są automatycznie usuwane wraz z głosowaniem
+        allow read, create: if request.auth != null;
+        // Pozwól użytkownikowi aktualizować i usuwać własne zamówienia
+        allow update, delete: if request.auth != null && 
+                              resource.data.userId == request.auth.uid;
       }
     }
   }

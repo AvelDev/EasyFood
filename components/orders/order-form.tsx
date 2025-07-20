@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ShoppingCart, Clock } from "lucide-react";
+import { ShoppingCart, Clock, Edit, Trash2 } from "lucide-react";
 import { Order } from "@/types";
 
 const orderSchema = z.object({
@@ -24,6 +25,7 @@ interface OrderFormProps {
   orderingEnded: boolean;
   submitting: boolean;
   onSubmit: (data: OrderFormData) => void;
+  onDelete?: () => void;
 }
 
 export function OrderForm({
@@ -31,11 +33,14 @@ export function OrderForm({
   orderingEnded,
   submitting,
   onSubmit,
+  onDelete,
 }: OrderFormProps) {
+  const [isEditing, setIsEditing] = useState(false);
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<OrderFormData>({
     resolver: zodResolver(orderSchema),
     defaultValues: userOrder
@@ -46,6 +51,42 @@ export function OrderForm({
         }
       : undefined,
   });
+
+  // Update form when userOrder changes
+  useEffect(() => {
+    if (userOrder) {
+      reset({
+        dish: userOrder.dish,
+        notes: userOrder.notes,
+        cost: userOrder.cost,
+      });
+    }
+  }, [userOrder, reset]);
+
+  const handleFormSubmit = (data: OrderFormData) => {
+    onSubmit(data);
+    if (!userOrder) {
+      // Only reset form for new orders, not updates
+      reset();
+    }
+    setIsEditing(false);
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    if (userOrder) {
+      reset({
+        dish: userOrder.dish,
+        notes: userOrder.notes,
+        cost: userOrder.cost,
+      });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    reset();
+  };
 
   if (orderingEnded && !userOrder) {
     return (
@@ -71,7 +112,7 @@ export function OrderForm({
     );
   }
 
-  if (userOrder) {
+  if (userOrder && !isEditing) {
     return (
       <Card className="bg-white/80 backdrop-blur-sm">
         <CardHeader>
@@ -112,10 +153,36 @@ export function OrderForm({
               </div>
             </div>
 
-            <p className="text-sm text-slate-600">
-              Skontaktuj się z administratorem, jeśli chcesz zmodyfikować swoje
-              zamówienie.
-            </p>
+            {!orderingEnded && (
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleEdit}
+                  variant="outline"
+                  className="flex-1"
+                  disabled={submitting}
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edytuj zamówienie
+                </Button>
+                {onDelete && (
+                  <Button
+                    onClick={onDelete}
+                    variant="outline"
+                    className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+                    disabled={submitting}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Usuń zamówienie
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {orderingEnded && (
+              <p className="text-sm text-slate-600">
+                Czas na modyfikację zamówień minął.
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -127,12 +194,12 @@ export function OrderForm({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ShoppingCart className="w-5 h-5" />
-          Złóż zamówienie
+          {userOrder ? "Edytuj zamówienie" : "Złóż zamówienie"}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(handleFormSubmit)}
           className={`space-y-4 ${
             orderingEnded ? "opacity-50 pointer-events-none" : ""
           }`}
@@ -181,17 +248,34 @@ export function OrderForm({
             />
           </div>
 
-          <Button
-            type="submit"
-            disabled={submitting || orderingEnded}
-            className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {submitting
-              ? "Wysyłanie..."
-              : orderingEnded
-              ? "Czas składania zamówień minął"
-              : "Złóż zamówienie"}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="submit"
+              disabled={submitting || orderingEnded}
+              className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting
+                ? userOrder
+                  ? "Aktualizowanie..."
+                  : "Wysyłanie..."
+                : orderingEnded
+                ? "Czas składania zamówień minął"
+                : userOrder
+                ? "Zaktualizuj zamówienie"
+                : "Złóż zamówienie"}
+            </Button>
+
+            {userOrder && isEditing && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancelEdit}
+                disabled={submitting}
+              >
+                Anuluj
+              </Button>
+            )}
+          </div>
         </form>
       </CardContent>
     </Card>

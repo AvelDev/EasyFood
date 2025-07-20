@@ -7,6 +7,8 @@ import {
   getPoll,
   getUserOrder,
   addOrder,
+  updateUserOrder,
+  deleteUserOrder,
   subscribeToOrders,
   subscribeToPoll,
   updatePoll,
@@ -108,26 +110,45 @@ export function useOrders(pollId: string, userId?: string) {
 
     setSubmitting(true);
     try {
-      const orderData: Order = {
-        userId,
-        dish: data.dish,
-        notes: data.notes || "",
-        cost: data.cost,
-        createdAt: new Date(),
-      };
+      if (userOrder) {
+        // Update existing order
+        await updateUserOrder(pollId, userId, data);
+        setUserOrder({
+          ...userOrder,
+          dish: data.dish,
+          notes: data.notes || "",
+          cost: data.cost,
+          createdAt: new Date(),
+        });
 
-      await addOrder(pollId, orderData);
-      setUserOrder(orderData);
+        toast({
+          title: "Zamówienie zaktualizowane",
+          description: "Twoje zamówienie zostało pomyślnie zaktualizowane.",
+        });
+      } else {
+        // Create new order
+        const orderData: Order = {
+          userId,
+          dish: data.dish,
+          notes: data.notes || "",
+          cost: data.cost,
+          createdAt: new Date(),
+        };
 
-      toast({
-        title: "Zamówienie złożone",
-        description: "Twoje zamówienie zostało pomyślnie złożone.",
-      });
+        await addOrder(pollId, orderData);
+        setUserOrder(orderData);
+
+        toast({
+          title: "Zamówienie złożone",
+          description: "Twoje zamówienie zostało pomyślnie złożone.",
+        });
+      }
     } catch (error) {
       console.error("Error submitting order:", error);
       toast({
         title: "Błąd",
-        description: "Nie udało się złożyć zamówienia. Spróbuj ponownie.",
+        description:
+          "Nie udało się złożyć/zaktualizować zamówienia. Spróbuj ponownie.",
         variant: "destructive",
       });
     } finally {
@@ -161,6 +182,30 @@ export function useOrders(pollId: string, userId?: string) {
     }
   };
 
+  const deleteOrder = async () => {
+    if (!userId || !userOrder) return;
+
+    setSubmitting(true);
+    try {
+      await deleteUserOrder(pollId, userId);
+      setUserOrder(null);
+
+      toast({
+        title: "Zamówienie usunięte",
+        description: "Twoje zamówienie zostało usunięte.",
+      });
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      toast({
+        title: "Błąd",
+        description: "Nie udało się usunąć zamówienia. Spróbuj ponownie.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const orderingEnded =
     poll?.orderingEndsAt &&
     poll.orderingEndsAt instanceof Date &&
@@ -178,5 +223,6 @@ export function useOrders(pollId: string, userId?: string) {
     totalCost,
     submitOrder,
     closeOrdering,
+    deleteOrder,
   };
 }
