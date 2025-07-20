@@ -1,0 +1,199 @@
+"use client";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ShoppingCart, Clock } from "lucide-react";
+import { Order } from "@/types";
+
+const orderSchema = z.object({
+  dish: z.string().min(1, "Nazwa dania jest wymagana"),
+  notes: z.string().optional(),
+  cost: z.number().min(0, "Koszt musi być dodatni"),
+});
+
+type OrderFormData = z.infer<typeof orderSchema>;
+
+interface OrderFormProps {
+  userOrder: Order | null;
+  orderingEnded: boolean;
+  submitting: boolean;
+  onSubmit: (data: OrderFormData) => void;
+}
+
+export function OrderForm({
+  userOrder,
+  orderingEnded,
+  submitting,
+  onSubmit,
+}: OrderFormProps) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<OrderFormData>({
+    resolver: zodResolver(orderSchema),
+    defaultValues: userOrder
+      ? {
+          dish: userOrder.dish,
+          notes: userOrder.notes,
+          cost: userOrder.cost,
+        }
+      : undefined,
+  });
+
+  if (orderingEnded && !userOrder) {
+    return (
+      <Card className="bg-white/80 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ShoppingCart className="w-5 h-5" />
+            Złóż zamówienie
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <Clock className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-slate-700 mb-2">
+              Czas na składanie zamówień minął
+            </h3>
+            <p className="text-slate-500">
+              Nie można już składać nowych zamówień dla tego głosowania.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (userOrder) {
+    return (
+      <Card className="bg-white/80 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ShoppingCart className="w-5 h-5" />
+            Twoje zamówienie
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <h3 className="font-semibold text-green-800 mb-2">
+                Zamówienie złożone!
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <strong>Danie:</strong> {userOrder.dish}
+                </div>
+                <div>
+                  <strong>Koszt:</strong> {userOrder.cost.toFixed(2)} zł
+                </div>
+                {userOrder.notes && (
+                  <div>
+                    <strong>Uwagi:</strong> {userOrder.notes}
+                  </div>
+                )}
+                <div className="flex items-center gap-2 text-slate-600">
+                  <Clock className="w-4 h-4" />
+                  <span>
+                    Zamówione {userOrder.createdAt.toLocaleDateString("pl-PL")}{" "}
+                    o{" "}
+                    {userOrder.createdAt.toLocaleTimeString("pl-PL", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-sm text-slate-600">
+              Skontaktuj się z administratorem, jeśli chcesz zmodyfikować swoje
+              zamówienie.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="bg-white/80 backdrop-blur-sm">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <ShoppingCart className="w-5 h-5" />
+          Złóż zamówienie
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className={`space-y-4 ${
+            orderingEnded ? "opacity-50 pointer-events-none" : ""
+          }`}
+        >
+          {orderingEnded && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-700 font-medium">
+                Czas na składanie zamówień minął. Nie można już składać nowych
+                zamówień.
+              </p>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="dish">Nazwa dania</Label>
+            <Input
+              id="dish"
+              placeholder="np. Kurczak Teriyaki"
+              {...register("dish")}
+            />
+            {errors.dish && (
+              <p className="text-sm text-red-600">{errors.dish.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="cost">Koszt (zł)</Label>
+            <Input
+              id="cost"
+              type="number"
+              step="0.01"
+              placeholder="0.00"
+              {...register("cost", { valueAsNumber: true })}
+            />
+            {errors.cost && (
+              <p className="text-sm text-red-600">{errors.cost.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="notes">Uwagi (opcjonalne)</Label>
+            <Textarea
+              id="notes"
+              placeholder="Specjalne instrukcje lub modyfikacje..."
+              {...register("notes")}
+            />
+          </div>
+
+          <Button
+            type="submit"
+            disabled={submitting || orderingEnded}
+            className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {submitting
+              ? "Wysyłanie..."
+              : orderingEnded
+              ? "Czas składania zamówień minął"
+              : "Złóż zamówienie"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
