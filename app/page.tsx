@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuthContext } from '@/contexts/auth-context';
+import { usePrivacyProtection } from '@/hooks/use-privacy-protection';
 import { useEffect, useState } from 'react';
 import { Poll } from '@/types';
 import { getPolls } from '@/lib/firestore';
@@ -10,7 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Vote, Clock, Users } from 'lucide-react';
 
 export default function Home() {
-  const { user, loading: authLoading } = useAuthContext();
+  const { user, loading: authLoading, isProtected } = usePrivacyProtection();
   const [polls, setPolls] = useState<Poll[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,10 +27,10 @@ export default function Home() {
       }
     };
 
-    if (user) {
+    if (user && isProtected) {
       fetchPolls();
     }
-  }, [user]);
+  }, [user, isProtected]);
 
   if (authLoading) {
     return (
@@ -39,7 +40,7 @@ export default function Home() {
     );
   }
 
-  if (!user) {
+  if (!user || !isProtected) {
     return (
       <div className="max-w-4xl mx-auto text-center py-12">
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl">

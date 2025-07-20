@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuthContext } from "@/contexts/auth-context";
+import { usePrivacyProtection } from "@/hooks/use-privacy-protection";
 import { useRouter } from "next/navigation";
 import { Poll, Vote } from "@/types";
 import {
@@ -25,7 +25,7 @@ interface PollPageProps {
 }
 
 export default function PollPage({ params }: PollPageProps) {
-  const { user } = useAuthContext();
+  const { user, loading: authLoading, isProtected } = usePrivacyProtection();
   const router = useRouter();
   const [poll, setPoll] = useState<Poll | null>(null);
   const [votes, setVotes] = useState<Vote[]>([]);

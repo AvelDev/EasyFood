@@ -26,4 +26,6 @@ export type User = {
   uid: string;
   name: string;
   role: "admin" | "user";
+  privacyPolicyAccepted?: boolean;
+  privacyPolicyAcceptedAt?: Date;
 };

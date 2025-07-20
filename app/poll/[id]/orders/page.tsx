@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuthContext } from "@/contexts/auth-context";
+import { usePrivacyProtection } from "@/hooks/use-privacy-protection";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,7 +31,7 @@ interface OrdersPageProps {
 }
 
 export default function OrdersPage({ params }: OrdersPageProps) {
-  const { user } = useAuthContext();
+  const { user, loading: authLoading, isProtected } = usePrivacyProtection();
   const router = useRouter();
   const [poll, setPoll] = useState<Poll | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);

@@ -1,6 +1,9 @@
 import { AuthProvider as FirebaseAuthProvider, User } from "firebase/auth";
 import { auth, googleProvider, discordProvider } from "./firebase";
 import { signInWithPopup, signOut as firebaseSignOut } from "firebase/auth";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { db } from "./firebase";
+import { User as AppUser } from "@/types";
 
 export type AuthProviderType = "google" | "discord";
 
@@ -19,15 +22,29 @@ export const getAuthProvider = (
 
 export const signInWithProvider = async (
   providerType: AuthProviderType
-): Promise<User> => {
+): Promise<{ user: User; needsPrivacyConsent: boolean }> => {
   try {
     const provider = getAuthProvider(providerType);
     const result = await signInWithPopup(auth, provider);
 
-    // Możesz tutaj dodać dodatkową logikę, np. zapisanie informacji o providerze
+    // Sprawdź czy użytkownik istnieje w Firestore i czy zaakceptował politykę prywatności
+    const userRef = doc(db, "users", result.user.uid);
+    const userDoc = await getDoc(userRef);
+
+    let needsPrivacyConsent = false;
+
+    if (!userDoc.exists()) {
+      // Nowy użytkownik - wymaga akceptacji polityki prywatności
+      needsPrivacyConsent = true;
+    } else {
+      // Istniejący użytkownik - sprawdź czy zaakceptował politykę prywatności
+      const userData = userDoc.data() as AppUser;
+      needsPrivacyConsent = !userData.privacyPolicyAccepted;
+    }
+
     console.log(`User signed in with ${providerType}:`, result.user);
 
-    return result.user;
+    return { user: result.user, needsPrivacyConsent };
   } catch (error: any) {
     console.error(`Error signing in with ${providerType}:`, error);
 
@@ -41,6 +58,39 @@ export const signInWithProvider = async (
     } else {
       throw new Error(`Błąd logowania: ${error.message}`);
     }
+  }
+};
+
+export const acceptPrivacyPolicy = async (user: User): Promise<void> => {
+  try {
+    const userRef = doc(db, "users", user.uid);
+    const userDoc = await getDoc(userRef);
+
+    const userData: AppUser = {
+      uid: user.uid,
+      name: user.displayName || "Unknown",
+      role: "user",
+      privacyPolicyAccepted: true,
+      privacyPolicyAcceptedAt: new Date(),
+    };
+
+    if (!userDoc.exists()) {
+      // Utwórz nowy dokument użytkownika
+      await setDoc(userRef, userData);
+    } else {
+      // Zaktualizuj istniejący dokument
+      await updateDoc(userRef, {
+        privacyPolicyAccepted: true,
+        privacyPolicyAcceptedAt: new Date(),
+      });
+    }
+
+    console.log("Privacy policy accepted for user:", user.uid);
+  } catch (error: any) {
+    console.error("Error accepting privacy policy:", error);
+    throw new Error(
+      `Błąd podczas akceptacji polityki prywatności: ${error.message}`
+    );
   }
 };
 
