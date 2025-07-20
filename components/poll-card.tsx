@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Poll } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Users, CheckCircle } from "lucide-react";
+import { Clock, Users, CheckCircle, Share2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -23,6 +23,7 @@ interface PollCardProps {
 export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
   const router = useRouter();
   const { user } = useAuthContext();
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const { isActive, isEnded } = useMemo(() => {
     const now = new Date();
@@ -30,6 +31,27 @@ export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
     const ended = poll.votingEndsAt <= now;
     return { isActive: active, isEnded: ended };
   }, [poll.closed, poll.votingEndsAt]);
+
+  const handleShareLink = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent navigation to poll page
+    const shareUrl = `${window.location.origin}/poll/${poll.id}`;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch (error) {
+      // Fallback for browsers that don't support clipboard API
+      const textArea = document.createElement("textarea");
+      textArea.value = shareUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    }
+  };
 
   return (
     <motion.div
@@ -139,6 +161,21 @@ export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
                 ? "Zobacz wyniki"
                 : "Zobacz głosowanie"}
             </Button>
+
+            <Button
+              onClick={handleShareLink}
+              variant="outline"
+              size="icon"
+              className="shrink-0"
+              title={linkCopied ? "Skopiowano!" : "Udostępnij link"}
+            >
+              {linkCopied ? (
+                <Check className="w-4 h-4 text-green-600" />
+              ) : (
+                <Share2 className="w-4 h-4" />
+              )}
+            </Button>
+
             {poll.closed && (
               <Button
                 onClick={() => router.push(`/poll/${poll.id}/orders`)}

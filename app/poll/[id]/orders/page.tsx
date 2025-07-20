@@ -22,8 +22,13 @@ interface OrdersPageProps {
 }
 
 export default function OrdersPage({ params }: OrdersPageProps) {
-  const { user, loading: authLoading, isProtected } = usePrivacyProtection();
   const router = useRouter();
+  const currentUrl = `/poll/${params.id}/orders`;
+  const {
+    user,
+    loading: authLoading,
+    isProtected,
+  } = usePrivacyProtection(currentUrl);
 
   const {
     poll,

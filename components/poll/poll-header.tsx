@@ -3,8 +3,9 @@
 import { Poll } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Users } from "lucide-react";
+import { Clock, Users, Share2, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import AnimatedCounter from "@/components/animated-counter";
 import CountdownTimer from "@/components/countdown-timer";
 import VotingStatus from "@/components/voting-status";
@@ -30,6 +31,27 @@ export default function PollHeader({
   onPollDeleted,
 }: PollHeaderProps) {
   const router = useRouter();
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  const handleShareLink = async () => {
+    const shareUrl = `${window.location.origin}/poll/${poll.id}`;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch (error) {
+      // Fallback for browsers that don't support clipboard API
+      const textArea = document.createElement("textarea");
+      textArea.value = shareUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    }
+  };
 
   return (
     <div className="mb-8">
@@ -92,6 +114,25 @@ export default function PollHeader({
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShareLink}
+            className="flex items-center gap-2"
+          >
+            {linkCopied ? (
+              <>
+                <Check className="w-4 h-4 text-green-600" />
+                <span className="text-green-600">Skopiowano!</span>
+              </>
+            ) : (
+              <>
+                <Share2 className="w-4 h-4" />
+                <span>Udostępnij</span>
+              </>
+            )}
+          </Button>
+
           <VotingStatus
             poll={poll}
             onTimeExpired={onTimeExpired}

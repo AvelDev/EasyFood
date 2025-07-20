@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Vote, AlertCircle } from "lucide-react";
@@ -13,17 +13,22 @@ import { User } from "firebase/auth";
 
 export default function SignIn() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading } = useAuthContext();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPrivacyDialog, setShowPrivacyDialog] = useState(false);
   const [pendingUser, setPendingUser] = useState<User | null>(null);
 
+  const redirectUrl = searchParams.get("redirect");
+
   useEffect(() => {
     if (!loading && user) {
-      router.push("/");
+      // Przekieruj na określony URL lub na stronę główną
+      const targetUrl = redirectUrl || "/";
+      router.push(targetUrl);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, redirectUrl]);
 
   const handleSignIn = async (provider: "google" | "discord") => {
     try {

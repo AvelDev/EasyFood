@@ -1,7 +1,6 @@
 "use client";
 
-import { useAuthContext } from "@/contexts/auth-context";
-import { redirect } from "next/navigation";
+import { usePrivacyProtection } from "@/hooks/use-privacy-protection";
 import {
   Card,
   CardContent,
@@ -15,7 +14,7 @@ import { AccountSettings } from "@/components/settings/account-settings";
 import { SecuritySettings } from "@/components/settings/security-settings";
 
 export default function SettingsPage() {
-  const { user, loading } = useAuthContext();
+  const { user, loading } = usePrivacyProtection("/settings");
 
   if (loading) {
     return (
@@ -35,8 +34,9 @@ export default function SettingsPage() {
     );
   }
 
+  // Hook usePrivacyProtection już obsługuje przekierowanie na logowanie
   if (!user) {
-    redirect("/auth/signin");
+    return null; // Component will be unmounted anyway by usePrivacyProtection redirect
   }
 
   return (
