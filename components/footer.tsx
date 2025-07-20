@@ -69,14 +69,16 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-slate-400 hover:text-white transition-colors duration-200 flex items-center gap-2 hover:underline"
-                title={`Commit: ${latestCommit.commit.message.split('\n')[0]}`}
+                title={`Commit: ${latestCommit.commit.message.split("\n")[0]}`}
               >
                 <Github className="w-4 h-4" />
                 <span className="hidden sm:inline">Ostatni commit:</span>
                 <span>{formatDate(latestCommit.commit.author.date)}</span>
               </a>
             ) : (
-              <div className="text-slate-500 text-xs">Brak informacji o commit</div>
+              <div className="text-slate-500 text-xs">
+                Brak informacji o commit
+              </div>
             )}
           </div>
 
