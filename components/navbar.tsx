@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { signOut } from 'firebase/auth';
-import { Button } from '@/components/ui/button';
-import { User, LogOut, Crown } from 'lucide-react';
-import { useAuthContext } from '@/contexts/auth-context';
-import { auth } from '@/lib/firebase';
-import { useRouter } from 'next/navigation';
+import { Button } from "@/components/ui/button";
+import { User, LogOut, Crown } from "lucide-react";
+import { useAuthContext } from "@/contexts/auth-context";
+import { signOut } from "@/lib/auth";
+import { useRouter } from "next/navigation";
+import UserProviderInfo from "./user-provider-info";
 
 export default function Navbar() {
   const { user, loading } = useAuthContext();
@@ -13,15 +13,15 @@ export default function Navbar() {
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
-      router.push('/auth/signin');
+      await signOut();
+      router.push("/auth/signin");
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error("Error signing out:", error);
     }
   };
 
   const handleSignIn = () => {
-    router.push('/auth/signin');
+    router.push("/auth/signin");
   };
 
   return (
@@ -33,20 +33,23 @@ export default function Navbar() {
               Restaurant Voting
             </h1>
           </div>
-          
+
           <div className="flex items-center gap-4">
             {loading ? (
               <div className="animate-pulse bg-slate-200 h-8 w-20 rounded"></div>
             ) : user ? (
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <User className="w-5 h-5 text-slate-600" />
-                  <span className="font-medium text-slate-700">
-                    {user.displayName}
-                  </span>
-                  {user.role === 'admin' && (
-                    <Crown className="w-4 h-4 text-yellow-500" />
-                  )}
+                <div className="flex flex-col items-end gap-1">
+                  <div className="flex items-center gap-2">
+                    <User className="w-5 h-5 text-slate-600" />
+                    <span className="font-medium text-slate-700">
+                      {user.displayName}
+                    </span>
+                    {user.role === "admin" && (
+                      <Crown className="w-4 h-4 text-yellow-500" />
+                    )}
+                  </div>
+                  <UserProviderInfo user={user} />
                 </div>
                 <Button
                   variant="ghost"
@@ -55,7 +58,7 @@ export default function Navbar() {
                   className="text-slate-600 hover:text-slate-900"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
-                  Sign out
+                  Wyloguj
                 </Button>
               </div>
             ) : (
@@ -63,7 +66,7 @@ export default function Navbar() {
                 onClick={handleSignIn}
                 className="bg-[#4285f4] hover:bg-[#3367d6] text-white"
               >
-                Sign in with Google
+                Zaloguj się
               </Button>
             )}
           </div>

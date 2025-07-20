@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { getAuth, GoogleAuthProvider, OAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,4 +14,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+
+// Google Auth Provider
 export const googleProvider = new GoogleAuthProvider();
+
+// Discord OIDC Provider
+export const discordProvider = new OAuthProvider("oidc.discord");
+discordProvider.addScope("identify");
+discordProvider.addScope("email");
+
+// Konfiguracja Discord OIDC
+discordProvider.setCustomParameters({
+  hd: "discord.com", // opcjonalne: ograniczenie do domeny
+});
