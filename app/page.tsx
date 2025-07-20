@@ -11,6 +11,7 @@ import LoadingSkeleton from "@/components/loading-skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Vote, Clock, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import PollsByDateGrouping from "@/components/polls-by-date-grouping";
 
 export default function Home() {
   const { user, loading: authLoading, isProtected } = usePrivacyProtection();
@@ -144,32 +145,7 @@ export default function Home() {
           </p>
         </div>
       ) : (
-        <motion.div
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          <AnimatePresence>
-            {polls.map((poll, index) => (
-              <motion.div
-                key={poll.id}
-                initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -20, scale: 0.9 }}
-                transition={{
-                  delay: index * 0.1,
-                  duration: 0.3,
-                  type: "spring",
-                  stiffness: 300,
-                }}
-                layout
-              >
-                <PollCard poll={poll} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+        <PollsByDateGrouping polls={polls} />
       )}
     </div>
   );
