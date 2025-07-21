@@ -14,25 +14,35 @@ interface AnalyticsContextType {
   clarity: typeof clarityAPI;
 }
 
-const AnalyticsContext = createContext<AnalyticsContextType | undefined>(undefined);
+const AnalyticsContext = createContext<AnalyticsContextType | undefined>(
+  undefined
+);
 
 interface AnalyticsProviderProps {
   children: ReactNode;
   config: AnalyticsConfig;
 }
 
-export function AnalyticsProvider({ children, config }: AnalyticsProviderProps) {
+export function AnalyticsProvider({
+  children,
+  config,
+}: AnalyticsProviderProps) {
   const { user } = useAuthContext();
 
   useEffect(() => {
     // Identyfikuj użytkownika w Clarity gdy się zaloguje
     if (user && config.enableClarity) {
-      clarityAPI.identify(user.uid, undefined, undefined, user.email || undefined);
-      
+      clarityAPI.identify(
+        user.uid,
+        undefined,
+        undefined,
+        user.email || undefined
+      );
+
       // Ustaw dodatkowe tagi
       clarityAPI.set("user_authenticated", "true");
       if (user.email) {
-        clarityAPI.set("user_email_domain", user.email.split('@')[1]);
+        clarityAPI.set("user_email_domain", user.email.split("@")[1]);
       }
     }
   }, [user, config.enableClarity]);
@@ -41,8 +51,8 @@ export function AnalyticsProvider({ children, config }: AnalyticsProviderProps) 
     <AnalyticsContext.Provider value={{ config, clarity: clarityAPI }}>
       {children}
       {config.enableClarity && config.clarityProjectId && (
-        <MicrosoftClarity 
-          projectId={config.clarityProjectId} 
+        <MicrosoftClarity
+          projectId={config.clarityProjectId}
           enabled={config.enableClarity}
         />
       )}
@@ -70,21 +80,21 @@ export function useAnalyticsEvents() {
       clarity.event("poll_voted");
     },
     trackPollShared: () => clarity.event("poll_shared"),
-    
+
     // Śledzenie akcji związanych z zamówieniami
     trackOrderPlaced: (restaurantName: string) => {
       clarity.set("last_order_restaurant", restaurantName);
       clarity.event("order_placed");
     },
     trackOrderCancelled: () => clarity.event("order_cancelled"),
-    
+
     // Śledzenie akcji związanych z ustawieniami
     trackSettingsOpened: (section: string) => {
       clarity.set("settings_section", section);
       clarity.event("settings_opened");
     },
     trackWebhookConfigured: () => clarity.event("webhook_configured"),
-    
+
     // Śledzenie błędów
     trackError: (errorType: string, errorMessage?: string) => {
       clarity.set("error_type", errorType);
@@ -98,6 +108,6 @@ export function useAnalyticsEvents() {
     trackImportantAction: (action: string) => {
       clarity.upgrade(`Important action: ${action}`);
       clarity.event(`important_${action}`);
-    }
+    },
   };
 }
