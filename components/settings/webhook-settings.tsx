@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuthContext } from "@/contexts/auth-context";
+import { useAnalyticsEvents } from "@/components/analytics";
 import {
   getAppSettings,
   updateAppSettings,
@@ -23,6 +24,12 @@ export function WebhookSettings() {
   const [hasChanges, setHasChanges] = useState(false);
   const { toast } = useToast();
   const { user } = useAuthContext();
+  const { trackSettingsOpened, trackWebhookConfigured, trackError } = useAnalyticsEvents();
+
+  useEffect(() => {
+    // Śledź otwarcie ustawień webhook
+    trackSettingsOpened('webhook');
+  }, [trackSettingsOpened]);
 
   const loadSettings = useCallback(async () => {
     try {
@@ -31,6 +38,7 @@ export function WebhookSettings() {
       setWebhookUrl(settings?.discordWebhookUrl || "");
     } catch (error) {
       console.error("Error loading settings:", error);
+      trackError("webhook_settings_load", error instanceof Error ? error.message : 'Unknown error');
       toast({
         title: "Błąd",
         description: "Nie udało się załadować ustawień.",
@@ -39,7 +47,7 @@ export function WebhookSettings() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, trackError]);
 
   useEffect(() => {
     loadSettings();
@@ -64,12 +72,14 @@ export function WebhookSettings() {
       );
 
       setHasChanges(false);
+      trackWebhookConfigured();
       toast({
         title: "Sukces",
         description: "Ustawienia zostały zapisane.",
       });
     } catch (error) {
       console.error("Error saving settings:", error);
+      trackError("webhook_settings_save", error instanceof Error ? error.message : 'Unknown error');
       toast({
         title: "Błąd",
         description: "Nie udało się zapisać ustawień.",
@@ -101,6 +111,7 @@ export function WebhookSettings() {
       });
     } catch (error) {
       console.error("Error testing webhook:", error);
+      trackError("webhook_test", error instanceof Error ? error.message : 'Unknown error');
       toast({
         title: "Błąd",
         description: "Webhook nie działa. Sprawdź URL i uprawnienia.",
