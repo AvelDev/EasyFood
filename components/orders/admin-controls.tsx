@@ -35,10 +35,10 @@ export function AdminControls({
         <Button
           variant="outline"
           size="sm"
-          className="text-red-700 border-red-200 hover:bg-red-50"
+          className="w-full sm:w-auto text-red-700 border-red-200 hover:bg-red-50"
         >
-          <X className="w-4 h-4 mr-1" />
-          Zakończ zamówienia
+          <X className="w-4 h-4 mr-1 flex-shrink-0" />
+          <span className="truncate">Zakończ zamówienia</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

@@ -109,7 +109,7 @@ export default function PollPage({ params }: PollPageProps) {
           <Button
             variant="outline"
             onClick={() => router.push("/")}
-            className="group flex items-center gap-2 px-4 py-2 bg-white border-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-800 transition-all duration-300 shadow-sm hover:shadow-md"
+            className="flex items-center gap-2 px-4 py-2 text-blue-700 transition-all duration-300 bg-white border-2 border-blue-200 shadow-sm group hover:bg-blue-50 hover:border-blue-300 hover:text-blue-800 hover:shadow-md"
           >
             <Home className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
             <span className="font-medium">Powrót do menu</span>
@@ -144,7 +144,7 @@ export default function PollPage({ params }: PollPageProps) {
         }}
       />
 
-      <div className="grid lg:grid-cols-2 gap-8">
+      <div className="grid gap-8 lg:grid-cols-2">
         <VotingSection
           poll={poll}
           canVote={canVote}

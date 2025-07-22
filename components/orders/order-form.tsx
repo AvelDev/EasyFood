@@ -127,7 +127,7 @@ export function OrderForm({
               <h3 className="mb-2 font-semibold text-green-800">
                 Zamówienie złożone!
               </h3>
-              <div className="text-sm space-y-2">
+              <div className="space-y-2 text-sm">
                 <div>
                   <strong>Danie:</strong> {userOrder.dish}
                 </div>
@@ -152,9 +152,8 @@ export function OrderForm({
                 </div>
               </div>
             </div>
-
             {!orderingEnded && (
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <Button
                   onClick={handleEdit}
                   variant="outline"
@@ -176,8 +175,7 @@ export function OrderForm({
                   </Button>
                 )}
               </div>
-            )}
-
+            )}{" "}
             {orderingEnded && (
               <p className="text-sm text-slate-600">
                 Czas na modyfikację zamówień minął.
@@ -248,7 +246,7 @@ export function OrderForm({
             />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <Button
               type="submit"
               disabled={submitting || orderingEnded}
@@ -259,10 +257,10 @@ export function OrderForm({
                   ? "Aktualizowanie..."
                   : "Wysyłanie..."
                 : orderingEnded
-                  ? "Czas składania zamówień minął"
-                  : userOrder
-                    ? "Zaktualizuj zamówienie"
-                    : "Złóż zamówienie"}
+                ? "Czas składania zamówień minął"
+                : userOrder
+                ? "Zaktualizuj zamówienie"
+                : "Złóż zamówienie"}
             </Button>
 
             {userOrder && isEditing && (
@@ -271,6 +269,7 @@ export function OrderForm({
                 variant="outline"
                 onClick={handleCancelEdit}
                 disabled={submitting}
+                className="flex-1 sm:flex-none sm:w-auto"
               >
                 Anuluj
               </Button>
