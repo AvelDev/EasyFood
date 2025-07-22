@@ -500,9 +500,16 @@ export const getUsers = async (uids: string[]): Promise<User[]> => {
     batches.push(uids.slice(i, i + 10));
   }
 
-  for (const batch of batches) {
+  // Execute all batches in parallel instead of sequentially
+  const promises = batches.map((batch) => {
     const q = query(collection(db, "users"), where(documentId(), "in", batch));
-    const querySnapshot = await getDocs(q);
+    return getDocs(q);
+  });
+
+  const snapshots = await Promise.all(promises);
+
+  // Process all snapshots
+  for (const querySnapshot of snapshots) {
     querySnapshot.docs.forEach((doc) => {
       const userData = doc.data() as User;
       users.push({

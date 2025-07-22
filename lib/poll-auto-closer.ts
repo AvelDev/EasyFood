@@ -3,19 +3,78 @@ import {
   getVotes,
   calculateVoteCounts,
   determineWinnerWithTieBreaking,
+  getPolls,
 } from "./firestore";
 
 export interface AutoCloseConfig {
   enabled: boolean;
   checkIntervalMs: number;
+  fallbackCheckEnabled: boolean;
 }
 
 class PollAutoCloser {
   private timers: Map<string, NodeJS.Timeout> = new Map();
+  private fallbackInterval: NodeJS.Timeout | null = null;
   private config: AutoCloseConfig = {
     enabled: true,
     checkIntervalMs: 10000, // Check every 10 seconds
+    fallbackCheckEnabled: true, // Enable periodic check for missed closures
   };
+
+  constructor() {
+    // Start fallback checker if enabled
+    if (this.config.fallbackCheckEnabled) {
+      this.startFallbackChecker();
+    }
+  }
+
+  /**
+   * Start periodic check for polls that should be closed but weren't
+   * This serves as a fallback in case setTimeout fails (e.g., in serverless environments)
+   */
+  private startFallbackChecker() {
+    if (this.fallbackInterval) {
+      clearInterval(this.fallbackInterval);
+    }
+
+    this.fallbackInterval = setInterval(async () => {
+      try {
+        await this.checkAndCloseExpiredPolls();
+      } catch (error) {
+        console.error("Error in fallback poll checker:", error);
+      }
+    }, this.config.checkIntervalMs);
+  }
+
+  /**
+   * Check for polls that should be closed and close them
+   */
+  private async checkAndCloseExpiredPolls() {
+    // Skip if not in browser environment (during build)
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    try {
+      const polls = await getPolls();
+      const now = new Date();
+
+      for (const poll of polls) {
+        if (!poll.closed && poll.votingEndsAt <= now) {
+          console.log(`Found expired poll ${poll.id}, closing it...`);
+          await this.closePoll(poll.id);
+          // Remove timer if it exists (it might have failed)
+          this.timers.delete(poll.id);
+        }
+      }
+    } catch (error) {
+      // Silently ignore permission errors during build or when not authenticated
+      if (error instanceof Error && error.message.includes("permission-denied")) {
+        return;
+      }
+      console.error("Error checking expired polls:", error);
+    }
+  }
 
   /**
    * Schedule automatic closure for a poll
@@ -43,6 +102,7 @@ class PollAutoCloser {
     }, timeUntilEnd);
 
     this.timers.set(pollId, timer);
+    console.log(`Scheduled poll ${pollId} to close in ${Math.round(timeUntilEnd / 1000)} seconds`);
   }
 
   /**
@@ -90,6 +150,25 @@ class PollAutoCloser {
    */
   updateConfig(config: Partial<AutoCloseConfig>) {
     this.config = { ...this.config, ...config };
+    
+    // Restart fallback checker if configuration changed
+    if (config.fallbackCheckEnabled !== undefined || config.checkIntervalMs !== undefined) {
+      if (this.config.fallbackCheckEnabled) {
+        this.startFallbackChecker();
+      } else {
+        this.stopFallbackChecker();
+      }
+    }
+  }
+
+  /**
+   * Stop the fallback checker
+   */
+  private stopFallbackChecker() {
+    if (this.fallbackInterval) {
+      clearInterval(this.fallbackInterval);
+      this.fallbackInterval = null;
+    }
   }
 
   /**
@@ -105,6 +184,7 @@ class PollAutoCloser {
   cleanup() {
     this.timers.forEach((timer) => clearTimeout(timer));
     this.timers.clear();
+    this.stopFallbackChecker();
   }
 
   /**

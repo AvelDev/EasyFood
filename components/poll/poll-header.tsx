@@ -10,28 +10,28 @@ import AnimatedCounter from "@/components/animated-counter";
 import CountdownTimer from "@/components/countdown-timer";
 import VotingStatus from "@/components/voting-status";
 import DeletePollDialog from "@/components/delete-poll-dialog";
+import { usePollContext } from "@/contexts/poll-context";
 
 interface PollHeaderProps {
-  poll: Poll;
-  votesCount: number;
-  isActive: boolean;
-  userRole?: string;
-  onTimeExpired: () => void;
-  onClosePoll: () => void;
   onPollDeleted: () => void;
 }
 
 export default function PollHeader({
-  poll,
-  votesCount,
-  isActive,
-  userRole,
-  onTimeExpired,
-  onClosePoll,
   onPollDeleted,
 }: PollHeaderProps) {
+  const { 
+    poll, 
+    votes, 
+    isActive, 
+    user, 
+    handleTimeExpired, 
+    handleClosePoll 
+  } = usePollContext();
+  
   const router = useRouter();
   const [linkCopied, setLinkCopied] = useState(false);
+
+  if (!poll) return null;
 
   const handleShareLink = async () => {
     const shareUrl = `${window.location.origin}/poll/${poll.id}`;
@@ -82,14 +82,14 @@ export default function PollHeader({
 
             <VotingStatus
               poll={poll}
-              onTimeExpired={onTimeExpired}
+              onTimeExpired={handleTimeExpired}
               className="flex items-center gap-2"
             />
 
-            {userRole === "admin" && (
+            {user?.role === "admin" && (
               <div className="flex items-center gap-2">
                 {isActive && (
-                  <Button variant="outline" size="sm" onClick={onClosePoll}>
+                  <Button variant="outline" size="sm" onClick={handleClosePoll}>
                     Zamknij głosowanie
                   </Button>
                 )}
@@ -104,7 +104,7 @@ export default function PollHeader({
             {isActive ? (
               <CountdownTimer
                 endTime={poll.votingEndsAt}
-                onTimeExpired={onTimeExpired}
+                onTimeExpired={handleTimeExpired}
                 className="font-medium"
               />
             ) : (
@@ -122,7 +122,7 @@ export default function PollHeader({
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4" />
               <AnimatedCounter
-                value={votesCount}
+                value={votes.length}
                 suffix=" głosów"
                 className="font-medium"
               />

@@ -10,23 +10,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import AnimatedCounter from "@/components/animated-counter";
 import AnimatedProgressBar from "@/components/animated-progress-bar";
+import { usePollContext } from "@/contexts/poll-context";
 import {
   normalizeRestaurantOptions,
   calculateVoteCounts,
   getVotersByRestaurant,
 } from "@/lib/firestore";
 
-interface ResultsSectionProps {
-  poll: Poll;
-  votes: Vote[];
-}
-
-export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
+export default function ResultsSection() {
+  const { poll, votes } = usePollContext();
   const router = useRouter();
-  const normalizedOptions = normalizeRestaurantOptions(poll.restaurantOptions);
 
   const voteCounts = useMemo(() => {
-    return calculateVoteCounts(votes);
+    return votes ? calculateVoteCounts(votes) : {};
   }, [votes]);
 
   const totalVotes = useMemo(() => {
@@ -34,8 +30,12 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
   }, [voteCounts]);
 
   const votersByRestaurant = useMemo(() => {
-    return getVotersByRestaurant(votes);
+    return votes ? getVotersByRestaurant(votes) : {};
   }, [votes]);
+
+  if (!poll) return null;
+  
+  const normalizedOptions = normalizeRestaurantOptions(poll.restaurantOptions);
 
   return (
     <Card className="bg-white/80 backdrop-blur-sm">

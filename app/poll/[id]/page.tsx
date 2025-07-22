@@ -6,6 +6,7 @@ import { usePoll } from "@/hooks/use-poll";
 import { Button } from "@/components/ui/button";
 import { PollHeader, VotingSection, ResultsSection } from "@/components/poll";
 import AdminPollEditor from "@/components/admin-poll-editor";
+import { PollProvider } from "@/contexts/poll-context";
 import { Home } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -24,6 +25,12 @@ export default function PollPage({ params }: PollPageProps) {
     isProtected,
   } = usePrivacyProtection(currentUrl);
 
+  const pollData = usePoll({
+    pollId: params.id,
+    userId: user?.uid,
+    userName: user?.displayName || user?.email || "Nieznany użytkownik",
+  });
+
   const {
     poll,
     votes,
@@ -35,11 +42,7 @@ export default function PollPage({ params }: PollPageProps) {
     handleVote,
     handleClosePoll,
     handleTimeExpired,
-  } = usePoll({
-    pollId: params.id,
-    userId: user?.uid,
-    userName: user?.displayName || user?.email || "Nieznany użytkownik",
-  });
+  } = pollData;
 
   if (authLoading || loading) {
     return (
@@ -93,72 +96,71 @@ export default function PollPage({ params }: PollPageProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Navigation Button */}
-      <motion.div
-        className="mb-6"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
+    <PollProvider 
+      value={{
+        poll,
+        votes,
+        userVote,
+        user,
+        loading,
+        voting,
+        isActive,
+        canVote,
+        handleVote,
+        handleClosePoll,
+        handleTimeExpired,
+      }}
+    >
+      <div className="max-w-4xl mx-auto">
+        {/* Navigation Button */}
         <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          className="mb-6"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          <Button
-            variant="outline"
-            onClick={() => router.push("/")}
-            className="flex items-center gap-2 px-4 py-2 text-blue-700 transition-all duration-300 bg-white border-2 border-blue-200 shadow-sm group hover:bg-blue-50 hover:border-blue-300 hover:text-blue-800 hover:shadow-md"
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
-            <Home className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
-            <span className="font-medium">Powrót do menu</span>
-          </Button>
+            <Button
+              variant="outline"
+              onClick={() => router.push("/")}
+              className="flex items-center gap-2 px-4 py-2 text-blue-700 transition-all duration-300 bg-white border-2 border-blue-200 shadow-sm group hover:bg-blue-50 hover:border-blue-300 hover:text-blue-800 hover:shadow-md"
+            >
+              <Home className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
+              <span className="font-medium">Powrót do menu</span>
+            </Button>
+          </motion.div>
         </motion.div>
-      </motion.div>
 
-      <PollHeader
-        poll={poll}
-        votesCount={votes.length}
-        isActive={isActive}
-        userRole={user?.role}
-        onTimeExpired={handleTimeExpired}
-        onClosePoll={handleClosePoll}
-        onPollDeleted={() => router.push("/")}
-      />
-
-      {/* Poll description */}
-      {poll.description && (
-        <div className="p-4 mb-6 border border-blue-200 rounded-lg bg-blue-50">
-          <p className="text-slate-700">{poll.description}</p>
-        </div>
-      )}
-
-      {/* Admin poll editor */}
-      <AdminPollEditor
-        poll={poll}
-        isAdmin={user?.role === "admin"}
-        onPollUpdated={() => {
-          // Refresh poll data after update
-          router.refresh();
-        }}
-      />
-
-      <div className="grid gap-8 lg:grid-cols-2">
-        <VotingSection
-          poll={poll}
-          canVote={canVote}
-          userVote={userVote}
-          votes={votes}
-          onVote={handleVote}
-          voting={voting}
-          userId={user?.uid}
-          userName={user?.displayName || user?.email || "Użytkownik"}
-          userRole={user?.role}
+        <PollHeader
+          onPollDeleted={() => router.push("/")}
         />
 
-        <ResultsSection poll={poll} votes={votes} />
+        {/* Poll description */}
+        {poll?.description && (
+          <div className="p-4 mb-6 border border-blue-200 rounded-lg bg-blue-50">
+            <p className="text-slate-700">{poll.description}</p>
+          </div>
+        )}
+
+        {/* Admin poll editor */}
+        <AdminPollEditor
+          poll={poll}
+          isAdmin={user?.role === "admin"}
+          onPollUpdated={() => {
+            // Refresh poll data after update
+            router.refresh();
+          }}
+        />
+
+        <div className="grid gap-8 lg:grid-cols-2">
+          <VotingSection />
+          <ResultsSection />
+        </div>
       </div>
-    </div>
+    </PollProvider>
   );
 }

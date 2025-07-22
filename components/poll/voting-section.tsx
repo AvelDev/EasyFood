@@ -11,6 +11,7 @@ import AnimatedCounter from "@/components/animated-counter";
 import ProposeOptionForm from "@/components/propose-option-form";
 import AdminProposalsManagement from "@/components/admin-proposals-management";
 import { useVotingProposals } from "@/hooks/use-voting-proposals";
+import { usePollContext } from "@/contexts/poll-context";
 import {
   calculateVoteCounts,
   getVotersByRestaurant,
@@ -18,38 +19,20 @@ import {
   getRestaurantName,
 } from "@/lib/firestore";
 
-interface VotingSectionProps {
-  poll: Poll;
-  canVote: boolean;
-  userVote: Vote | null;
-  votes: Vote[];
-  onVote: (restaurants: string[]) => Promise<void>; // Changed to accept array of restaurants
-  voting: boolean;
-  userId?: string;
-  userName?: string;
-  userRole?: "admin" | "user";
-}
+export default function VotingSection() {
+  const {
+    poll,
+    canVote,
+    userVote,
+    votes,
+    handleVote,
+    voting,
+    user,
+  } = usePollContext();
 
-export default function VotingSection({
-  poll,
-  canVote,
-  userVote,
-  votes,
-  onVote,
-  voting,
-  userId,
-  userName,
-  userRole,
-}: VotingSectionProps) {
-  const [selectedRestaurants, setSelectedRestaurants] = useState<string[]>(
-    userVote?.restaurants || []
-  );
+  const [selectedRestaurants, setSelectedRestaurants] = useState<string[]>([]);
 
-  // Normalize restaurant options for consistent handling
-  const normalizedOptions = normalizeRestaurantOptions(poll.restaurantOptions);
-  const restaurantNames = normalizedOptions.map((option: any) => option.name);
-
-  // Voting proposals hook
+  // Voting proposals hook - must be called unconditionally
   const {
     proposals,
     userProposals,
@@ -60,16 +43,22 @@ export default function VotingSection({
     rejectProposal,
     deleteProposal,
   } = useVotingProposals({
-    pollId: poll.id,
-    userId,
-    userName,
-    userRole,
+    pollId: poll?.id || "",
+    userId: user?.uid,
+    userName: user?.displayName || user?.email || "Użytkownik",
+    userRole: user?.role,
   });
 
   // Update selected restaurants when userVote changes
   useEffect(() => {
     setSelectedRestaurants(userVote?.restaurants || []);
   }, [userVote?.restaurants]);
+
+  if (!poll) return null;
+
+  // Normalize restaurant options for consistent handling
+  const normalizedOptions = normalizeRestaurantOptions(poll.restaurantOptions);
+  const restaurantNames = normalizedOptions.map((option: any) => option.name);
 
   const voteCounts = calculateVoteCounts(votes);
   const votersByRestaurant = getVotersByRestaurant(votes);
@@ -86,9 +75,9 @@ export default function VotingSection({
     });
   };
 
-  const handleVote = async () => {
-    // Always call onVote, even if no restaurants selected (for deletion)
-    await onVote(selectedRestaurants);
+  const handleVoteClick = async () => {
+    // Always call handleVote, even if no restaurants selected (for deletion)
+    await handleVote(selectedRestaurants);
   };
 
   return (
@@ -200,7 +189,7 @@ export default function VotingSection({
                 transition={{ delay: 0.3 }}
               >
                 <Button
-                  onClick={handleVote}
+                  onClick={handleVoteClick}
                   disabled={voting}
                   className={`w-full shadow-lg hover:shadow-xl transition-all duration-300 ${
                     userVote && selectedRestaurants.length === 0
@@ -252,7 +241,7 @@ export default function VotingSection({
       </Card>
 
       {/* Propose new option form - only for authenticated users during active voting */}
-      {canVote && userId && userName && (
+      {canVote && user?.uid && (user?.displayName || user?.email) && (
         <ProposeOptionForm
           onSubmit={submitProposal}
           submitting={submitting}
@@ -262,7 +251,7 @@ export default function VotingSection({
       )}
 
       {/* Admin management panel - only for admins */}
-      {userRole === "admin" && proposals.length > 0 && (
+      {user?.role === "admin" && proposals.length > 0 && (
         <AdminProposalsManagement
           proposals={proposals}
           onApprove={approveProposal}
