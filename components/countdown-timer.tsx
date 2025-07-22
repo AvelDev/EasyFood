@@ -43,7 +43,7 @@ export default function CountdownTimer({
 
     const days = Math.floor(difference / (1000 * 60 * 60 * 24));
     const hours = Math.floor(
-      (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
     );
     const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((difference % (1000 * 60)) / 1000);
@@ -92,7 +92,7 @@ export default function CountdownTimer({
       isCritical: timeLeft.total <= 60 * 1000, // 1 minute
       isLastSeconds: timeLeft.total <= 10 * 1000, // 10 seconds
     }),
-    [timeLeft.total]
+    [timeLeft.total],
   );
 
   if (isExpired) {
@@ -137,8 +137,8 @@ export default function CountdownTimer({
             isCritical
               ? "text-red-500"
               : isUrgent
-              ? "text-orange-500"
-              : "text-blue-500"
+                ? "text-orange-500"
+                : "text-blue-500"
           } flex-shrink-0`}
         />
 

@@ -42,16 +42,16 @@ export default function PollPage({ params }: PollPageProps) {
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="w-8 h-8 border-b-2 border-blue-600 rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (!poll) {
     return (
-      <div className="text-center py-12 max-w-md mx-auto">
+      <div className="max-w-md py-12 mx-auto text-center">
         <div className="mb-6">
-          <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
+          <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100">
             <svg
               className="w-8 h-8 text-slate-400"
               fill="none"
@@ -67,10 +67,10 @@ export default function PollPage({ params }: PollPageProps) {
             </svg>
           </div>
         </div>
-        <h2 className="text-2xl font-semibold text-slate-700 mb-3">
+        <h2 className="mb-3 text-2xl font-semibold text-slate-700">
           Głosowanie nie zostało znalezione
         </h2>
-        <p className="text-slate-500 mb-6">
+        <p className="mb-6 text-slate-500">
           Głosowanie o ID &quot;{params.id}&quot; nie istnieje lub zostało
           usunięte.
         </p>
@@ -104,7 +104,7 @@ export default function PollPage({ params }: PollPageProps) {
 
       {/* Poll description */}
       {poll.description && (
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="p-4 mb-6 border border-blue-200 rounded-lg bg-blue-50">
           <p className="text-slate-700">{poll.description}</p>
         </div>
       )}

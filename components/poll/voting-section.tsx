@@ -43,7 +43,7 @@ export default function VotingSection({
   userRole,
 }: VotingSectionProps) {
   const [selectedRestaurants, setSelectedRestaurants] = useState<string[]>(
-    userVote?.restaurants || []
+    userVote?.restaurants || [],
   );
 
   // Normalize restaurant options for consistent handling
@@ -100,7 +100,7 @@ export default function VotingSection({
           <CardTitle className="flex items-center gap-2">
             Opcje restauracji
             {poll.selectedRestaurant && (
-              <Badge className="bg-green-100 text-green-700">
+              <Badge className="text-green-700 bg-green-100">
                 Zwycięzca: {poll.selectedRestaurant}
               </Badge>
             )}
@@ -112,12 +112,12 @@ export default function VotingSection({
               {userVote &&
                 userVote.restaurants &&
                 userVote.restaurants.length > 0 && (
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="p-3 border border-blue-200 rounded-lg bg-blue-50">
                     <p className="text-sm text-blue-700">
                       <strong>Aktualne głosy:</strong>{" "}
                       {userVote.restaurants.join(", ")}
                     </p>
-                    <p className="text-xs text-blue-600 mt-1">
+                    <p className="mt-1 text-xs text-blue-600">
                       Możesz zmienić swoje głosy wybierając inne opcje poniżej.
                       Możesz głosować na kilka restauracji.
                     </p>
@@ -172,7 +172,7 @@ export default function VotingSection({
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 mt-1"
+                              className="flex items-center mt-1 text-xs text-blue-600 hover:text-blue-800 gap-1"
                             >
                               <ExternalLink className="w-3 h-3" />
                               Zobacz menu
@@ -220,7 +220,7 @@ export default function VotingSection({
                           repeat: Infinity,
                           ease: "linear",
                         }}
-                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                        className="w-4 h-4 border-2 border-white rounded-full border-t-transparent"
                       />
                       {userVote ? "Aktualizowanie..." : "Głosowanie..."}
                     </div>
@@ -303,8 +303,8 @@ function VotingResults({
     <AnimatePresence>
       <div className="space-y-4">
         {/* Voting summary */}
-        <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
-          <h4 className="font-medium text-slate-800 mb-2">
+        <div className="p-3 border rounded-lg bg-slate-50 border-slate-200">
+          <h4 className="mb-2 font-medium text-slate-800">
             Podsumowanie głosowania:
           </h4>
           <div className="text-sm text-slate-600 space-y-1">
@@ -316,11 +316,11 @@ function VotingResults({
             {voteDetails.length > 0 && (
               <div className="mt-2">
                 <p className="font-medium">Szczegóły głosowania:</p>
-                <div className="max-h-32 overflow-y-auto mt-1 space-y-1">
+                <div className="mt-1 overflow-y-auto max-h-32 space-y-1">
                   {voteDetails.map((detail, index) => (
                     <div
                       key={detail.userId}
-                      className="text-xs bg-white p-2 rounded border"
+                      className="p-2 text-xs bg-white border rounded"
                     >
                       <span className="font-medium">{detail.userName}:</span>{" "}
                       {detail.restaurants.join(", ")}
@@ -344,8 +344,8 @@ function VotingResults({
                 poll.selectedRestaurant === option.name
                   ? "border-green-500 bg-green-50 shadow-lg shadow-green-100"
                   : userVotedRestaurants.includes(option.name)
-                  ? "border-blue-500 bg-blue-50 shadow-lg shadow-blue-100"
-                  : "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                    ? "border-blue-500 bg-blue-50 shadow-lg shadow-blue-100"
+                    : "border-slate-200 bg-slate-50 hover:bg-slate-100"
               }`}
             >
               <div className="space-y-3">
@@ -357,7 +357,7 @@ function VotingResults({
                         href={option.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 mt-1"
+                        className="flex items-center mt-1 text-xs text-blue-600 hover:text-blue-800 gap-1"
                       >
                         <ExternalLink className="w-3 h-3" />
                         Zobacz menu
@@ -396,7 +396,7 @@ function VotingResults({
                           delay: 0.2,
                         }}
                       >
-                        <Badge className="bg-blue-100 text-blue-700">
+                        <Badge className="text-blue-700 bg-blue-100">
                           Twój głos
                         </Badge>
                       </motion.div>
@@ -407,8 +407,8 @@ function VotingResults({
                 {/* Lista użytkowników którzy głosowali na tę restaurację */}
                 {votersByRestaurant[option.name] &&
                   votersByRestaurant[option.name].length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-slate-200">
-                      <p className="text-sm font-medium text-slate-700 mb-2">
+                    <div className="pt-3 mt-3 border-t border-slate-200">
+                      <p className="mb-2 text-sm font-medium text-slate-700">
                         Głosowali ({votersByRestaurant[option.name].length}):
                       </p>
                       <div className="flex flex-wrap gap-1">
@@ -417,11 +417,11 @@ function VotingResults({
                             <Badge
                               key={`${option.name}-${voterIndex}`}
                               variant="secondary"
-                              className="text-xs px-2 py-1 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                              className="px-2 py-1 text-xs bg-slate-100 text-slate-700 hover:bg-slate-200"
                             >
                               {voterName}
                             </Badge>
-                          )
+                          ),
                         )}
                       </div>
                     </div>

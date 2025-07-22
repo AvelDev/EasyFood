@@ -89,7 +89,7 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
 
         <div className="grid gap-3">
           {/* Email Verification */}
-          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50">
             <div className="flex items-center gap-3">
               {user.emailVerified ? (
                 <CheckCircle className="w-5 h-5 text-green-600" />
@@ -119,7 +119,7 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
           </div>
 
           {/* Account Security */}
-          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50">
             <div className="flex items-center gap-3">
               <Shield className="w-5 h-5 text-blue-600" />
               <div>
@@ -134,7 +134,7 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
                 </p>
               </div>
             </div>
-            <div className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+            <div className="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded">
               Zabezpieczone
             </div>
           </div>
@@ -147,12 +147,12 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
           Zarządzanie sesją
         </h3>
 
-        <div className="p-4 border border-slate-200 rounded-lg">
+        <div className="p-4 border rounded-lg border-slate-200">
           <div className="flex items-start gap-3">
             <LogOut className="w-5 h-5 text-slate-600 mt-0.5" />
             <div className="flex-1">
               <h4 className="font-medium text-slate-900">Wyloguj się</h4>
-              <p className="text-sm text-slate-600 mt-1">
+              <p className="mt-1 text-sm text-slate-600">
                 Zakończ bieżącą sesję i wyloguj się z aplikacji na tym
                 urządzeniu.
               </p>
@@ -177,19 +177,19 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
         </h3>
 
         <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
+          <AlertTriangle className="w-4 h-4" />
           <AlertDescription>
             Operacje w tej sekcji są nieodwracalne. Upewnij się, że rozumiesz
             konsekwencje przed kontynuowaniem.
           </AlertDescription>
         </Alert>
 
-        <div className="p-4 border border-red-200 bg-red-50 rounded-lg">
+        <div className="p-4 border border-red-200 rounded-lg bg-red-50">
           <div className="flex items-start gap-3">
             <Trash2 className="w-5 h-5 text-red-600 mt-0.5" />
             <div className="flex-1">
               <h4 className="font-medium text-red-900">Usuń konto</h4>
-              <p className="text-sm text-red-700 mt-1">
+              <p className="mt-1 text-sm text-red-700">
                 Trwale usuwa Twoje konto i wszystkie powiązane dane. Ta operacja
                 jest nieodwracalna.
               </p>

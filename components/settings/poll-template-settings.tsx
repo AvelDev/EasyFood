@@ -39,7 +39,7 @@ export function PollTemplateSettings() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<PollTemplate | null>(
-    null
+    null,
   );
   const [formData, setFormData] = useState({
     name: "",
@@ -184,10 +184,10 @@ export function PollTemplateSettings() {
     return (
       <div className="space-y-4">
         <div className="animate-pulse">
-          <div className="h-4 bg-slate-200 rounded w-1/4 mb-4"></div>
+          <div className="w-1/4 h-4 mb-4 rounded bg-slate-200"></div>
           <div className="space-y-2">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 bg-slate-200 rounded"></div>
+              <div key={i} className="h-12 rounded bg-slate-200"></div>
             ))}
           </div>
         </div>
@@ -197,7 +197,7 @@ export function PollTemplateSettings() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-medium">Szablony głosowań</h3>
           <p className="text-sm text-slate-600">
@@ -212,7 +212,7 @@ export function PollTemplateSettings() {
       </div>
 
       {templates.length === 0 ? (
-        <div className="text-center py-8 text-slate-500">
+        <div className="py-8 text-center text-slate-500">
           <MapPin className="w-12 h-12 mx-auto mb-4 opacity-50" />
           <p>Brak szablonów głosowań</p>
           <p className="text-sm">

@@ -17,7 +17,7 @@ import { PollTemplate, AppSettings, User } from "@/types";
 
 // Szablony głosowań
 export async function createPollTemplate(
-  template: Omit<PollTemplate, "id" | "createdAt">
+  template: Omit<PollTemplate, "id" | "createdAt">,
 ): Promise<string> {
   try {
     const templateData = {
@@ -35,7 +35,7 @@ export async function createPollTemplate(
 
 export async function updatePollTemplate(
   templateId: string,
-  updates: Partial<Omit<PollTemplate, "id" | "createdAt" | "createdBy">>
+  updates: Partial<Omit<PollTemplate, "id" | "createdAt" | "createdBy">>,
 ): Promise<void> {
   try {
     const templateRef = doc(db, "pollTemplates", templateId);
@@ -60,7 +60,7 @@ export async function getPollTemplates(): Promise<PollTemplate[]> {
   try {
     const q = query(
       collection(db, "pollTemplates"),
-      orderBy("createdAt", "desc")
+      orderBy("createdAt", "desc"),
     );
 
     const querySnapshot = await getDocs(q);
@@ -92,7 +92,7 @@ export async function getActivePollTemplates(): Promise<PollTemplate[]> {
     const q = query(
       collection(db, "pollTemplates"),
       where("isActive", "==", true),
-      orderBy("name", "asc")
+      orderBy("name", "asc"),
     );
 
     const querySnapshot = await getDocs(q);
@@ -144,7 +144,7 @@ export async function getAppSettings(): Promise<AppSettings | null> {
 
 export async function updateAppSettings(
   updates: Partial<Pick<AppSettings, "discordWebhookUrl">>,
-  updatedBy: string
+  updatedBy: string,
 ): Promise<void> {
   try {
     const settingsRef = doc(db, "appSettings", "main");

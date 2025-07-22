@@ -31,12 +31,12 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white shadow-sm border-b border-slate-200">
-      <div className="container mx-auto px-4">
+    <nav className="bg-white border-b shadow-sm border-slate-200">
+      <div className="container px-4 mx-auto">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <h1
-              className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity"
+              className="text-2xl font-bold text-transparent cursor-pointer bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text hover:opacity-80 transition-opacity"
               onClick={() => router.push("/")}
             >
               EasyFood
@@ -45,7 +45,7 @@ export default function Navbar() {
 
           <div className="flex items-center gap-4">
             {loading ? (
-              <div className="animate-pulse bg-slate-200 h-8 w-20 rounded"></div>
+              <div className="w-20 h-8 rounded animate-pulse bg-slate-200"></div>
             ) : user ? (
               <div className="flex items-center gap-3">
                 <DropdownMenu>
@@ -65,7 +65,7 @@ export default function Navbar() {
                   <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem
                       onClick={() => router.push("/settings")}
-                      className="flex items-center gap-2 cursor-pointer"
+                      className="flex items-center cursor-pointer gap-2"
                     >
                       <Settings className="w-4 h-4" />
                       Ustawienia
@@ -73,7 +73,7 @@ export default function Navbar() {
                     {user.role === "admin" && (
                       <DropdownMenuItem
                         onClick={() => router.push("/settings/general")}
-                        className="flex items-center gap-2 cursor-pointer"
+                        className="flex items-center cursor-pointer gap-2"
                       >
                         <Crown className="w-4 h-4" />
                         Ustawienia ogólne
@@ -82,7 +82,7 @@ export default function Navbar() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={handleSignOut}
-                      className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600"
+                      className="flex items-center text-red-600 cursor-pointer gap-2 focus:text-red-600"
                     >
                       <LogOut className="w-4 h-4" />
                       Wyloguj się

@@ -27,7 +27,7 @@ export function useOrders(pollId: string, userId?: string) {
   // Function to enrich orders with user names
   const enrichOrdersWithUserNames = async (ordersData: Order[]) => {
     const userIds = Array.from(
-      new Set(ordersData.map((order) => order.userId))
+      new Set(ordersData.map((order) => order.userId)),
     );
     const users = await getUsers(userIds);
     const userMap = new Map(users.map((user) => [user.uid, user.name]));

@@ -66,7 +66,7 @@ export default function PollsByDateGrouping({
       group.polls.sort(
         (a, b) =>
           new Date(b.votingEndsAt).getTime() -
-          new Date(a.votingEndsAt).getTime()
+          new Date(a.votingEndsAt).getTime(),
       );
     });
 
@@ -133,7 +133,7 @@ export default function PollsByDateGrouping({
   const formatDateHeader = (
     date: Date,
     isToday: boolean,
-    isFuture: boolean
+    isFuture: boolean,
   ) => {
     if (isToday) {
       return "Dzisiaj";
@@ -187,10 +187,10 @@ export default function PollsByDateGrouping({
                         {formatDateHeader(
                           group.date,
                           group.isToday,
-                          group.isFuture
+                          group.isFuture,
                         )}
                       </CardTitle>
-                      <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                      <Badge className="text-blue-800 bg-blue-100 border-blue-200">
                         Aktywne
                       </Badge>
                     </div>
@@ -255,7 +255,7 @@ export default function PollsByDateGrouping({
                         {formatDateHeader(
                           group.date,
                           group.isToday,
-                          group.isFuture
+                          group.isFuture,
                         )}
                       </CardTitle>
                     </div>
@@ -307,7 +307,7 @@ export default function PollsByDateGrouping({
           transition={{ duration: 0.3, delay: 0.2 }}
         >
           <Collapsible open={expandedFuture} onOpenChange={setExpandedFuture}>
-            <Card className="bg-green-50/80 border-green-200 backdrop-blur-sm">
+            <Card className="border-green-200 bg-green-50/80 backdrop-blur-sm">
               <CollapsibleTrigger asChild>
                 <CardHeader className="pb-4 cursor-pointer hover:bg-green-100/50 transition-colors">
                   <div className="flex items-center justify-between">
@@ -318,12 +318,12 @@ export default function PollsByDateGrouping({
                       </CardTitle>
                       <Badge
                         variant="secondary"
-                        className="bg-green-200 text-green-800"
+                        className="text-green-800 bg-green-200"
                       >
                         {laterFutureKeys.reduce(
                           (total, key) =>
                             total + groupedPolls[key].polls.length,
-                          0
+                          0,
                         )}{" "}
                         głosowań
                       </Badge>
@@ -364,16 +364,16 @@ export default function PollsByDateGrouping({
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
                             transition={{ duration: 0.3 }}
-                            className="border-l-2 border-green-200 pl-4"
+                            className="pl-4 border-l-2 border-green-200"
                           >
-                            <div className="flex items-center gap-3 mb-3">
+                            <div className="flex items-center mb-3 gap-3">
                               <Calendar className="w-4 h-4 text-green-600" />
                               <h3 className="text-lg font-medium text-green-800">
                                 {formatDateHeader(group.date, false, true)}
                               </h3>
                               <Badge
                                 variant="outline"
-                                className="text-xs border-green-300 text-green-700"
+                                className="text-xs text-green-700 border-green-300"
                               >
                                 {group.polls.length}{" "}
                                 {group.polls.length === 1
@@ -441,7 +441,7 @@ export default function PollsByDateGrouping({
                         {pastKeys.reduce(
                           (total, key) =>
                             total + groupedPolls[key].polls.length,
-                          0
+                          0,
                         )}{" "}
                         głosowań
                       </Badge>
@@ -482,9 +482,9 @@ export default function PollsByDateGrouping({
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
                             transition={{ duration: 0.3 }}
-                            className="border-l-2 border-slate-200 pl-4"
+                            className="pl-4 border-l-2 border-slate-200"
                           >
-                            <div className="flex items-center gap-3 mb-3">
+                            <div className="flex items-center mb-3 gap-3">
                               <Calendar className="w-4 h-4 text-slate-500" />
                               <h3 className="text-lg font-medium text-slate-700">
                                 {formatDateHeader(group.date, false, false)}
@@ -540,10 +540,10 @@ export default function PollsByDateGrouping({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="text-center py-12"
+          className="py-12 text-center"
         >
-          <Calendar className="w-16 h-16 mx-auto text-slate-400 mb-4" />
-          <h2 className="text-2xl font-semibold text-slate-600 mb-2">
+          <Calendar className="w-16 h-16 mx-auto mb-4 text-slate-400" />
+          <h2 className="mb-2 text-2xl font-semibold text-slate-600">
             Brak głosowań
           </h2>
           <p className="text-slate-500">

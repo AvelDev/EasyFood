@@ -35,7 +35,7 @@ export function AdminControls({
         <Button
           variant="outline"
           size="sm"
-          className="border-red-200 text-red-700 hover:bg-red-50"
+          className="text-red-700 border-red-200 hover:bg-red-50"
         >
           <X className="w-4 h-4 mr-1" />
           Zakończ zamówienia

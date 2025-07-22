@@ -15,7 +15,7 @@ interface AnalyticsContextType {
 }
 
 const AnalyticsContext = createContext<AnalyticsContextType | undefined>(
-  undefined
+  undefined,
 );
 
 interface AnalyticsProviderProps {
@@ -36,7 +36,7 @@ export function AnalyticsProvider({
         user.uid,
         undefined,
         undefined,
-        user.email || undefined
+        user.email || undefined,
       );
 
       // Ustaw dodatkowe tagi

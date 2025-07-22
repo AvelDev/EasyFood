@@ -40,19 +40,16 @@ Implementacja obowiązkowej akceptacji polityki prywatności podczas logowania/r
 ## Jak to działa
 
 1. **Logowanie nowego użytkownika**:
-
    - Użytkownik klika "Kontynuuj z Google/Discord"
    - System sprawdza czy użytkownik istnieje w bazie danych
    - Jeśli nie lub nie zaakceptował polityki - wyświetla dialog polityki prywatności
 
 2. **Akceptacja polityki**:
-
    - Użytkownik musi przeczytać politykę i zaznaczyć checkbox
    - Po kliknięciu "Akceptuję i kontynuuję" - dane są zapisywane w Firestore
    - Użytkownik zostaje przekierowany do strony głównej
 
 3. **Odrzucenie polityki**:
-
    - Użytkownik zostaje wylogowany
    - Wyświetla się komunikat o konieczności akceptacji polityki
 
@@ -90,14 +87,12 @@ W Firestore, w kolekcji `users`, każdy dokument użytkownika zawiera teraz:
 ## Testowanie
 
 1. Nowy użytkownik:
-
    - Zaloguj się po raz pierwszy
    - Powinien wyświetlić się dialog polityki prywatności
    - Spróbuj odrzucić - zostaniesz wylogowany
    - Zaloguj się ponownie i zaakceptuj politykę
 
 2. Istniejący użytkownik:
-
    - Jeśli wcześniej nie zaakceptował polityki - powinien zobaczyć dialog
    - Jeśli już zaakceptował - bezpośrednie przejście do aplikacji
 

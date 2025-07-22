@@ -21,9 +21,9 @@ export default function RootLayout({
     <html lang="pl">
       <body className={inter.className}>
         <Providers>
-          <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col">
+          <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
             <Navbar />
-            <main className="container mx-auto px-4 py-8 flex-grow">
+            <main className="container flex-grow px-4 py-8 mx-auto">
               {children}
             </main>
             <Footer />

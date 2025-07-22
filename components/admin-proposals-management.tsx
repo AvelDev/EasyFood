@@ -34,7 +34,7 @@ export default function AdminProposalsManagement({
   const [selectedProposal, setSelectedProposal] =
     useState<VotingOptionProposal | null>(null);
   const [action, setAction] = useState<"approve" | "reject" | "delete" | null>(
-    null
+    null,
   );
   const [adminNotes, setAdminNotes] = useState("");
   const [processing, setProcessing] = useState(false);
@@ -68,7 +68,7 @@ export default function AdminProposalsManagement({
 
   const openDialog = (
     proposal: VotingOptionProposal,
-    actionType: "approve" | "reject" | "delete"
+    actionType: "approve" | "reject" | "delete",
   ) => {
     setSelectedProposal(proposal);
     setAction(actionType);
@@ -107,7 +107,7 @@ export default function AdminProposalsManagement({
                   className="flex items-center justify-between p-4 border rounded-lg bg-white/50"
                 >
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center mb-2 gap-2">
                       <h4 className="font-medium">{proposal.restaurantName}</h4>
                       <Badge
                         variant="outline"
@@ -116,7 +116,7 @@ export default function AdminProposalsManagement({
                         Oczekuje
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <div className="flex items-center text-sm gap-2 text-slate-600">
                       <User className="w-4 h-4" />
                       <span>
                         Zaproponowane przez: {proposal.proposedByName}
@@ -132,7 +132,7 @@ export default function AdminProposalsManagement({
                     <Button
                       size="sm"
                       onClick={() => openDialog(proposal, "approve")}
-                      className="bg-green-600 hover:bg-green-700 text-white"
+                      className="text-white bg-green-600 hover:bg-green-700"
                     >
                       <Check className="w-4 h-4 mr-1" />
                     </Button>
@@ -171,7 +171,7 @@ export default function AdminProposalsManagement({
                   className="flex items-center justify-between p-3 border rounded-lg bg-white/30"
                 >
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center mb-1 gap-2">
                       <span className="font-medium">
                         {proposal.restaurantName}
                       </span>
@@ -268,8 +268,8 @@ export default function AdminProposalsManagement({
                 action === "delete"
                   ? "destructive"
                   : action === "approve"
-                  ? "default"
-                  : "destructive"
+                    ? "default"
+                    : "destructive"
               }
             >
               {processing ? (
@@ -280,7 +280,7 @@ export default function AdminProposalsManagement({
                     repeat: Infinity,
                     ease: "linear",
                   }}
-                  className="w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"
+                  className="w-4 h-4 mr-2 border-2 border-white rounded-full border-t-transparent"
                 />
               ) : null}
               {action === "approve" && "Zatwierdź"}

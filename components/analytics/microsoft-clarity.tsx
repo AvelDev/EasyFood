@@ -38,7 +38,7 @@ export function MicrosoftClarity({
     return () => {
       // Cleanup - usunięcie skryptu gdy komponent jest demontowany
       const existingScript = document.querySelector(
-        `script[src*="clarity.ms/tag/${projectId}"]`
+        `script[src*="clarity.ms/tag/${projectId}"]`,
       );
       if (existingScript) {
         existingScript.remove();
@@ -74,7 +74,7 @@ export const clarityAPI = {
     userId: string,
     sessionId?: string,
     pageId?: string,
-    userHint?: string
+    userHint?: string,
   ) => {
     if (typeof window !== "undefined" && (window as any).clarity) {
       (window as any).clarity("identify", userId, sessionId, pageId, userHint);

@@ -41,7 +41,7 @@ export function WebhookSettings() {
       console.error("Error loading settings:", error);
       trackError(
         "webhook_settings_load",
-        error instanceof Error ? error.message : "Unknown error"
+        error instanceof Error ? error.message : "Unknown error",
       );
       toast({
         title: "Błąd",
@@ -72,7 +72,7 @@ export function WebhookSettings() {
         {
           discordWebhookUrl: webhookUrl.trim() || undefined,
         },
-        user.uid
+        user.uid,
       );
 
       setHasChanges(false);
@@ -85,7 +85,7 @@ export function WebhookSettings() {
       console.error("Error saving settings:", error);
       trackError(
         "webhook_settings_save",
-        error instanceof Error ? error.message : "Unknown error"
+        error instanceof Error ? error.message : "Unknown error",
       );
       toast({
         title: "Błąd",
@@ -120,7 +120,7 @@ export function WebhookSettings() {
       console.error("Error testing webhook:", error);
       trackError(
         "webhook_test",
-        error instanceof Error ? error.message : "Unknown error"
+        error instanceof Error ? error.message : "Unknown error",
       );
       toast({
         title: "Błąd",
@@ -143,9 +143,9 @@ export function WebhookSettings() {
     return (
       <div className="space-y-4">
         <div className="animate-pulse">
-          <div className="h-4 bg-slate-200 rounded w-1/4 mb-4"></div>
-          <div className="h-10 bg-slate-200 rounded mb-4"></div>
-          <div className="h-8 bg-slate-200 rounded w-1/6"></div>
+          <div className="w-1/4 h-4 mb-4 rounded bg-slate-200"></div>
+          <div className="h-10 mb-4 rounded bg-slate-200"></div>
+          <div className="w-1/6 h-8 rounded bg-slate-200"></div>
         </div>
       </div>
     );
@@ -155,7 +155,7 @@ export function WebhookSettings() {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium">Webhook Discord</h3>
-        <p className="text-sm text-slate-600 mb-4">
+        <p className="mb-4 text-sm text-slate-600">
           Konfiguruj webhook Discord, aby otrzymywać powiadomienia o nowych
           głosowaniach i zamówieniach.
         </p>
@@ -179,7 +179,7 @@ export function WebhookSettings() {
                 }
               />
               {webhookUrl && !isValidWebhookUrl(webhookUrl) && (
-                <p className="text-sm text-red-600 mt-1">
+                <p className="mt-1 text-sm text-red-600">
                   URL musi zaczynać się od https://discord.com/api/webhooks/ lub
                   https://discordapp.com/api/webhooks/
                 </p>
@@ -187,10 +187,10 @@ export function WebhookSettings() {
             </div>
 
             <Alert>
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="w-4 h-4" />
               <AlertDescription>
                 Aby utworzyć webhook Discord:
-                <ol className="list-decimal list-inside mt-2 space-y-1">
+                <ol className="mt-2 list-decimal list-inside space-y-1">
                   <li>Wejdź na swój serwer Discord</li>
                   <li>Kliknij prawym przyciskiem na kanał</li>
                   <li>

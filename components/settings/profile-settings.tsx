@@ -59,15 +59,15 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
   return (
     <div className="space-y-6">
       {/* Current User Info */}
-      <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg">
+      <div className="flex items-center p-4 rounded-lg gap-4 bg-slate-50">
         <div className="flex-shrink-0">
-          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+          <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full">
             <User className="w-6 h-6 text-blue-600" />
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-lg font-semibold text-slate-900 truncate">
+          <div className="flex items-center mb-1 gap-2">
+            <h3 className="text-lg font-semibold truncate text-slate-900">
               {user.displayName || "Użytkownik"}
             </h3>
             <Badge
@@ -80,7 +80,7 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
               {user.role === "admin" ? "Administrator" : "Użytkownik"}
             </Badge>
           </div>
-          <p className="text-sm text-slate-600 truncate">{user.email}</p>
+          <p className="text-sm truncate text-slate-600">{user.email}</p>
         </div>
       </div>
 
@@ -102,7 +102,7 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
 
         {hasChanges && (
           <Alert>
-            <AlertCircle className="h-4 w-4" />
+            <AlertCircle className="w-4 h-4" />
             <AlertDescription>
               Masz niezapisane zmiany. Kliknij &ldquo;Zapisz&rdquo;, aby je
               zachować.
@@ -134,7 +134,7 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
       {/* Role Information */}
       <div className="space-y-2">
         <Label>Twoja rola</Label>
-        <div className="p-3 bg-slate-50 rounded-lg">
+        <div className="p-3 rounded-lg bg-slate-50">
           <div className="flex items-center gap-2">
             {user.role === "admin" && (
               <Crown className="w-4 h-4 text-yellow-600" />
@@ -143,7 +143,7 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
               {user.role === "admin" ? "Administrator" : "Użytkownik"}
             </span>
           </div>
-          <p className="text-sm text-slate-600 mt-1">
+          <p className="mt-1 text-sm text-slate-600">
             {user.role === "admin"
               ? "Masz pełne uprawnienia do zarządzania aplikacją."
               : "Możesz tworzyć i uczestniczyć w głosowaniach na jedzenie."}

@@ -32,20 +32,20 @@ export function OrdersList({
     switch (status) {
       case "paid":
         return (
-          <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">
+          <Badge className="text-xs text-green-700 bg-green-100 border-green-200">
             Opłacone
           </Badge>
         );
       case "unpaid":
         return (
-          <Badge className="bg-red-100 text-red-700 border-red-200 text-xs">
+          <Badge className="text-xs text-red-700 bg-red-100 border-red-200">
             Nieopłacone
           </Badge>
         );
       case "pending":
       default:
         return (
-          <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 text-xs">
+          <Badge className="text-xs text-yellow-700 bg-yellow-100 border-yellow-200">
             Oczekuje
           </Badge>
         );
@@ -62,7 +62,7 @@ export function OrdersList({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-slate-500 text-center py-8">
+          <p className="py-8 text-center text-slate-500">
             Brak zamówień. Bądź pierwszy i złóż zamówienie!
           </p>
         </CardContent>
@@ -89,19 +89,19 @@ export function OrdersList({
                   : "border-slate-200 bg-slate-50"
               }`}
             >
-              <div className="flex justify-between items-start mb-2">
+              <div className="flex items-start justify-between mb-2">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center mb-1 gap-2">
                     <h3 className="font-semibold text-slate-800">
                       {order.dish}
                     </h3>
-                    <Badge variant="outline" className="text-green-600 text-xs">
+                    <Badge variant="outline" className="text-xs text-green-600">
                       {order.cost.toFixed(2)} zł
                     </Badge>
                     {order.costAdjustment && (
                       <Badge
                         variant="outline"
-                        className="text-orange-600 text-xs"
+                        className="text-xs text-orange-600"
                       >
                         {order.costAdjustment > 0 ? "+" : ""}
                         {order.costAdjustment.toFixed(2)} zł
@@ -109,10 +109,10 @@ export function OrdersList({
                     )}
                     {order.cost + (order.costAdjustment || 0) !==
                       order.cost && (
-                      <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs">
+                      <Badge className="text-xs text-blue-700 bg-blue-100 border-blue-200">
                         <DollarSign className="w-3 h-3 mr-1" />
                         {(order.cost + (order.costAdjustment || 0)).toFixed(
-                          2
+                          2,
                         )}{" "}
                         zł
                       </Badge>
@@ -120,7 +120,7 @@ export function OrdersList({
                   </div>
 
                   {/* Show user name, payment status and confirmation status */}
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex flex-wrap items-center gap-2">
                     {order.userName && (
                       <Badge
                         variant="secondary"
@@ -134,14 +134,14 @@ export function OrdersList({
                       </Badge>
                     )}
                     {order.userId === currentUserId && (
-                      <Badge className="bg-blue-100 text-blue-700 text-xs">
+                      <Badge className="text-xs text-blue-700 bg-blue-100">
                         Twoje zamówienie
                       </Badge>
                     )}
                     {order.paymentStatus &&
                       getPaymentStatusBadge(order.paymentStatus)}
                     {order.orderConfirmed && (
-                      <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">
+                      <Badge className="text-xs text-green-700 bg-green-100 border-green-200">
                         <CheckCircle className="w-3 h-3 mr-1" />
                         Potwierdzone
                       </Badge>
@@ -151,19 +151,19 @@ export function OrdersList({
               </div>
 
               {order.notes && (
-                <p className="text-sm text-slate-600 mb-2">
+                <p className="mb-2 text-sm text-slate-600">
                   <span className="font-medium">Uwagi:</span> {order.notes}
                 </p>
               )}
 
               {order.adminNotes && (
-                <p className="text-sm text-blue-700 mb-2">
+                <p className="mb-2 text-sm text-blue-700">
                   <span className="font-medium">Uwagi administratora:</span>{" "}
                   {order.adminNotes}
                 </p>
               )}
 
-              <div className="flex items-center gap-2 text-xs text-slate-500">
+              <div className="flex items-center text-xs gap-2 text-slate-500">
                 <Clock className="w-3 h-3" />
                 <span>
                   {order.createdAt.toLocaleDateString("pl-PL")} o{" "}
@@ -177,19 +177,19 @@ export function OrdersList({
           ))}
 
           <div className="pt-4 border-t">
-            <div className="flex justify-between items-center text-lg font-semibold">
+            <div className="flex items-center justify-between text-lg font-semibold">
               <span>Łączny koszt:</span>
               <span className="text-green-600">{totalCost.toFixed(2)} zł</span>
             </div>
             {getTotalCostWithAdjustments() !== totalCost && (
-              <div className="flex justify-between items-center text-lg font-semibold mt-1">
+              <div className="flex items-center justify-between mt-1 text-lg font-semibold">
                 <span>Z korektami:</span>
                 <span className="text-blue-600">
                   {getTotalCostWithAdjustments().toFixed(2)} zł
                 </span>
               </div>
             )}
-            <p className="text-sm text-slate-600 mt-1">
+            <p className="mt-1 text-sm text-slate-600">
               Średnio na osobę:{" "}
               {(
                 getTotalCostWithAdjustments() / Math.max(orders.length, 1)

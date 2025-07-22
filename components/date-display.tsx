@@ -47,10 +47,10 @@ export default function DateDisplay({
   return (
     <div className={`inline-flex items-center gap-2 ${className}`}>
       <div className="flex items-center gap-1.5 text-slate-600">
-        <Calendar className="w-4 h-4 text-slate-500 flex-shrink-0" />
+        <Calendar className="flex-shrink-0 w-4 h-4 text-slate-500" />
 
         {/* Mobile: Stacked layout */}
-        <div className="flex flex-col sm:hidden text-sm">
+        <div className="flex flex-col text-sm sm:hidden">
           <span className="font-medium text-slate-700">
             {formattedDate.fullDate}
           </span>
@@ -58,7 +58,7 @@ export default function DateDisplay({
         </div>
 
         {/* Desktop: Inline layout */}
-        <div className="hidden sm:flex items-center gap-1 text-sm">
+        <div className="items-center hidden text-sm sm:flex gap-1">
           <span className="font-medium text-slate-700">
             {formattedDate.fullDate}
           </span>

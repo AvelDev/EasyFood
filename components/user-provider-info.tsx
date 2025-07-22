@@ -58,7 +58,7 @@ export default function UserProviderInfo({ user }: UserProviderInfoProps) {
   }
 
   return (
-    <div className="text-xs text-slate-500 flex items-center gap-1">
+    <div className="flex items-center text-xs text-slate-500 gap-1">
       <span>Zalogowano przez:</span>
       {providers.map((provider, index) => (
         <div key={provider.providerId} className="flex items-center gap-1">

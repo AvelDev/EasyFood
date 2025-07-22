@@ -46,10 +46,10 @@ export function PrivacyPolicyDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="h-96 w-full rounded-md border p-4">
+        <ScrollArea className="w-full p-4 border h-96 rounded-md">
           <div className="space-y-4">
             <section>
-              <h3 className="text-lg font-semibold mb-2">1. Wprowadzenie</h3>
+              <h3 className="mb-2 text-lg font-semibold">1. Wprowadzenie</h3>
               <p className="text-sm text-gray-600">
                 Niniejsza Polityka Prywatności opisuje, w jaki sposób zbieramy,
                 używamy i chronimy Twoje dane osobowe podczas korzystania z
@@ -60,10 +60,10 @@ export function PrivacyPolicyDialog({
             <Separator />
 
             <section>
-              <h3 className="text-lg font-semibold mb-2">2. Zbierane dane</h3>
+              <h3 className="mb-2 text-lg font-semibold">2. Zbierane dane</h3>
               <div className="text-sm text-gray-600 space-y-2">
                 <p>Zbieramy następujące dane osobowe:</p>
-                <ul className="list-disc pl-6 space-y-1">
+                <ul className="pl-6 list-disc space-y-1">
                   <li>Imię i nazwisko</li>
                   <li>Adres e-mail</li>
                   <li>
@@ -78,12 +78,12 @@ export function PrivacyPolicyDialog({
             <Separator />
 
             <section>
-              <h3 className="text-lg font-semibold mb-2">
+              <h3 className="mb-2 text-lg font-semibold">
                 3. Cel przetwarzania danych
               </h3>
               <div className="text-sm text-gray-600 space-y-2">
                 <p>Twoje dane wykorzystujemy w celu:</p>
-                <ul className="list-disc pl-6 space-y-1">
+                <ul className="pl-6 list-disc space-y-1">
                   <li>Umożliwienia korzystania z funkcji aplikacji</li>
                   <li>Organizacji głosowań na restauracje</li>
                   <li>Koordynacji zespołowych zamówień</li>
@@ -95,7 +95,7 @@ export function PrivacyPolicyDialog({
             <Separator />
 
             <section>
-              <h3 className="text-lg font-semibold mb-2">
+              <h3 className="mb-2 text-lg font-semibold">
                 4. Udostępnianie danych
               </h3>
               <p className="text-sm text-gray-600">
@@ -108,7 +108,7 @@ export function PrivacyPolicyDialog({
             <Separator />
 
             <section>
-              <h3 className="text-lg font-semibold mb-2">
+              <h3 className="mb-2 text-lg font-semibold">
                 5. Przechowywanie danych
               </h3>
               <p className="text-sm text-gray-600">
@@ -120,10 +120,10 @@ export function PrivacyPolicyDialog({
             <Separator />
 
             <section>
-              <h3 className="text-lg font-semibold mb-2">6. Twoje prawa</h3>
+              <h3 className="mb-2 text-lg font-semibold">6. Twoje prawa</h3>
               <div className="text-sm text-gray-600 space-y-2">
                 <p>Masz prawo do:</p>
-                <ul className="list-disc pl-6 space-y-1">
+                <ul className="pl-6 list-disc space-y-1">
                   <li>Dostępu do swoich danych</li>
                   <li>Sprostowania nieprawidłowych danych</li>
                   <li>Usunięcia swoich danych</li>
@@ -135,7 +135,7 @@ export function PrivacyPolicyDialog({
             <Separator />
 
             <section>
-              <h3 className="text-lg font-semibold mb-2">7. Kontakt</h3>
+              <h3 className="mb-2 text-lg font-semibold">7. Kontakt</h3>
               <p className="text-sm text-gray-600">
                 W przypadku pytań dotyczących polityki prywatności, skontaktuj
                 się z administratorem aplikacji.
@@ -144,7 +144,7 @@ export function PrivacyPolicyDialog({
           </div>
         </ScrollArea>
 
-        <div className="flex items-center space-x-2 py-4">
+        <div className="flex items-center py-4 space-x-2">
           <Checkbox
             id="privacy-accept"
             checked={isAccepted}

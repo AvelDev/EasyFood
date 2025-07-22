@@ -60,7 +60,7 @@ export function usePoll({ pollId, userId, userName }: UsePollProps) {
           () => {
             // This callback will be called when poll is auto-closed
             console.log("Poll was automatically closed by timer");
-          }
+          },
         );
       }
     });
@@ -133,7 +133,7 @@ export function usePoll({ pollId, userId, userName }: UsePollProps) {
           toast({
             title: "Głos zaktualizowany",
             description: `Twój głos został pomyślnie zaktualizowany. Wybrane restauracje: ${restaurants.join(
-              ", "
+              ", ",
             )}.`,
           });
         }
@@ -154,7 +154,7 @@ export function usePoll({ pollId, userId, userName }: UsePollProps) {
         toast({
           title: "Głos oddany",
           description: `Twój głos został pomyślnie oddany. Wybrane restauracje: ${restaurants.join(
-            ", "
+            ", ",
           )}.`,
         });
       }

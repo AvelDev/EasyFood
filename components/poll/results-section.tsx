@@ -45,7 +45,7 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
           <p>Liczba głosujących: {votes.length}</p>
           <p>Łączna liczba głosów: {totalVotes}</p>
           {totalVotes > votes.length && (
-            <p className="text-blue-600 font-medium">
+            <p className="font-medium text-blue-600">
               ⚡ Użytkownicy mogą głosować na kilka restauracji
             </p>
           )}
@@ -66,7 +66,7 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.3 }}
               >
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="flex flex-col">
                       <span
@@ -81,7 +81,7 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
                           href={option.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                          className="flex items-center text-xs text-blue-600 hover:text-blue-800 gap-1"
                         >
                           <ExternalLink className="w-3 h-3" />
                           Zobacz menu
@@ -102,7 +102,7 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
                       </motion.div>
                     )}
                   </div>
-                  <div className="text-sm text-slate-600 flex items-center gap-1">
+                  <div className="flex items-center text-sm text-slate-600 gap-1">
                     <AnimatedCounter
                       value={count}
                       suffix=" głosów"
@@ -132,8 +132,8 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
                 {/* Lista użytkowników którzy głosowali na tę restaurację */}
                 {votersByRestaurant[option.name] &&
                   votersByRestaurant[option.name].length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-slate-200">
-                      <p className="text-sm font-medium text-slate-700 mb-2">
+                    <div className="pt-3 mt-3 border-t border-slate-200">
+                      <p className="mb-2 text-sm font-medium text-slate-700">
                         Głosowali ({votersByRestaurant[option.name].length}):
                       </p>
                       <div className="flex flex-wrap gap-1">
@@ -142,11 +142,11 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
                             <Badge
                               key={`${option.name}-${voterIndex}`}
                               variant="secondary"
-                              className="text-xs px-2 py-1 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                              className="px-2 py-1 text-xs bg-slate-100 text-slate-700 hover:bg-slate-200"
                             >
                               {voterName}
                             </Badge>
-                          )
+                          ),
                         )}
                       </div>
                     </div>
@@ -157,10 +157,10 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
         </div>
 
         {poll.closed && (
-          <div className="mt-6 pt-6 border-t">
+          <div className="pt-6 mt-6 border-t">
             <Button
               onClick={() => router.push(`/poll/${poll.id}/orders`)}
-              className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+              className="w-full text-white bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
             >
               Zobacz zamówienia
             </Button>

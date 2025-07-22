@@ -87,22 +87,22 @@ export default function SignIn() {
     setShowPrivacyDialog(false);
     setPendingUser(null);
     setError(
-      "Akceptacja polityki prywatności jest wymagana do korzystania z aplikacji"
+      "Akceptacja polityki prywatności jest wymagana do korzystania z aplikacji",
     );
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-32 h-32 border-b-2 border-blue-600 rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-        <Card className="w-full max-w-md bg-white/80 backdrop-blur-sm shadow-xl">
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-slate-50 to-slate-100">
+        <Card className="w-full max-w-md shadow-xl bg-white/80 backdrop-blur-sm">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
               <Vote className="w-12 h-12 text-blue-600" />
@@ -110,7 +110,7 @@ export default function SignIn() {
             <CardTitle className="text-2xl font-bold text-slate-800">
               Zaloguj się do systemu głosowania na restauracje
             </CardTitle>
-            <p className="text-slate-600 mt-2">
+            <p className="mt-2 text-slate-600">
               Dołącz do swojego zespołu w głosowaniu na restauracje i składaniu
               zamówień
             </p>
@@ -118,7 +118,7 @@ export default function SignIn() {
           <CardContent>
             {error && (
               <Alert variant="destructive" className="mb-4">
-                <AlertCircle className="h-4 w-4" />
+                <AlertCircle className="w-4 h-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
@@ -181,7 +181,7 @@ export default function SignIn() {
               </Button>
             </div>
 
-            <div className="mt-6 text-center text-sm text-slate-600">
+            <div className="mt-6 text-sm text-center text-slate-600">
               <p>
                 Logując się, wyrażasz zgodę na uczestnictwo w głosowaniach na
                 restauracje i koordynację zamówień zespołowych.

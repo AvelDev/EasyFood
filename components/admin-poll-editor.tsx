@@ -48,7 +48,7 @@ export default function AdminPollEditor({
     setSaving(true);
     try {
       const votingEndsAt = new Date(
-        `${formData.votingDate}T${formData.votingTime}`
+        `${formData.votingDate}T${formData.votingTime}`,
       );
       const orderingEndsAt =
         formData.orderingDate && formData.orderingTime
@@ -106,7 +106,7 @@ export default function AdminPollEditor({
     setFormData({
       ...formData,
       restaurantOptions: formData.restaurantOptions.filter(
-        (_, i) => i !== index
+        (_, i) => i !== index,
       ),
     });
   };
@@ -114,7 +114,7 @@ export default function AdminPollEditor({
   const updateRestaurantOption = (
     index: number,
     field: "name" | "url",
-    value: string
+    value: string,
   ) => {
     const updated = [...formData.restaurantOptions];
     updated[index] = { ...updated[index], [field]: value };
@@ -213,7 +213,7 @@ export default function AdminPollEditor({
                               updateRestaurantOption(
                                 index,
                                 "name",
-                                e.target.value
+                                e.target.value,
                               )
                             }
                           />
@@ -314,7 +314,7 @@ export default function AdminPollEditor({
                     repeat: Infinity,
                     ease: "linear",
                   }}
-                  className="w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"
+                  className="w-4 h-4 mr-2 border-2 border-white rounded-full border-t-transparent"
                 />
               ) : (
                 <Save className="w-4 h-4 mr-2" />

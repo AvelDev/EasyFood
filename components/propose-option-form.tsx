@@ -142,7 +142,7 @@ export default function ProposeOptionForm({
                           repeat: Infinity,
                           ease: "linear",
                         }}
-                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                        className="w-4 h-4 border-2 border-white rounded-full border-t-transparent"
                       />
                     ) : (
                       <Send className="w-4 h-4" />
@@ -180,8 +180,8 @@ export default function ProposeOptionForm({
                     proposal.status === "approved"
                       ? "default"
                       : proposal.status === "rejected"
-                      ? "destructive"
-                      : "secondary"
+                        ? "destructive"
+                        : "secondary"
                   }
                   className="flex items-center gap-1"
                 >
@@ -191,8 +191,8 @@ export default function ProposeOptionForm({
                     {proposal.status === "pending"
                       ? "oczekuje"
                       : proposal.status === "approved"
-                      ? "zatwierdzona"
-                      : "odrzucona"}
+                        ? "zatwierdzona"
+                        : "odrzucona"}
                     )
                   </span>
                 </Badge>

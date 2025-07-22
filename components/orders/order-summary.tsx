@@ -23,7 +23,7 @@ export function OrderSummary({
   return (
     <div className="flex items-start justify-between">
       <div>
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">
+        <h1 className="mb-2 text-3xl font-bold text-slate-800">
           Zamówienia dla {poll.title}
         </h1>
         <div className="flex items-center gap-4 text-slate-600">
@@ -52,15 +52,15 @@ export function OrderSummary({
       </div>
 
       <div className="flex items-center gap-2">
-        <Badge className="bg-green-100 text-green-700">
+        <Badge className="text-green-700 bg-green-100">
           {ordersCount} zamówień
         </Badge>
         {orderingEnded ? (
-          <Badge className="bg-red-100 text-red-700">
+          <Badge className="text-red-700 bg-red-100">
             Zamówienia zakończone
           </Badge>
         ) : (
-          <Badge className="bg-blue-100 text-blue-700">
+          <Badge className="text-blue-700 bg-blue-100">
             Można składać zamówienia
           </Badge>
         )}

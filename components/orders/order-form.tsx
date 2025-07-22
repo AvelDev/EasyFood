@@ -98,9 +98,9 @@ export function OrderForm({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8">
-            <Clock className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-slate-700 mb-2">
+          <div className="py-8 text-center">
+            <Clock className="w-12 h-12 mx-auto mb-4 text-red-500" />
+            <h3 className="mb-2 text-lg font-semibold text-slate-700">
               Czas na składanie zamówień minął
             </h3>
             <p className="text-slate-500">
@@ -123,11 +123,11 @@ export function OrderForm({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <h3 className="font-semibold text-green-800 mb-2">
+            <div className="p-4 border border-green-200 rounded-lg bg-green-50">
+              <h3 className="mb-2 font-semibold text-green-800">
                 Zamówienie złożone!
               </h3>
-              <div className="space-y-2 text-sm">
+              <div className="text-sm space-y-2">
                 <div>
                   <strong>Danie:</strong> {userOrder.dish}
                 </div>
@@ -205,8 +205,8 @@ export function OrderForm({
           }`}
         >
           {orderingEnded && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-700 font-medium">
+            <div className="p-3 mb-4 border border-red-200 rounded-lg bg-red-50">
+              <p className="text-sm font-medium text-red-700">
                 Czas na składanie zamówień minął. Nie można już składać nowych
                 zamówień.
               </p>
@@ -252,17 +252,17 @@ export function OrderForm({
             <Button
               type="submit"
               disabled={submitting || orderingEnded}
-              className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 text-white bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting
                 ? userOrder
                   ? "Aktualizowanie..."
                   : "Wysyłanie..."
                 : orderingEnded
-                ? "Czas składania zamówień minął"
-                : userOrder
-                ? "Zaktualizuj zamówienie"
-                : "Złóż zamówienie"}
+                  ? "Czas składania zamówień minął"
+                  : userOrder
+                    ? "Zaktualizuj zamówienie"
+                    : "Złóż zamówienie"}
             </Button>
 
             {userOrder && isEditing && (

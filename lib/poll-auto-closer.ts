@@ -78,7 +78,7 @@ class PollAutoCloser {
       console.log(
         `Poll ${pollId} has been automatically closed with winner: ${
           winner || "none"
-        }`
+        }`,
       );
     } catch (error) {
       console.error(`Error automatically closing poll ${pollId}:`, error);

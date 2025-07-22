@@ -61,7 +61,7 @@ export default function Home() {
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="w-8 h-8 border-b-2 border-blue-600 rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -77,7 +77,7 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-slate-800">
             Głosowania na restauracje
           </h1>
-          <p className="text-slate-600 mt-1">
+          <p className="mt-1 text-slate-600">
             Głosuj na restauracje i składaj swoje zamówienia
           </p>
         </div>
@@ -89,9 +89,9 @@ export default function Home() {
       {loading ? (
         <LoadingSkeleton />
       ) : polls.length === 0 ? (
-        <div className="text-center py-12">
-          <Vote className="w-16 h-16 mx-auto text-slate-400 mb-4" />
-          <h2 className="text-2xl font-semibold text-slate-600 mb-2">
+        <div className="py-12 text-center">
+          <Vote className="w-16 h-16 mx-auto mb-4 text-slate-400" />
+          <h2 className="mb-2 text-2xl font-semibold text-slate-600">
             Brak głosowań
           </h2>
           <p className="text-slate-500">

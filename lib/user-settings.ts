@@ -21,7 +21,7 @@ export interface UserProfileUpdate {
  */
 export const updateUserProfile = async (
   userId: string,
-  updates: UserProfileUpdate
+  updates: UserProfileUpdate,
 ): Promise<void> => {
   try {
     const userRef = doc(db, "users", userId);
@@ -108,7 +108,7 @@ const deleteUserVotes = async (userId: string): Promise<void> => {
     }
 
     console.log(
-      `Usunięto wszystkie głosy użytkownika ${userId} ze wszystkich ankiet`
+      `Usunięto wszystkie głosy użytkownika ${userId} ze wszystkich ankiet`,
     );
   } catch (error) {
     console.error("Error deleting user votes:", error);
@@ -137,7 +137,7 @@ const deleteUserOrders = async (userId: string): Promise<void> => {
     }
 
     console.log(
-      `Usunięto wszystkie zamówienia użytkownika ${userId} ze wszystkich ankiet`
+      `Usunięto wszystkie zamówienia użytkownika ${userId} ze wszystkich ankiet`,
     );
   } catch (error) {
     console.error("Error deleting user orders:", error);
@@ -149,7 +149,7 @@ const deleteUserOrders = async (userId: string): Promise<void> => {
  * Sprawdza czy użytkownik ma uprawnienia administratora
  */
 export const checkAdminPermissions = async (
-  userId: string
+  userId: string,
 ): Promise<boolean> => {
   try {
     const userData = await getUserData(userId);
@@ -223,7 +223,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
  * Filtruje sekcje ustawień na podstawie uprawnień użytkownika
  */
 export const getAvailableSettingsSections = (
-  isAdmin: boolean
+  isAdmin: boolean,
 ): SettingsSection[] => {
   return SETTINGS_SECTIONS.filter((section) => !section.adminOnly || isAdmin);
 };

@@ -68,7 +68,7 @@ export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
       className="h-full"
     >
-      <Card className="hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm border-0 shadow-lg h-full flex flex-col">
+      <Card className="flex flex-col h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm">
         <CardHeader className="pb-4">
           <div className="flex items-start justify-between">
             <CardTitle className="text-xl font-semibold text-slate-800">
@@ -87,10 +87,10 @@ export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
           </div>
         </CardHeader>
 
-        <CardContent className="pt-0 flex-1 flex flex-col">
-          <div className="space-y-4 flex-1">
+        <CardContent className="flex flex-col flex-1 pt-0">
+          <div className="flex-1 space-y-4">
             <div>
-              <p className="text-sm text-slate-600 mb-2">Opcje restauracji:</p>
+              <p className="mb-2 text-sm text-slate-600">Opcje restauracji:</p>
               <div className="flex flex-wrap gap-2">
                 {normalizedOptions.map((option, index) => (
                   <Badge
@@ -116,12 +116,12 @@ export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
 
             {/* Poll description */}
             {poll.description && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <div className="p-3 border border-blue-200 bg-blue-50 rounded-md">
                 <p className="text-sm text-slate-700">{poll.description}</p>
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm text-slate-600">
+            <div className="flex flex-col text-sm sm:flex-row sm:items-center sm:justify-between gap-3 text-slate-600">
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 {isActive ? (
                   <div className="flex flex-col gap-2">
@@ -160,23 +160,23 @@ export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2 mt-4">
+          <div className="flex flex-col mt-4 sm:flex-row gap-2">
             <Button
               onClick={() => router.push(`/poll/${poll.id}`)}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+              className="flex-1 text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             >
               {isActive
                 ? "Głosuj teraz"
                 : poll.closed
-                ? "Zobacz wyniki"
-                : "Zobacz głosowanie"}
+                  ? "Zobacz wyniki"
+                  : "Zobacz głosowanie"}
             </Button>
 
             {poll.closed && (
               <Button
                 onClick={() => router.push(`/poll/${poll.id}/orders`)}
                 variant="outline"
-                className="flex-1 border-green-200 text-green-700 hover:bg-green-50 text-xs sm:text-sm whitespace-nowrap overflow-hidden"
+                className="flex-1 overflow-hidden text-xs text-green-700 border-green-200 hover:bg-green-50 sm:text-sm whitespace-nowrap"
               >
                 <span className="block">Zamówienia</span>
               </Button>

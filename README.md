@@ -5,7 +5,7 @@ Aplikacja Next.js do zespołowego głosowania na restauracje i zarządzania zam�
 ## Funkcje
 
 - **Uwierzytelnianie Discord**: Bezpieczne logowanie z Discord OAuth2
-- **Dostęp oparty na rolach**: Role administratora i użytkownika z różnymi uprawnieniami  
+- **Dostęp oparty na rolach**: Role administratora i użytkownika z różnymi uprawnieniami
 - **Głosowanie na restauracje**: Tworzenie głosowań, głosowanie na restauracje i przeglądanie wyników
 - **Zarządzanie zamówieniami**: Składanie zamówień po zakończeniu głosowania
 - **Aktualizacje na żywo**: Wyniki głosowania i śledzenie zamówień w czasie rzeczywistym
@@ -81,11 +81,13 @@ Odwiedź `http://localhost:3000` aby zobaczyć aplikację.
 ## Role użytkowników
 
 ### Administratorzy
+
 - Mogą tworzyć nowe głosowania na restauracje
 - Mogą ręcznie zamykać głosowania
 - Mogą przeglądać wszystkie zamówienia i obliczać sumy
 
 ### Zwykli użytkownicy
+
 - Mogą głosować w aktywnych głosowaniach
 - Mogą składać zamówienia po zamknięciu głosowań
 - Mogą przeglądać wyniki głosowań
@@ -103,16 +105,18 @@ Odwiedź `http://localhost:3000` aby zobaczyć aplikację.
 ## Struktura bazy danych
 
 ### Kolekcja Users
+
 ```typescript
 {
-  uid: string
-  name: string
-  email: string
-  role: "admin" | "user"
+  uid: string;
+  name: string;
+  email: string;
+  role: "admin" | "user";
 }
 ```
 
 ### Kolekcja Polls
+
 ```typescript
 {
   id: string
@@ -126,22 +130,24 @@ Odwiedź `http://localhost:3000` aby zobaczyć aplikację.
 ```
 
 ### Podkolekcja Votes
+
 ```typescript
 {
-  userId: string
-  restaurant: string
-  createdAt: Timestamp
+  userId: string;
+  restaurant: string;
+  createdAt: Timestamp;
 }
 ```
 
 ### Podkolekcja Orders
+
 ```typescript
 {
-  userId: string
-  dish: string
-  notes: string
-  cost: number
-  createdAt: Timestamp
+  userId: string;
+  dish: string;
+  notes: string;
+  cost: number;
+  createdAt: Timestamp;
 }
 ```
 

@@ -94,20 +94,20 @@ export function AdminOrderManagement({
     switch (status) {
       case "paid":
         return (
-          <Badge className="bg-green-100 text-green-700 border-green-200">
+          <Badge className="text-green-700 bg-green-100 border-green-200">
             Opłacone
           </Badge>
         );
       case "unpaid":
         return (
-          <Badge className="bg-red-100 text-red-700 border-red-200">
+          <Badge className="text-red-700 bg-red-100 border-red-200">
             Nieopłacone
           </Badge>
         );
       case "pending":
       default:
         return (
-          <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200">
+          <Badge className="text-yellow-700 bg-yellow-100 border-yellow-200">
             Oczekuje
           </Badge>
         );
@@ -125,9 +125,9 @@ export function AdminOrderManagement({
       <CardContent>
         <div className="space-y-6">
           {/* Summary */}
-          <div className="bg-slate-50 p-4 rounded-lg">
-            <h3 className="font-semibold mb-2">Podsumowanie</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div className="p-4 rounded-lg bg-slate-50">
+            <h3 className="mb-2 font-semibold">Podsumowanie</h3>
+            <div className="text-sm grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
                 <span className="text-slate-600">Zamówienia:</span>
                 <div className="font-semibold">{orders.length}</div>
@@ -160,17 +160,17 @@ export function AdminOrderManagement({
           {/* Orders List */}
           <div className="space-y-4">
             {orders.map((order, index) => (
-              <div key={index} className="border rounded-lg p-4 bg-white">
-                <div className="flex justify-between items-start mb-3">
+              <div key={index} className="p-4 bg-white border rounded-lg">
+                <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center mb-2 gap-2">
                       <h4 className="font-semibold">{order.dish}</h4>
                       {order.userName && (
                         <Badge variant="outline">{order.userName}</Badge>
                       )}
                       {getPaymentStatusBadge(order.paymentStatus)}
                       {order.orderConfirmed && (
-                        <Badge className="bg-green-100 text-green-700 border-green-200">
+                        <Badge className="text-green-700 bg-green-100 border-green-200">
                           <CheckCircle className="w-3 h-3 mr-1" />
                           Potwierdzone
                         </Badge>
@@ -242,10 +242,10 @@ export function AdminOrderManagement({
                 </div>
 
                 {editingOrder === index && (
-                  <div className="mt-4 pt-4 border-t space-y-4">
+                  <div className="pt-4 mt-4 border-t space-y-4">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium mb-1">
+                        <label className="block mb-1 text-sm font-medium">
                           Uwagi administratora
                         </label>
                         <Textarea
@@ -257,7 +257,7 @@ export function AdminOrderManagement({
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium mb-1">
+                        <label className="block mb-1 text-sm font-medium">
                           Korekta kosztów (zł)
                         </label>
                         <Input
@@ -276,14 +276,14 @@ export function AdminOrderManagement({
 
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium mb-1">
+                        <label className="block mb-1 text-sm font-medium">
                           Status płatności
                         </label>
                         <Select
                           value={paymentStatus}
                           onValueChange={(value) =>
                             setPaymentStatus(
-                              value as "pending" | "paid" | "unpaid"
+                              value as "pending" | "paid" | "unpaid",
                             )
                           }
                         >
@@ -301,11 +301,11 @@ export function AdminOrderManagement({
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium mb-1">
+                        <label className="block mb-1 text-sm font-medium">
                           Potwierdzenie zamówienia
                         </label>
-                        <div className="flex items-center gap-3 pt-2">
-                          <label className="flex items-center gap-2 cursor-pointer">
+                        <div className="flex items-center pt-2 gap-3">
+                          <label className="flex items-center cursor-pointer gap-2">
                             <input
                               type="checkbox"
                               checked={orderConfirmed}

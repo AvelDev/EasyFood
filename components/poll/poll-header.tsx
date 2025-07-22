@@ -65,7 +65,7 @@ export default function PollHeader({
 
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">
+          <h1 className="mb-2 text-3xl font-bold text-slate-800">
             {poll.title}
           </h1>
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-slate-600">
@@ -98,7 +98,7 @@ export default function PollHeader({
               </div>
             </div>
             {poll.orderingEndsAt && poll.orderingEndsAt instanceof Date && (
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center text-sm gap-2">
                 <Clock className="w-4 h-4" />
                 <span>
                   Zamówienia do{" "}

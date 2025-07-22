@@ -23,17 +23,17 @@ const VotingStatus = memo(function VotingStatus({
   return (
     <div className={className}>
       {poll.closed ? (
-        <Badge className="bg-green-100 text-green-700 hover:bg-green-100 px-3 py-1">
+        <Badge className="px-3 py-1 text-green-700 bg-green-100 hover:bg-green-100">
           <CheckCircle className="w-3 h-3 mr-1" />
           Zamknięte
         </Badge>
       ) : isActive ? (
-        <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 px-3 py-1">
+        <Badge className="px-3 py-1 text-blue-700 bg-blue-100 hover:bg-blue-100">
           <Clock className="w-3 h-3 mr-1" />
           Aktywne
         </Badge>
       ) : (
-        <Badge className="bg-red-100 text-red-700 hover:bg-red-100 px-3 py-1">
+        <Badge className="px-3 py-1 text-red-700 bg-red-100 hover:bg-red-100">
           <Lock className="w-3 h-3 mr-1" />
           Zakończone
         </Badge>

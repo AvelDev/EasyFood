@@ -20,14 +20,14 @@ export default function GeneralSettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
-        <div className="container mx-auto max-w-6xl py-8">
+      <div className="min-h-screen p-4 bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="container max-w-6xl py-8 mx-auto">
           <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-slate-200 rounded w-1/3"></div>
-            <div className="h-4 bg-slate-200 rounded w-2/3"></div>
+            <div className="w-1/3 h-8 rounded bg-slate-200"></div>
+            <div className="w-2/3 h-4 rounded bg-slate-200"></div>
             <div className="grid gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-64 bg-slate-200 rounded-lg"></div>
+                <div key={i} className="h-64 rounded-lg bg-slate-200"></div>
               ))}
             </div>
           </div>
@@ -44,10 +44,10 @@ export default function GeneralSettingsPage() {
   // Sprawdź czy użytkownik jest administratorem
   if (user.role !== "admin") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
-        <div className="container mx-auto max-w-4xl py-8">
+      <div className="min-h-screen p-4 bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="container max-w-4xl py-8 mx-auto">
           <Alert variant="destructive">
-            <Shield className="h-4 w-4" />
+            <Shield className="w-4 h-4" />
             <AlertDescription>
               Nie masz uprawnień do dostępu do ustawień ogólnych. Ta sekcja jest
               dostępna tylko dla administratorów.
@@ -59,8 +59,8 @@ export default function GeneralSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
-      <div className="container mx-auto max-w-6xl py-8">
+    <div className="min-h-screen p-4 bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="container max-w-6xl py-8 mx-auto">
         <div className="space-y-6">
           {/* Header */}
           <div className="space-y-2">

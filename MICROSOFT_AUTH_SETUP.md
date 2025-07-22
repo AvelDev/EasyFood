@@ -21,13 +21,14 @@ Ten dokument opisuje proces konfiguracji Microsoft Authentication w aplikacji Ea
 5. Wypełnij formularz:
    - **Name**: EasyFood Auth (lub dowolna nazwa)
    - **Supported account types**: Accounts in any organizational directory and personal Microsoft accounts
-   - **Redirect URI**: 
+   - **Redirect URI**:
      - Type: Web
      - URI: `https://YOUR_PROJECT_ID.firebaseapp.com/__/auth/handler`
-     
+
 ### 1.2 Konfiguracja po utworzeniu
 
 1. W sekcji **Overview** skopiuj:
+
    - **Application (client) ID**
    - **Directory (tenant) ID**
 
@@ -36,8 +37,8 @@ Ten dokument opisuje proces konfiguracji Microsoft Authentication w aplikacji Ea
 4. Dodaj opis i wybierz czas wygaśnięcia
 5. Skopiuj **Client secret value** (będzie widoczny tylko raz!)
 
-3. Przejdź do **API permissions**
-4. Dodaj następujące uprawnienia Microsoft Graph:
+6. Przejdź do **API permissions**
+7. Dodaj następujące uprawnienia Microsoft Graph:
    - `email`
    - `openid`
    - `profile`

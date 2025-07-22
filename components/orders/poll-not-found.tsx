@@ -8,8 +8,8 @@ interface PollNotFoundProps {
 
 export function PollNotFound({ onGoHome }: PollNotFoundProps) {
   return (
-    <div className="text-center py-12">
-      <h2 className="text-2xl font-semibold text-slate-600 mb-4">
+    <div className="py-12 text-center">
+      <h2 className="mb-4 text-2xl font-semibold text-slate-600">
         Głosowanie nie zostało znalezione
       </h2>
       <Button onClick={onGoHome}>Powrót do strony głównej</Button>

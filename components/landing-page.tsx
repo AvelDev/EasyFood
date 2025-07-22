@@ -99,35 +99,35 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50"></div>
-        <div className="relative max-w-7xl mx-auto px-4 py-20 sm:py-24">
+        <div className="relative px-4 py-20 mx-auto max-w-7xl sm:py-24">
           <motion.div
             className="text-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-5xl sm:text-6xl font-bold text-slate-900 mb-6">
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="mb-6 text-5xl font-bold sm:text-6xl text-slate-900">
+              <span className="text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
                 EasyFood
               </span>
               <br />
-              <span className="text-slate-700 text-4xl sm:text-5xl">
+              <span className="text-4xl text-slate-700 sm:text-5xl">
                 Zespołowe zamawianie jedzenia
               </span>
             </h1>
-            <p className="text-xl text-slate-600 mb-8 max-w-3xl mx-auto">
+            <p className="max-w-3xl mx-auto mb-8 text-xl text-slate-600">
               Uprość proces zamawiania jedzenia w swojej firmie. Głosujcie razem
               na restauracje, składajcie zamówienia i cieszczcie się wspólnymi
               posiłkami.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col justify-center sm:flex-row gap-4">
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg"
+                className="px-8 py-4 text-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 onClick={() => router.push("/auth/signin")}
               >
                 Zacznij już teraz
-                <ArrowRight className="ml-2 w-5 h-5" />
+                <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
               <Button
                 variant="outline"
@@ -143,12 +143,12 @@ export default function LandingPage() {
 
       {/* Features Section */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+        <div className="px-4 mx-auto max-w-7xl">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-3xl font-bold sm:text-4xl text-slate-900">
               Dlaczego warto wybrać EasyFood?
             </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="max-w-2xl mx-auto text-xl text-slate-600">
               Odkryj funkcje, które czynią zamawianie jedzenia w zespole prostym
               i przyjemnym
             </p>
@@ -168,7 +168,7 @@ export default function LandingPage() {
                 >
                   <CardContent className="p-6">
                     <div className="mb-4">{feature.icon}</div>
-                    <h3 className="font-semibold text-slate-800 mb-3 text-lg">
+                    <h3 className="mb-3 text-lg font-semibold text-slate-800">
                       {feature.title}
                     </h3>
                     <p className="text-slate-600">{feature.description}</p>
@@ -182,12 +182,12 @@ export default function LandingPage() {
 
       {/* How it works Section */}
       <section className="py-20 bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+        <div className="px-4 mx-auto max-w-7xl">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-3xl font-bold sm:text-4xl text-slate-900">
               Jak to działa?
             </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="max-w-2xl mx-auto text-xl text-slate-600">
               Prosty proces w czterech krokach
             </p>
           </div>
@@ -202,10 +202,10 @@ export default function LandingPage() {
                 transition={{ duration: 0.5, delay: index * 0.2 }}
                 viewport={{ once: true }}
               >
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
+                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-2xl font-bold text-white rounded-full bg-gradient-to-r from-blue-600 to-purple-600">
                   {step.number}
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                <h3 className="mb-2 text-lg font-semibold text-slate-900">
                   {step.title}
                 </h3>
                 <p className="text-slate-600">{step.description}</p>
@@ -217,13 +217,13 @@ export default function LandingPage() {
 
       {/* Benefits Section */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="px-4 mx-auto max-w-7xl">
+          <div className="items-center grid lg:grid-cols-2 gap-12">
             <div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-6">
+              <h2 className="mb-6 text-3xl font-bold sm:text-4xl text-slate-900">
                 Oszczędzaj czas i unikaj problemów
               </h2>
-              <p className="text-lg text-slate-600 mb-8">
+              <p className="mb-8 text-lg text-slate-600">
                 EasyFood rozwiązuje typowe problemy związane z zamawianiem
                 jedzenia w zespole
               </p>
@@ -236,7 +236,7 @@ export default function LandingPage() {
                   "Historia wszystkich głosowań i zamówień",
                 ].map((benefit, index) => (
                   <div key={index} className="flex items-center gap-3">
-                    <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="flex-shrink-0 w-6 h-6 text-green-600" />
                     <span className="text-slate-700">{benefit}</span>
                   </div>
                 ))}
@@ -244,15 +244,15 @@ export default function LandingPage() {
             </div>
 
             <div className="relative">
-              <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-8">
-                <div className="bg-white rounded-xl p-6 shadow-lg">
-                  <div className="flex items-center gap-3 mb-4">
+              <div className="p-8 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl">
+                <div className="p-6 bg-white shadow-lg rounded-xl">
+                  <div className="flex items-center mb-4 gap-3">
                     <Zap className="w-8 h-8 text-yellow-500" />
                     <h3 className="text-xl font-semibold text-slate-900">
                       Szybkie efekty
                     </h3>
                   </div>
-                  <p className="text-slate-600 mb-4">
+                  <p className="mb-4 text-slate-600">
                     Zespoły używające EasyFood oszczędzają średnio 15 minut
                     dziennie na organizację zamawiania jedzenia.
                   </p>
@@ -270,22 +270,22 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 to-purple-600 text-white">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-6">
+      <section className="py-20 text-white bg-gradient-to-br from-blue-600 to-purple-600">
+        <div className="max-w-4xl px-4 mx-auto text-center">
+          <h2 className="mb-6 text-3xl font-bold sm:text-4xl">
             Gotowy na rozpoczęcie?
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="mb-8 text-xl text-blue-100">
             Dołącz do zespołów, które już uprościły swoje zamawianie jedzenia
           </p>
           <Button
             size="lg"
             variant="secondary"
-            className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 text-lg font-semibold"
+            className="px-8 py-4 text-lg font-semibold text-blue-600 bg-white hover:bg-blue-50"
             onClick={() => router.push("/auth/signin")}
           >
             Zaloguj się i zacznij
-            <ArrowRight className="ml-2 w-5 h-5" />
+            <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
         </div>
       </section>

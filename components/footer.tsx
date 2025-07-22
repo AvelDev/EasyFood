@@ -22,7 +22,7 @@ export default function Footer() {
     const fetchLatestCommit = async () => {
       try {
         const response = await fetch(
-          "https://api.github.com/repos/AvelDev/EasyFood/commits?per_page=1"
+          "https://api.github.com/repos/AvelDev/EasyFood/commits?per_page=1",
         );
         if (response.ok) {
           const commits = await response.json();
@@ -51,16 +51,16 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-slate-900 text-white py-8 mt-auto">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+    <footer className="py-8 mt-auto text-white bg-slate-900">
+      <div className="px-4 mx-auto max-w-7xl">
+        <div className="flex flex-col items-center justify-between md:flex-row gap-4">
           {/* Copyright */}
-          <div className="text-slate-400 text-sm">
+          <div className="text-sm text-slate-400">
             © {currentYear} EasyFood. Wszystkie prawa zastrzeżone.
           </div>
 
           {/* Latest Commit */}
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center text-sm gap-4">
             {loading ? (
               <div className="text-slate-400 animate-pulse">Ładowanie...</div>
             ) : latestCommit ? (
@@ -68,7 +68,7 @@ export default function Footer() {
                 href={latestCommit.html_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-slate-400 hover:text-white transition-colors duration-200 flex items-center gap-2 hover:underline"
+                className="flex items-center text-slate-400 hover:text-white transition-colors duration-200 gap-2 hover:underline"
                 title={`Commit: ${latestCommit.commit.message.split("\n")[0]}`}
               >
                 <Github className="w-4 h-4" />
@@ -76,7 +76,7 @@ export default function Footer() {
                 <span>{formatDate(latestCommit.commit.author.date)}</span>
               </a>
             ) : (
-              <div className="text-slate-500 text-xs">
+              <div className="text-xs text-slate-500">
                 Brak informacji o commit
               </div>
             )}
@@ -88,7 +88,7 @@ export default function Footer() {
               href="https://github.com/AvelDev/EasyFood"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-slate-400 hover:text-white transition-colors duration-200 flex items-center gap-2 hover:underline"
+              className="flex items-center text-slate-400 hover:text-white transition-colors duration-200 gap-2 hover:underline"
               title="Zobacz kod źródłowy na GitHub"
             >
               <Github className="w-5 h-5" />

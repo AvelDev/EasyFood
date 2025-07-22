@@ -57,7 +57,7 @@ export const useAuth = () => {
               console.error("Error listening to user document:", error);
               setUser(null);
               setLoading(false);
-            }
+            },
           );
         } catch (error) {
           console.error("Error setting up user listener:", error);

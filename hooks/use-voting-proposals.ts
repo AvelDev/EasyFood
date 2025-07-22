@@ -70,7 +70,7 @@ export function useVotingProposals({
 
   const approveProposal = async (
     proposal: VotingOptionProposal,
-    adminNotes?: string
+    adminNotes?: string,
   ) => {
     if (!userId || !userName || userRole !== "admin") return;
 
@@ -80,7 +80,7 @@ export function useVotingProposals({
         proposal.id,
         proposal.restaurantName,
         userId,
-        userName
+        userName,
       );
 
       if (adminNotes) {
@@ -105,7 +105,7 @@ export function useVotingProposals({
 
   const rejectProposal = async (
     proposal: VotingOptionProposal,
-    adminNotes?: string
+    adminNotes?: string,
   ) => {
     if (!userId || !userName || userRole !== "admin") return;
 

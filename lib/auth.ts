@@ -1,5 +1,10 @@
 import { AuthProvider as FirebaseAuthProvider, User } from "firebase/auth";
-import { auth, googleProvider, discordProvider, microsoftProvider } from "./firebase";
+import {
+  auth,
+  googleProvider,
+  discordProvider,
+  microsoftProvider,
+} from "./firebase";
 import { signInWithPopup, signOut as firebaseSignOut } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
@@ -8,7 +13,7 @@ import { User as AppUser } from "@/types";
 export type AuthProviderType = "google" | "discord" | "microsoft";
 
 export const getAuthProvider = (
-  providerType: AuthProviderType
+  providerType: AuthProviderType,
 ): FirebaseAuthProvider => {
   switch (providerType) {
     case "google":
@@ -23,7 +28,7 @@ export const getAuthProvider = (
 };
 
 export const signInWithProvider = async (
-  providerType: AuthProviderType
+  providerType: AuthProviderType,
 ): Promise<{ user: User; needsPrivacyConsent: boolean }> => {
   try {
     const provider = getAuthProvider(providerType);
@@ -92,7 +97,7 @@ export const acceptPrivacyPolicy = async (user: User): Promise<void> => {
   } catch (error: any) {
     console.error("Error accepting privacy policy:", error);
     throw new Error(
-      `Błąd podczas akceptacji polityki prywatności: ${error.message}`
+      `Błąd podczas akceptacji polityki prywatności: ${error.message}`,
     );
   }
 };

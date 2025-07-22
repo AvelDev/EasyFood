@@ -72,7 +72,7 @@ export function UserManagement() {
       filtered = filtered.filter(
         (user) =>
           user.name.toLowerCase().includes(query) ||
-          user.uid.toLowerCase().includes(query)
+          user.uid.toLowerCase().includes(query),
       );
     }
 
@@ -113,7 +113,7 @@ export function UserManagement() {
           user.role,
           user.createdAt ? user.createdAt.toISOString() : "",
           user.privacyPolicyAccepted ? "Zaakceptowana" : "Nie zaakceptowana",
-        ].join(",")
+        ].join(","),
       ),
     ].join("\n");
 
@@ -123,7 +123,7 @@ export function UserManagement() {
     link.setAttribute("href", url);
     link.setAttribute(
       "download",
-      `users_${new Date().toISOString().split("T")[0]}.csv`
+      `users_${new Date().toISOString().split("T")[0]}.csv`,
     );
     link.style.visibility = "hidden";
     document.body.appendChild(link);
@@ -140,11 +140,11 @@ export function UserManagement() {
     return (
       <div className="space-y-4">
         <div className="animate-pulse">
-          <div className="h-4 bg-slate-200 rounded w-1/4 mb-4"></div>
-          <div className="h-10 bg-slate-200 rounded mb-4"></div>
+          <div className="w-1/4 h-4 mb-4 rounded bg-slate-200"></div>
+          <div className="h-10 mb-4 rounded bg-slate-200"></div>
           <div className="space-y-2">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-12 bg-slate-200 rounded"></div>
+              <div key={i} className="h-12 rounded bg-slate-200"></div>
             ))}
           </div>
         </div>
@@ -154,7 +154,7 @@ export function UserManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-medium">Zarządzanie użytkownikami</h3>
           <p className="text-sm text-slate-600">
@@ -169,7 +169,7 @@ export function UserManagement() {
 
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-blue-600" />
             <div>
@@ -179,7 +179,7 @@ export function UserManagement() {
           </div>
         </div>
 
-        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+        <div className="p-4 border border-purple-200 rounded-lg bg-purple-50">
           <div className="flex items-center gap-2">
             <Crown className="w-5 h-5 text-purple-600" />
             <div>
@@ -191,7 +191,7 @@ export function UserManagement() {
           </div>
         </div>
 
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+        <div className="p-4 border border-green-200 rounded-lg bg-green-50">
           <div className="flex items-center gap-2">
             <UserIcon className="w-5 h-5 text-green-600" />
             <div>
@@ -205,9 +205,9 @@ export function UserManagement() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-4 items-center">
+      <div className="flex items-center gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <Search className="absolute w-4 h-4 left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
           <Input
             placeholder="Szukaj po nazwie lub UID..."
             value={searchQuery}
@@ -238,7 +238,7 @@ export function UserManagement() {
 
       {/* Users Table */}
       {filteredUsers.length === 0 ? (
-        <div className="text-center py-8 text-slate-500">
+        <div className="py-8 text-center text-slate-500">
           <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
           {users.length === 0 ? (
             <div>
@@ -282,7 +282,7 @@ export function UserManagement() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <code className="text-xs bg-slate-100 px-2 py-1 rounded">
+                    <code className="px-2 py-1 text-xs rounded bg-slate-100">
                       {user.uid}
                     </code>
                   </TableCell>
@@ -294,7 +294,7 @@ export function UserManagement() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1 text-sm">
+                    <div className="flex items-center text-sm gap-1">
                       <Calendar className="w-3 h-3 text-slate-400" />
                       {formatDate(user.createdAt)}
                     </div>
@@ -325,7 +325,7 @@ export function UserManagement() {
         </div>
       )}
 
-      <div className="text-sm text-slate-500 text-center">
+      <div className="text-sm text-center text-slate-500">
         Wyświetlane {filteredUsers.length} z {users.length} użytkowników
       </div>
     </div>

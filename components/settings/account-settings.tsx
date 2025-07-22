@@ -39,7 +39,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
 
         <div className="grid gap-4">
           {/* User ID */}
-          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50">
             <div className="flex items-center gap-3">
               <User className="w-5 h-5 text-slate-600" />
               <div>
@@ -49,13 +49,13 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                 </p>
               </div>
             </div>
-            <code className="text-xs bg-slate-200 px-2 py-1 rounded font-mono">
+            <code className="px-2 py-1 font-mono text-xs rounded bg-slate-200">
               {user.uid.substring(0, 8)}...
             </code>
           </div>
 
           {/* Role */}
-          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50">
             <div className="flex items-center gap-3">
               {user.role === "admin" ? (
                 <Crown className="w-5 h-5 text-yellow-600" />
@@ -82,7 +82,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
           </div>
 
           {/* Privacy Policy Status */}
-          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50">
             <div className="flex items-center gap-3">
               <CheckCircle className="w-5 h-5 text-green-600" />
               <div>
@@ -96,14 +96,14 @@ export function AccountSettings({ user }: AccountSettingsProps) {
             </div>
             <Badge
               variant="outline"
-              className="bg-green-50 text-green-700 border-green-200"
+              className="text-green-700 border-green-200 bg-green-50"
             >
               Zaakceptowana
             </Badge>
           </div>
 
           {/* Creation Date */}
-          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50">
             <div className="flex items-center gap-3">
               <Calendar className="w-5 h-5 text-slate-600" />
               <div>
@@ -128,7 +128,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
           Metody logowania
         </h3>
 
-        <div className="p-4 bg-slate-50 rounded-lg">
+        <div className="p-4 rounded-lg bg-slate-50">
           <UserProviderInfo user={user} />
         </div>
       </div>
@@ -144,13 +144,13 @@ export function AccountSettings({ user }: AccountSettingsProps) {
         </Button>
 
         {showDetails && (
-          <div className="space-y-3 p-4 bg-slate-50 rounded-lg">
+          <div className="p-4 rounded-lg space-y-3 bg-slate-50">
             <h4 className="font-medium text-slate-900">Szczegóły techniczne</h4>
 
-            <div className="space-y-2 text-sm">
+            <div className="text-sm space-y-2">
               <div className="flex justify-between">
                 <span className="text-slate-600">Pełne ID:</span>
-                <code className="text-xs bg-slate-200 px-2 py-1 rounded font-mono">
+                <code className="px-2 py-1 font-mono text-xs rounded bg-slate-200">
                   {user.uid}
                 </code>
               </div>
@@ -173,7 +173,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                   <div className="mt-1 space-y-1">
                     {user.providerData.map((provider, index) => (
                       <div key={index} className="text-xs">
-                        <code className="bg-slate-200 px-2 py-1 rounded">
+                        <code className="px-2 py-1 rounded bg-slate-200">
                           {provider.providerId}: {provider.uid}
                         </code>
                       </div>

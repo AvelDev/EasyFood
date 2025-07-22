@@ -44,7 +44,7 @@ const pollSchema = z.object({
       z.object({
         name: z.string().min(1, "Nazwa restauracji jest wymagana"),
         url: z.string().optional(),
-      })
+      }),
     )
     .min(2, "Wymagane są co najmniej 2 restauracje"),
   votingDate: z.string().min(1, "Data głosowania jest wymagana"),
@@ -172,18 +172,18 @@ export default function CreatePollDialog({
     // Calculate end times based on template duration
     const now = new Date();
     const votingEndTime = new Date(
-      now.getTime() + template.votingDurationHours * 60 * 60 * 1000
+      now.getTime() + template.votingDurationHours * 60 * 60 * 1000,
     );
     const orderingEndTime = new Date(
       votingEndTime.getTime() +
-        (template.orderingDurationHours || 0) * 60 * 60 * 1000
+        (template.orderingDurationHours || 0) * 60 * 60 * 1000,
     );
 
     // Apply template values
     setValue("title", template.name);
     setValue(
       "restaurants",
-      template.restaurantOptions.map((name) => ({ name, url: "" }))
+      template.restaurantOptions.map((name) => ({ name, url: "" })),
     );
     setValue("votingDate", votingEndTime.toISOString().split("T")[0]);
     setValue("votingTime", votingEndTime.toTimeString().slice(0, 5));
@@ -198,7 +198,7 @@ export default function CreatePollDialog({
       // Tworzenie obiektów Date z wybranych dat i godzin
       const votingEndsAt = new Date(`${data.votingDate}T${data.votingTime}`);
       const orderingEndsAt = new Date(
-        `${data.votingDate}T${data.orderingTime}`
+        `${data.votingDate}T${data.orderingTime}`,
       );
 
       const pollId = await createPoll({
@@ -235,7 +235,7 @@ export default function CreatePollDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white">
+        <Button className="text-white bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700">
           <Plus className="w-4 h-4 mr-2" />
           Utwórz głosowanie
         </Button>
@@ -329,7 +329,7 @@ export default function CreatePollDialog({
             {fields.map((field, index) => (
               <div
                 key={field.id}
-                className="space-y-2 p-4 border rounded-lg bg-slate-50"
+                className="p-4 border rounded-lg space-y-2 bg-slate-50"
               >
                 <div className="flex gap-2">
                   <Input
@@ -436,7 +436,7 @@ export default function CreatePollDialog({
               </div>
             </div>
 
-            <div className="text-xs text-slate-500 bg-blue-50 p-3 rounded-lg">
+            <div className="p-3 text-xs rounded-lg text-slate-500 bg-blue-50">
               <strong>Informacja:</strong> Zamówienia automatycznie kończą się
               30 minut po zakończeniu głosowania. Możesz dostosować ten czas
               według potrzeb.
@@ -455,7 +455,7 @@ export default function CreatePollDialog({
             <Button
               type="submit"
               disabled={isLoading}
-              className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+              className="flex-1 text-white bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
             >
               {isLoading ? "Tworzenie..." : "Utwórz głosowanie"}
             </Button>
