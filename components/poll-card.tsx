@@ -68,7 +68,7 @@ export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
       className="h-full"
     >
-      <Card className="flex flex-col h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm">
+      <Card className="flex flex-col h-full transition-all duration-300 border-0 shadow-lg hover:shadow-xl bg-white/80 backdrop-blur-sm">
         <CardHeader className="pb-4">
           <div className="flex items-start justify-between">
             <CardTitle className="text-xl font-semibold text-slate-800">
@@ -116,13 +116,13 @@ export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
 
             {/* Poll description */}
             {poll.description && (
-              <div className="p-3 border border-blue-200 bg-blue-50 rounded-md">
+              <div className="p-3 border border-blue-200 rounded-md bg-blue-50">
                 <p className="text-sm text-slate-700">{poll.description}</p>
               </div>
             )}
 
-            <div className="flex flex-col text-sm sm:flex-row sm:items-center sm:justify-between gap-3 text-slate-600">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+            <div className="flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between text-slate-600">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 {isActive ? (
                   <div className="flex flex-col gap-2">
                     <CountdownTimer
@@ -160,7 +160,7 @@ export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
             </div>
           </div>
 
-          <div className="flex flex-col mt-4 sm:flex-row gap-2">
+          <div className="flex flex-col gap-2 mt-4 sm:flex-row">
             <Button
               onClick={() => router.push(`/poll/${poll.id}`)}
               className="flex-1 text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
@@ -168,8 +168,8 @@ export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
               {isActive
                 ? "Głosuj teraz"
                 : poll.closed
-                  ? "Zobacz wyniki"
-                  : "Zobacz głosowanie"}
+                ? "Zobacz"
+                : "Głosowanie"}
             </Button>
 
             {poll.closed && (

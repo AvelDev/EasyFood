@@ -55,14 +55,6 @@ export default function PollHeader({
 
   return (
     <div className="mb-8">
-      <Button
-        variant="ghost"
-        onClick={() => router.push("/")}
-        className="mb-4 text-slate-600"
-      >
-        ← Powrót do głosowań
-      </Button>
-
       <div className="grid-cols-2">
         <div className="flex flex-wrap items-center justify-between mb-4">
           <h1 className="mb-2 text-3xl font-bold text-slate-800">

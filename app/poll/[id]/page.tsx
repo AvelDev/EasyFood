@@ -6,6 +6,8 @@ import { usePoll } from "@/hooks/use-poll";
 import { Button } from "@/components/ui/button";
 import { PollHeader, VotingSection, ResultsSection } from "@/components/poll";
 import AdminPollEditor from "@/components/admin-poll-editor";
+import { Home } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface PollPageProps {
   params: {
@@ -92,6 +94,29 @@ export default function PollPage({ params }: PollPageProps) {
 
   return (
     <div className="max-w-4xl mx-auto">
+      {/* Navigation Button */}
+      <motion.div
+        className="mb-6"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        >
+          <Button
+            variant="outline"
+            onClick={() => router.push("/")}
+            className="group flex items-center gap-2 px-4 py-2 bg-white border-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-800 transition-all duration-300 shadow-sm hover:shadow-md"
+          >
+            <Home className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
+            <span className="font-medium">Powrót do menu</span>
+          </Button>
+        </motion.div>
+      </motion.div>
+
       <PollHeader
         poll={poll}
         votesCount={votes.length}
