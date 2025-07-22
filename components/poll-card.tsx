@@ -4,7 +4,14 @@ import { useMemo, useState } from "react";
 import { Poll } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Users, CheckCircle, Share2, Check } from "lucide-react";
+import {
+  Clock,
+  Users,
+  CheckCircle,
+  Share2,
+  Check,
+  ExternalLink,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -14,6 +21,7 @@ import VotingStatus from "./voting-status";
 import DateDisplay from "./date-display";
 import DeletePollDialog from "./delete-poll-dialog";
 import { useAuthContext } from "@/contexts/auth-context";
+import { normalizeRestaurantOptions } from "@/lib/firestore";
 
 interface PollCardProps {
   poll: Poll;
@@ -21,9 +29,10 @@ interface PollCardProps {
 }
 
 export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
-  const router = useRouter();
   const { user } = useAuthContext();
+  const router = useRouter();
   const [linkCopied, setLinkCopied] = useState(false);
+  const normalizedOptions = normalizeRestaurantOptions(poll.restaurantOptions);
 
   const { isActive, isEnded } = useMemo(() => {
     const now = new Date();
@@ -83,24 +92,34 @@ export default function PollCard({ poll, onPollDeleted }: PollCardProps) {
             <div>
               <p className="text-sm text-slate-600 mb-2">Opcje restauracji:</p>
               <div className="flex flex-wrap gap-2">
-                {poll.restaurantOptions.map((restaurant, index) => (
+                {normalizedOptions.map((option, index) => (
                   <Badge
                     key={index}
                     variant="outline"
                     className={`${
-                      poll.selectedRestaurant === restaurant
+                      poll.selectedRestaurant === option.name
                         ? "bg-green-50 text-green-700 border-green-200"
                         : "bg-slate-50 text-slate-700"
                     }`}
                   >
-                    {restaurant}
-                    {poll.selectedRestaurant === restaurant && (
-                      <CheckCircle className="w-3 h-3 ml-1" />
-                    )}
+                    <div className="flex items-center gap-1">
+                      {option.name}
+                      {option.url && <ExternalLink className="w-3 h-3" />}
+                      {poll.selectedRestaurant === option.name && (
+                        <CheckCircle className="w-3 h-3" />
+                      )}
+                    </div>
                   </Badge>
                 ))}
               </div>
             </div>
+
+            {/* Poll description */}
+            {poll.description && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-sm text-slate-700">{poll.description}</p>
+              </div>
+            )}
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm text-slate-600">
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { usePoll } from "@/hooks/use-poll";
 import { Button } from "@/components/ui/button";
 import { PollHeader, VotingSection, ResultsSection } from "@/components/poll";
+import AdminPollEditor from "@/components/admin-poll-editor";
 
 interface PollPageProps {
   params: {
@@ -100,6 +101,23 @@ export default function PollPage({ params }: PollPageProps) {
         onPollDeleted={() => router.push("/")}
       />
 
+      {/* Poll description */}
+      {poll.description && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-slate-700">{poll.description}</p>
+        </div>
+      )}
+
+      {/* Admin poll editor */}
+      <AdminPollEditor
+        poll={poll}
+        isAdmin={user?.role === "admin"}
+        onPollUpdated={() => {
+          // Refresh poll data after update
+          router.refresh();
+        }}
+      />
+
       <div className="grid lg:grid-cols-2 gap-8">
         <VotingSection
           poll={poll}
@@ -108,6 +126,9 @@ export default function PollPage({ params }: PollPageProps) {
           votes={votes}
           onVote={handleVote}
           voting={voting}
+          userId={user?.uid}
+          userName={user?.displayName || user?.email || "Użytkownik"}
+          userRole={user?.role}
         />
 
         <ResultsSection poll={poll} votes={votes} />

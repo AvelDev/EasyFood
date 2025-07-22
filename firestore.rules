@@ -59,7 +59,14 @@ service cloud.firestore {
     // Dostęp do głosowań (polls)
     match /polls/{pollId} {
       // Czytanie i tworzenie dla wszystkich zalogowanych użytkowników
-      allow read, create, update: if request.auth != null;
+      allow read, create: if request.auth != null;
+      
+      // Aktualizacja tylko dla administratorów (mogą edytować aktywne głosowania)
+      // lub dla twórcy głosowania (tylko jeśli głosowanie jeszcze się nie rozpoczęło)
+      allow update: if request.auth != null && 
+                    (isAdmin() || 
+                     (request.auth.uid == resource.data.createdBy && 
+                      resource.data.votingEndsAt > request.time));
       
       // Usuwanie tylko dla administratorów
       allow delete: if isAdmin();
@@ -86,6 +93,29 @@ service cloud.firestore {
         // Usuwanie tylko własnych zamówień
         allow delete: if request.auth != null && 
                       resource.data.userId == request.auth.uid;
+      }
+
+      // Dostęp do propozycji opcji głosowania w ramach danego głosowania
+      match /votingProposals/{proposalId} {
+        // Wszystkim zalogowanym użytkownikom pozwól czytać propozycje
+        allow read: if request.auth != null;
+        
+        // Tworzenie propozycji tylko dla zalogowanych użytkowników
+        // Walidacja czy użytkownik ustawia własny userId
+        allow create: if request.auth != null && 
+                      request.resource.data.proposedBy == request.auth.uid &&
+                      request.resource.data.status == 'pending';
+        
+        // Aktualizacja tylko dla administratorów (zatwierdzanie/odrzucanie)
+        // lub dla autora propozycji (edycja przed zatwierdzeniem)
+        allow update: if request.auth != null && 
+                      (isAdmin() || 
+                       (resource.data.proposedBy == request.auth.uid && 
+                        resource.data.status == 'pending'));
+        
+        // Usuwanie tylko dla administratorów lub autora propozycji
+        allow delete: if request.auth != null && 
+                      (isAdmin() || resource.data.proposedBy == request.auth.uid);
       }
     }
   }

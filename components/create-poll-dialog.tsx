@@ -13,8 +13,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Calendar, Clock, FileText } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Calendar,
+  Clock,
+  FileText,
+  Link as LinkIcon,
+} from "lucide-react";
 import { createPoll } from "@/lib/firestore";
 import { useAuthContext } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
@@ -30,9 +38,13 @@ import {
 
 const pollSchema = z.object({
   title: z.string().min(1, "Tytuł jest wymagany"),
+  description: z.string().optional(),
   restaurants: z
     .array(
-      z.object({ name: z.string().min(1, "Nazwa restauracji jest wymagana") })
+      z.object({
+        name: z.string().min(1, "Nazwa restauracji jest wymagana"),
+        url: z.string().optional(),
+      })
     )
     .min(2, "Wymagane są co najmniej 2 restauracje"),
   votingDate: z.string().min(1, "Data głosowania jest wymagana"),
@@ -85,7 +97,11 @@ export default function CreatePollDialog({
     resolver: zodResolver(pollSchema),
     defaultValues: {
       title: "",
-      restaurants: [{ name: "" }, { name: "" }],
+      description: "",
+      restaurants: [
+        { name: "", url: "" },
+        { name: "", url: "" },
+      ],
       votingDate: getTodayDate(),
       votingTime: "",
       orderingTime: "",
@@ -138,7 +154,11 @@ export default function CreatePollDialog({
       // Reset to default values
       reset({
         title: "",
-        restaurants: [{ name: "" }, { name: "" }],
+        description: "",
+        restaurants: [
+          { name: "", url: "" },
+          { name: "", url: "" },
+        ],
         votingDate: getTodayDate(),
         votingTime: "",
         orderingTime: "",
@@ -163,7 +183,7 @@ export default function CreatePollDialog({
     setValue("title", template.name);
     setValue(
       "restaurants",
-      template.restaurantOptions.map((name) => ({ name }))
+      template.restaurantOptions.map((name) => ({ name, url: "" }))
     );
     setValue("votingDate", votingEndTime.toISOString().split("T")[0]);
     setValue("votingTime", votingEndTime.toTimeString().slice(0, 5));
@@ -183,7 +203,11 @@ export default function CreatePollDialog({
 
       const pollId = await createPoll({
         title: data.title,
-        restaurantOptions: data.restaurants.map((r) => r.name),
+        description: data.description || "",
+        restaurantOptions: data.restaurants.map((r) => ({
+          name: r.name,
+          ...(r.url && r.url.trim() ? { url: r.url.trim() } : {}),
+        })),
         createdBy: user.uid,
         votingEndsAt: votingEndsAt,
         orderingEndsAt: orderingEndsAt,
@@ -273,6 +297,21 @@ export default function CreatePollDialog({
             )}
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="description">Opis głosowania (opcjonalny)</Label>
+            <Textarea
+              id="description"
+              placeholder="Dodaj opis lub szczegóły dotyczące głosowania..."
+              rows={3}
+              {...register("description")}
+            />
+            {errors.description && (
+              <p className="text-sm text-red-600">
+                {errors.description.message}
+              </p>
+            )}
+          </div>
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <Label>Opcje restauracji</Label>
@@ -280,7 +319,7 @@ export default function CreatePollDialog({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => append({ name: "" })}
+                onClick={() => append({ name: "", url: "" })}
               >
                 <Plus className="w-4 h-4 mr-1" />
                 Dodaj restaurację
@@ -288,20 +327,38 @@ export default function CreatePollDialog({
             </div>
 
             {fields.map((field, index) => (
-              <div key={field.id} className="flex gap-2">
-                <Input
-                  placeholder={`Restauracja ${index + 1}`}
-                  {...register(`restaurants.${index}.name`)}
-                />
-                {fields.length > 2 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => remove(index)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+              <div
+                key={field.id}
+                className="space-y-2 p-4 border rounded-lg bg-slate-50"
+              >
+                <div className="flex gap-2">
+                  <Input
+                    placeholder={`Restauracja ${index + 1}`}
+                    {...register(`restaurants.${index}.name`)}
+                  />
+                  {fields.length > 2 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => remove(index)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <LinkIcon className="w-4 h-4 text-slate-500" />
+                  <Input
+                    placeholder="Link do menu/strony restauracji (opcjonalny)"
+                    type="url"
+                    {...register(`restaurants.${index}.url`)}
+                  />
+                </div>
+                {errors.restaurants?.[index]?.name && (
+                  <p className="text-sm text-red-600">
+                    {errors.restaurants?.[index]?.name?.message}
+                  </p>
                 )}
               </div>
             ))}

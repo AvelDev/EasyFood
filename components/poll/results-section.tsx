@@ -5,11 +5,12 @@ import { Poll, Vote } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown } from "lucide-react";
+import { Crown, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import AnimatedCounter from "@/components/animated-counter";
 import AnimatedProgressBar from "@/components/animated-progress-bar";
+import { normalizeRestaurantOptions } from "@/lib/firestore";
 
 interface ResultsSectionProps {
   poll: Poll;
@@ -18,6 +19,7 @@ interface ResultsSectionProps {
 
 export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
   const router = useRouter();
+  const normalizedOptions = normalizeRestaurantOptions(poll.restaurantOptions);
 
   const voteCounts = useMemo(() => {
     return votes.reduce((acc, vote) => {
@@ -33,15 +35,15 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {poll.restaurantOptions.map((restaurant, index) => {
-            const count = voteCounts[restaurant] || 0;
+          {normalizedOptions.map((option, index) => {
+            const count = voteCounts[option.name] || 0;
             const percentage =
               votes.length > 0 ? (count / votes.length) * 100 : 0;
-            const isWinner = poll.selectedRestaurant === restaurant;
+            const isWinner = poll.selectedRestaurant === option.name;
 
             return (
               <motion.div
-                key={restaurant}
+                key={option.name}
                 className="space-y-2"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -49,13 +51,26 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
               >
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    <span
-                      className={`font-medium ${
-                        isWinner ? "text-green-700" : ""
-                      }`}
-                    >
-                      {restaurant}
-                    </span>
+                    <div className="flex flex-col">
+                      <span
+                        className={`font-medium ${
+                          isWinner ? "text-green-700" : ""
+                        }`}
+                      >
+                        {option.name}
+                      </span>
+                      {option.url && (
+                        <a
+                          href={option.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          Zobacz menu
+                        </a>
+                      )}
+                    </div>
                     {isWinner && (
                       <motion.div
                         initial={{ scale: 0, rotate: -180 }}

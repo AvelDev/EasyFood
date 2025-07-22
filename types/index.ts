@@ -1,7 +1,13 @@
+export type RestaurantOption = {
+  name: string;
+  url?: string; // Opcjonalny link do restauracji
+};
+
 export type Poll = {
   id: string;
   title: string;
-  restaurantOptions: string[];
+  description?: string; // Opcjonalny opis głosowania
+  restaurantOptions: string[] | RestaurantOption[]; // Może być tablicą stringów (backward compatibility) lub obiektów
   createdBy: string;
   votingEndsAt: Date;
   orderingEndsAt?: Date;
@@ -47,6 +53,20 @@ export type PollTemplate = {
   createdBy: string;
   createdAt: Date;
   isActive: boolean;
+};
+
+export type VotingOptionProposal = {
+  id: string;
+  pollId: string;
+  restaurantName: string;
+  proposedBy: string;
+  proposedByName: string;
+  status: "pending" | "approved" | "rejected";
+  createdAt: Date;
+  reviewedAt?: Date;
+  reviewedBy?: string;
+  reviewedByName?: string;
+  adminNotes?: string;
 };
 
 export type AppSettings = {
