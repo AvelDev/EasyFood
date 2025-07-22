@@ -74,9 +74,10 @@ service cloud.firestore {
       // Dostęp do głosów w ramach danego głosowania
       match /votes/{voteId} {
         // Funkcja sprawdzająca czy poll jest aktywny (czas głosowania nie minął)
-        function isPollActive() {
-          let poll = get(/databases/$(database)/documents/polls/$(pollId));
-          return poll.data.votingEndsAt > request.time && !poll.data.closed;
+        function isPollActive(pollId) {
+          return exists(/databases/$(database)/documents/polls/$(pollId)) &&
+                 get(/databases/$(database)/documents/polls/$(pollId)).data.votingEndsAt > request.time &&
+                 !get(/databases/$(database)/documents/polls/$(pollId)).data.closed;
         }
         
         // Walidacja danych głosu - sprawdź czy zawiera poprawne pola
@@ -96,18 +97,18 @@ service cloud.firestore {
         allow read: if request.auth != null;
         // Tworzenie głosów tylko gdy poll jest aktywny
         allow create: if request.auth != null && 
-                      isPollActive() &&
+                      isPollActive(pollId) &&
                       request.resource.data.userId == request.auth.uid &&
                       isValidVote(request.resource.data);
         // Pozwól użytkownikowi aktualizować własne głosy tylko gdy poll jest aktywny
         allow update: if request.auth != null && 
-                      isPollActive() &&
+                      isPollActive(pollId) &&
                       resource.data.userId == request.auth.uid &&
                       request.resource.data.userId == request.auth.uid &&
                       isValidVote(request.resource.data);
         // Pozwól użytkownikowi usuwać własne głosy tylko gdy poll jest aktywny
         allow delete: if request.auth != null && 
-                      isPollActive() &&
+                      isPollActive(pollId) &&
                       resource.data.userId == request.auth.uid;
       }
 

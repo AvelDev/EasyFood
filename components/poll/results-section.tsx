@@ -41,14 +41,9 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
     <Card className="bg-white/80 backdrop-blur-sm">
       <CardHeader>
         <CardTitle>Wyniki głosowania</CardTitle>
-        <div className="text-sm text-slate-600 space-y-1">
+        <div className="space-y-1 text-sm text-slate-600">
           <p>Liczba głosujących: {votes.length}</p>
           <p>Łączna liczba głosów: {totalVotes}</p>
-          {totalVotes > votes.length && (
-            <p className="font-medium text-blue-600">
-              ⚡ Użytkownicy mogą głosować na kilka restauracji
-            </p>
-          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -81,7 +76,7 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
                           href={option.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center text-xs text-blue-600 hover:text-blue-800 gap-1"
+                          className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
                         >
                           <ExternalLink className="w-3 h-3" />
                           Zobacz menu
@@ -102,7 +97,7 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
                       </motion.div>
                     )}
                   </div>
-                  <div className="flex items-center text-sm text-slate-600 gap-1">
+                  <div className="flex items-center gap-1 text-sm text-slate-600">
                     <AnimatedCounter
                       value={count}
                       suffix=" głosów"
@@ -132,10 +127,7 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
                 {/* Lista użytkowników którzy głosowali na tę restaurację */}
                 {votersByRestaurant[option.name] &&
                   votersByRestaurant[option.name].length > 0 && (
-                    <div className="pt-3 mt-3 border-t border-slate-200">
-                      <p className="mb-2 text-sm font-medium text-slate-700">
-                        Głosowali ({votersByRestaurant[option.name].length}):
-                      </p>
+                    <div className="pb-3 mt-3">
                       <div className="flex flex-wrap gap-1">
                         {votersByRestaurant[option.name].map(
                           (voterName, voterIndex) => (
@@ -146,7 +138,7 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
                             >
                               {voterName}
                             </Badge>
-                          ),
+                          )
                         )}
                       </div>
                     </div>
