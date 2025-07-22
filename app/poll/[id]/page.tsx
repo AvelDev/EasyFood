@@ -36,6 +36,7 @@ export default function PollPage({ params }: PollPageProps) {
   } = usePoll({
     pollId: params.id,
     userId: user?.uid,
+    userName: user?.displayName || user?.email || "Nieznany użytkownik",
   });
 
   if (authLoading || loading) {

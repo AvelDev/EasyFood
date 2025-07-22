@@ -162,16 +162,35 @@ export const addVote = async (pollId: string, vote: Vote) => {
   const voteData = {
     ...vote,
     createdAt: Timestamp.fromDate(vote.createdAt),
+    // Ensure restaurants is an array for new votes
+    restaurants: vote.restaurants || (vote.restaurant ? [vote.restaurant] : []),
+    // Ensure userName is included
+    userName: vote.userName || "Nieznany użytkownik",
   };
+
+  // Remove deprecated restaurant field for new votes
+  if (voteData.restaurant && voteData.restaurants.length > 0) {
+    delete voteData.restaurant;
+  }
+
   await addDoc(collection(db, "polls", pollId, "votes"), voteData);
 };
 
 export const getVotes = async (pollId: string): Promise<Vote[]> => {
   const querySnapshot = await getDocs(collection(db, "polls", pollId, "votes"));
-  return querySnapshot.docs.map((doc) => ({
-    ...doc.data(),
-    createdAt: doc.data().createdAt.toDate(),
-  })) as Vote[];
+  return querySnapshot.docs.map((doc) => {
+    const data = doc.data();
+    // Handle backward compatibility
+    const restaurants =
+      data.restaurants || (data.restaurant ? [data.restaurant] : []);
+
+    return {
+      ...data,
+      restaurants,
+      userName: data.userName || "Nieznany użytkownik",
+      createdAt: data.createdAt.toDate(),
+    };
+  }) as Vote[];
 };
 
 // Real-time votes listener
@@ -182,10 +201,19 @@ export const subscribeToVotes = (
   const votesRef = collection(db, "polls", pollId, "votes");
 
   return onSnapshot(votesRef, (querySnapshot: QuerySnapshot<DocumentData>) => {
-    const votes = querySnapshot.docs.map((doc) => ({
-      ...doc.data(),
-      createdAt: doc.data().createdAt.toDate(),
-    })) as Vote[];
+    const votes = querySnapshot.docs.map((doc) => {
+      const data = doc.data();
+      // Handle backward compatibility
+      const restaurants =
+        data.restaurants || (data.restaurant ? [data.restaurant] : []);
+
+      return {
+        ...data,
+        restaurants,
+        userName: data.userName || "Nieznany użytkownik",
+        createdAt: data.createdAt.toDate(),
+      };
+    }) as Vote[];
     callback(votes);
   });
 };
@@ -202,9 +230,16 @@ export const getUserVote = async (
 
   if (!querySnapshot.empty) {
     const doc = querySnapshot.docs[0];
+    const data = doc.data();
+    // Handle backward compatibility
+    const restaurants =
+      data.restaurants || (data.restaurant ? [data.restaurant] : []);
+
     return {
-      ...doc.data(),
-      createdAt: doc.data().createdAt.toDate(),
+      ...data,
+      restaurants,
+      userName: data.userName || "Nieznany użytkownik",
+      createdAt: data.createdAt.toDate(),
     } as Vote;
   }
   return null;
@@ -213,7 +248,8 @@ export const getUserVote = async (
 export const updateUserVote = async (
   pollId: string,
   userId: string,
-  newRestaurant: string
+  newRestaurants: string[],
+  userName?: string
 ) => {
   const q = query(
     collection(db, "polls", pollId, "votes"),
@@ -224,7 +260,8 @@ export const updateUserVote = async (
   if (!querySnapshot.empty) {
     const docRef = querySnapshot.docs[0].ref;
     await updateDoc(docRef, {
-      restaurant: newRestaurant,
+      restaurants: newRestaurants,
+      userName: userName || "Nieznany użytkownik",
       createdAt: Timestamp.fromDate(new Date()),
     });
   } else {
@@ -245,6 +282,84 @@ export const deleteUserVote = async (pollId: string, userId: string) => {
   } else {
     throw new Error("Vote not found");
   }
+};
+
+// Calculate vote counts for restaurants with multi-vote support
+export const calculateVoteCounts = (votes: Vote[]): Record<string, number> => {
+  const counts: Record<string, number> = {};
+
+  votes.forEach((vote) => {
+    // Handle new multi-vote format
+    if (vote.restaurants && vote.restaurants.length > 0) {
+      vote.restaurants.forEach((restaurant) => {
+        counts[restaurant] = (counts[restaurant] || 0) + 1;
+      });
+    }
+    // Handle backward compatibility with single vote
+    else if (vote.restaurant) {
+      counts[vote.restaurant] = (counts[vote.restaurant] || 0) + 1;
+    }
+  });
+
+  return counts;
+};
+
+// Find winner(s) with tie-breaking by random selection
+export const determineWinnerWithTieBreaking = (
+  voteCounts: Record<string, number>
+): string | null => {
+  const restaurants = Object.keys(voteCounts);
+  if (restaurants.length === 0) return null;
+
+  // Find maximum vote count
+  const maxVotes = Math.max(...Object.values(voteCounts));
+
+  // Find all restaurants with maximum votes (potential winners)
+  const winners = restaurants.filter(
+    (restaurant) => voteCounts[restaurant] === maxVotes
+  );
+
+  // If there's only one winner, return it
+  if (winners.length === 1) {
+    return winners[0];
+  }
+
+  // If there's a tie, randomly select one winner
+  const randomIndex = Math.floor(Math.random() * winners.length);
+  return winners[randomIndex];
+};
+
+// Get vote details showing what users voted for
+export const getVoteDetails = (
+  votes: Vote[]
+): Array<{ userId: string; userName: string; restaurants: string[] }> => {
+  return votes.map((vote) => ({
+    userId: vote.userId,
+    userName: vote.userName || "Nieznany użytkownik",
+    restaurants: vote.restaurants || (vote.restaurant ? [vote.restaurant] : []),
+  }));
+};
+
+// Get users who voted for each restaurant
+export const getVotersByRestaurant = (
+  votes: Vote[]
+): Record<string, string[]> => {
+  const votersByRestaurant: Record<string, string[]> = {};
+
+  votes.forEach((vote) => {
+    const restaurants =
+      vote.restaurants || (vote.restaurant ? [vote.restaurant] : []);
+    const userName = vote.userName || "Nieznany użytkownik";
+
+    restaurants.forEach((restaurant) => {
+      if (!votersByRestaurant[restaurant]) {
+        votersByRestaurant[restaurant] = [];
+      }
+      votersByRestaurant[restaurant].push(userName);
+    });
+  });
+
+  return votersByRestaurant;
 };
 
 // Orders

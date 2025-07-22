@@ -11,14 +11,20 @@ import AnimatedCounter from "@/components/animated-counter";
 import ProposeOptionForm from "@/components/propose-option-form";
 import AdminProposalsManagement from "@/components/admin-proposals-management";
 import { useVotingProposals } from "@/hooks/use-voting-proposals";
-import { normalizeRestaurantOptions, getRestaurantName } from "@/lib/firestore";
+import {
+  calculateVoteCounts,
+  getVoteDetails,
+  getVotersByRestaurant,
+  normalizeRestaurantOptions,
+  getRestaurantName,
+} from "@/lib/firestore";
 
 interface VotingSectionProps {
   poll: Poll;
   canVote: boolean;
   userVote: Vote | null;
   votes: Vote[];
-  onVote: (restaurant: string) => Promise<void>;
+  onVote: (restaurants: string[]) => Promise<void>; // Changed to accept array of restaurants
   voting: boolean;
   userId?: string;
   userName?: string;
@@ -36,13 +42,13 @@ export default function VotingSection({
   userName,
   userRole,
 }: VotingSectionProps) {
-  const [selectedRestaurant, setSelectedRestaurant] = useState<string>(
-    userVote?.restaurant || ""
+  const [selectedRestaurants, setSelectedRestaurants] = useState<string[]>(
+    userVote?.restaurants || []
   );
 
   // Normalize restaurant options for consistent handling
   const normalizedOptions = normalizeRestaurantOptions(poll.restaurantOptions);
-  const restaurantNames = normalizedOptions.map((option) => option.name);
+  const restaurantNames = normalizedOptions.map((option: any) => option.name);
 
   // Voting proposals hook
   const {
@@ -61,19 +67,30 @@ export default function VotingSection({
     userRole,
   });
 
-  // Update selected restaurant when userVote changes
+  // Update selected restaurants when userVote changes
   useEffect(() => {
-    setSelectedRestaurant(userVote?.restaurant || "");
-  }, [userVote?.restaurant]);
+    setSelectedRestaurants(userVote?.restaurants || []);
+  }, [userVote?.restaurants]);
 
-  const voteCounts = votes.reduce((acc, vote) => {
-    acc[vote.restaurant] = (acc[vote.restaurant] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const voteCounts = calculateVoteCounts(votes);
+  const voteDetails = getVoteDetails(votes);
+  const votersByRestaurant = getVotersByRestaurant(votes);
+
+  const handleRestaurantToggle = (restaurantName: string) => {
+    setSelectedRestaurants((prev) => {
+      if (prev.includes(restaurantName)) {
+        // Remove if already selected
+        return prev.filter((name) => name !== restaurantName);
+      } else {
+        // Add if not selected
+        return [...prev, restaurantName];
+      }
+    });
+  };
 
   const handleVote = async () => {
-    if (!selectedRestaurant) return;
-    await onVote(selectedRestaurant);
+    if (selectedRestaurants.length === 0) return;
+    await onVote(selectedRestaurants);
   };
 
   return (
@@ -92,50 +109,56 @@ export default function VotingSection({
         <CardContent>
           {canVote ? (
             <div className="space-y-4">
-              {userVote && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-700">
-                    <strong>Aktualny głos:</strong> {userVote.restaurant}
-                  </p>
-                  <p className="text-xs text-blue-600 mt-1">
-                    Możesz zmienić swój głos wybierając inną opcję poniżej
-                  </p>
-                </div>
-              )}
+              {userVote &&
+                userVote.restaurants &&
+                userVote.restaurants.length > 0 && (
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-700">
+                      <strong>Aktualne głosy:</strong>{" "}
+                      {userVote.restaurants.join(", ")}
+                    </p>
+                    <p className="text-xs text-blue-600 mt-1">
+                      Możesz zmienić swoje głosy wybierając inne opcje poniżej.
+                      Możesz głosować na kilka restauracji.
+                    </p>
+                  </div>
+                )}
               <div className="space-y-3">
-                {normalizedOptions.map((option, index) => (
+                {normalizedOptions.map((option: any, index: number) => (
                   <motion.div
                     key={option.name}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    onClick={() => setSelectedRestaurant(option.name)}
+                    onClick={() => handleRestaurantToggle(option.name)}
                     className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-300 ${
-                      selectedRestaurant === option.name
+                      selectedRestaurants.includes(option.name)
                         ? "border-blue-500 bg-blue-50 shadow-lg shadow-blue-100 scale-[1.02]"
                         : "border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 hover:shadow-md"
                     }`}
                     whileHover={{
-                      scale: selectedRestaurant === option.name ? 1.02 : 1.01,
+                      scale: selectedRestaurants.includes(option.name)
+                        ? 1.02
+                        : 1.01,
                     }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        {/* Custom radio indicator */}
+                        {/* Checkbox indicator for multiple selection */}
                         <div
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                            selectedRestaurant === option.name
+                          className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+                            selectedRestaurants.includes(option.name)
                               ? "border-blue-500 bg-blue-500"
                               : "border-slate-300 bg-white"
                           }`}
                         >
-                          {selectedRestaurant === option.name && (
+                          {selectedRestaurants.includes(option.name) && (
                             <motion.div
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
                               transition={{ type: "spring", stiffness: 500 }}
-                              className="w-2 h-2 bg-white rounded-full"
+                              className="w-2 h-2 bg-white rounded-sm"
                             />
                           )}
                         </div>
@@ -158,7 +181,7 @@ export default function VotingSection({
                         </div>
                       </div>
 
-                      {selectedRestaurant === option.name && (
+                      {selectedRestaurants.includes(option.name) && (
                         <motion.div
                           initial={{ scale: 0, rotate: -180 }}
                           animate={{ scale: 1, rotate: 0 }}
@@ -180,8 +203,12 @@ export default function VotingSection({
               >
                 <Button
                   onClick={handleVote}
-                  disabled={!selectedRestaurant || voting}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                  disabled={voting}
+                  className={`w-full shadow-lg hover:shadow-xl transition-all duration-300 ${
+                    userVote && selectedRestaurants.length === 0
+                      ? "bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white"
+                      : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                  }`}
                   size="lg"
                 >
                   {voting ? (
@@ -198,9 +225,19 @@ export default function VotingSection({
                       {userVote ? "Aktualizowanie..." : "Głosowanie..."}
                     </div>
                   ) : userVote ? (
-                    "Zmień głos"
+                    selectedRestaurants.length === 0 ? (
+                      "Usuń głos"
+                    ) : (
+                      `Zmień głos${
+                        selectedRestaurants.length > 1 ? "y" : ""
+                      } (${selectedRestaurants.length} wybrane)`
+                    )
+                  ) : selectedRestaurants.length === 0 ? (
+                    "Wybierz restauracje do głosowania"
                   ) : (
-                    "Oddaj głos"
+                    `Oddaj głos${selectedRestaurants.length > 1 ? "y" : ""} (${
+                      selectedRestaurants.length
+                    } wybrane)`
                   )}
                 </Button>
               </motion.div>
@@ -210,6 +247,8 @@ export default function VotingSection({
               poll={poll}
               userVote={userVote}
               voteCounts={voteCounts}
+              voteDetails={voteDetails}
+              votersByRestaurant={votersByRestaurant}
             />
           )}
         </CardContent>
@@ -242,86 +281,155 @@ interface VotingResultsProps {
   poll: Poll;
   userVote: Vote | null;
   voteCounts: Record<string, number>;
+  voteDetails: Array<{
+    userId: string;
+    userName: string;
+    restaurants: string[];
+  }>;
+  votersByRestaurant: Record<string, string[]>;
 }
 
-function VotingResults({ poll, userVote, voteCounts }: VotingResultsProps) {
+function VotingResults({
+  poll,
+  userVote,
+  voteCounts,
+  voteDetails,
+  votersByRestaurant,
+}: VotingResultsProps) {
   const normalizedOptions = normalizeRestaurantOptions(poll.restaurantOptions);
+  const userVotedRestaurants = userVote?.restaurants || [];
 
   return (
     <AnimatePresence>
-      <div className="space-y-3">
-        {normalizedOptions.map((option, index) => (
-          <motion.div
-            key={option.name}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className={`p-4 rounded-lg border-2 transition-all duration-300 ${
-              poll.selectedRestaurant === option.name
-                ? "border-green-500 bg-green-50 shadow-lg shadow-green-100"
-                : userVote?.restaurant === option.name
-                ? "border-blue-500 bg-blue-50 shadow-lg shadow-blue-100"
-                : "border-slate-200 bg-slate-50 hover:bg-slate-100"
-            }`}
-          >
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col">
-                  <span className="font-medium">{option.name}</span>
-                  {option.url && (
-                    <a
-                      href={option.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 mt-1"
+      <div className="space-y-4">
+        {/* Voting summary */}
+        <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+          <h4 className="font-medium text-slate-800 mb-2">
+            Podsumowanie głosowania:
+          </h4>
+          <div className="text-sm text-slate-600 space-y-1">
+            <p>Łączna liczba osób głosujących: {voteDetails.length}</p>
+            <p>
+              Łączna liczba oddanych głosów:{" "}
+              {Object.values(voteCounts).reduce((sum, count) => sum + count, 0)}
+            </p>
+            {voteDetails.length > 0 && (
+              <div className="mt-2">
+                <p className="font-medium">Szczegóły głosowania:</p>
+                <div className="max-h-32 overflow-y-auto mt-1 space-y-1">
+                  {voteDetails.map((detail, index) => (
+                    <div
+                      key={detail.userId}
+                      className="text-xs bg-white p-2 rounded border"
                     >
-                      <ExternalLink className="w-3 h-3" />
-                      Zobacz menu
-                    </a>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="relative">
-                    <AnimatedCounter
-                      value={voteCounts[option.name] || 0}
-                      suffix=" głosów"
-                      className="font-semibold"
-                    />
-                  </Badge>
-
-                  <AnimatePresence>
-                    {poll.selectedRestaurant === option.name && (
-                      <motion.div
-                        initial={{ scale: 0, rotate: -180 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        exit={{ scale: 0, rotate: 180 }}
-                        transition={{ type: "spring", stiffness: 500 }}
-                      >
-                        <CheckCircle className="w-4 h-4 text-green-600" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  {userVote?.restaurant === option.name && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 500,
-                        delay: 0.2,
-                      }}
-                    >
-                      <Badge className="bg-blue-100 text-blue-700">
-                        Twój głos
-                      </Badge>
-                    </motion.div>
-                  )}
+                      <span className="font-medium">{detail.userName}:</span>{" "}
+                      {detail.restaurants.join(", ")}
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
+            )}
+          </div>
+        </div>
+
+        {/* Restaurant results */}
+        <div className="space-y-3">
+          {normalizedOptions.map((option: any, index: number) => (
+            <motion.div
+              key={option.name}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className={`p-4 rounded-lg border-2 transition-all duration-300 ${
+                poll.selectedRestaurant === option.name
+                  ? "border-green-500 bg-green-50 shadow-lg shadow-green-100"
+                  : userVotedRestaurants.includes(option.name)
+                  ? "border-blue-500 bg-blue-50 shadow-lg shadow-blue-100"
+                  : "border-slate-200 bg-slate-50 hover:bg-slate-100"
+              }`}
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="font-medium">{option.name}</span>
+                    {option.url && (
+                      <a
+                        href={option.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 mt-1"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        Zobacz menu
+                      </a>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="relative">
+                      <AnimatedCounter
+                        value={voteCounts[option.name] || 0}
+                        suffix=" głosów"
+                        className="font-semibold"
+                      />
+                    </Badge>
+
+                    <AnimatePresence>
+                      {poll.selectedRestaurant === option.name && (
+                        <motion.div
+                          initial={{ scale: 0, rotate: -180 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          exit={{ scale: 0, rotate: 180 }}
+                          transition={{ type: "spring", stiffness: 500 }}
+                        >
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {userVotedRestaurants.includes(option.name) && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 500,
+                          delay: 0.2,
+                        }}
+                      >
+                        <Badge className="bg-blue-100 text-blue-700">
+                          Twój głos
+                        </Badge>
+                      </motion.div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Lista użytkowników którzy głosowali na tę restaurację */}
+                {votersByRestaurant[option.name] &&
+                  votersByRestaurant[option.name].length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-slate-200">
+                      <p className="text-sm font-medium text-slate-700 mb-2">
+                        Głosowali ({votersByRestaurant[option.name].length}):
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {votersByRestaurant[option.name].map(
+                          (voterName, voterIndex) => (
+                            <Badge
+                              key={`${option.name}-${voterIndex}`}
+                              variant="secondary"
+                              className="text-xs px-2 py-1 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                            >
+                              {voterName}
+                            </Badge>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </AnimatePresence>
   );

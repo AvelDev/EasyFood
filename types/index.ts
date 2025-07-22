@@ -17,8 +17,11 @@ export type Poll = {
 
 export type Vote = {
   userId: string;
-  restaurant: string;
+  restaurants: string[]; // Tablica restauracji na które głosuje użytkownik
   createdAt: Date;
+  userName?: string; // Nazwa użytkownika
+  // Backward compatibility - deprecated
+  restaurant?: string;
 };
 
 export type Order = {

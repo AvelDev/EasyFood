@@ -11,6 +11,8 @@ import {
   updatePoll,
   subscribeToPoll,
   subscribeToVotes,
+  calculateVoteCounts,
+  determineWinnerWithTieBreaking,
 } from "@/lib/firestore";
 import { pollAutoCloser } from "@/lib/poll-auto-closer";
 import { useToast } from "@/hooks/use-toast";
@@ -18,9 +20,10 @@ import { useToast } from "@/hooks/use-toast";
 interface UsePollProps {
   pollId: string;
   userId?: string;
+  userName?: string;
 }
 
-export function usePoll({ pollId, userId }: UsePollProps) {
+export function usePoll({ pollId, userId, userName }: UsePollProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [poll, setPoll] = useState<Poll | null>(null);
@@ -89,26 +92,60 @@ export function usePoll({ pollId, userId }: UsePollProps) {
     };
   }, [pollId, userId, router, toast]);
 
-  const handleVote = async (restaurant: string) => {
+  const handleVote = async (restaurants: string[]) => {
     if (!userId || !poll) return;
+
+    // Check if poll is still active
+    if (poll.closed || poll.votingEndsAt <= new Date()) {
+      toast({
+        title: "Głosowanie zakończone",
+        description:
+          "Nie można już oddawać ani zmieniać głosów - czas głosowania minął.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setVoting(true);
     try {
       if (userVote) {
-        // Update existing vote
-        await updateUserVote(pollId, userId, restaurant);
-        setUserVote({ ...userVote, restaurant, createdAt: new Date() });
+        if (restaurants.length === 0) {
+          // Delete vote if no restaurants selected
+          await deleteUserVote(pollId, userId);
+          setUserVote(null);
 
-        toast({
-          title: "Głos zaktualizowany",
-          description: "Twój głos został pomyślnie zaktualizowany.",
-        });
-      } else {
+          toast({
+            title: "Głos usunięty",
+            description: "Twój głos został usunięty.",
+          });
+        } else {
+          // Update existing vote
+          await updateUserVote(pollId, userId, restaurants, userName);
+          setUserVote({
+            ...userVote,
+            restaurants,
+            userName: userName || "Nieznany użytkownik",
+            createdAt: new Date(),
+            // Keep backward compatibility
+            restaurant: restaurants[0],
+          });
+
+          toast({
+            title: "Głos zaktualizowany",
+            description: `Twój głos został pomyślnie zaktualizowany. Wybrane restauracje: ${restaurants.join(
+              ", "
+            )}.`,
+          });
+        }
+      } else if (restaurants.length > 0) {
         // Add new vote
         const voteData: Vote = {
           userId,
-          restaurant,
+          restaurants,
+          userName: userName || "Nieznany użytkownik",
           createdAt: new Date(),
+          // Backward compatibility
+          restaurant: restaurants[0],
         };
 
         await addVote(pollId, voteData);
@@ -116,7 +153,9 @@ export function usePoll({ pollId, userId }: UsePollProps) {
 
         toast({
           title: "Głos oddany",
-          description: "Twój głos został pomyślnie oddany.",
+          description: `Twój głos został pomyślnie oddany. Wybrane restauracje: ${restaurants.join(
+            ", "
+          )}.`,
         });
       }
 
@@ -138,15 +177,9 @@ export function usePoll({ pollId, userId }: UsePollProps) {
     if (!poll) return;
 
     try {
-      // Calculate the winner
-      const voteCounts = votes.reduce((acc, vote) => {
-        acc[vote.restaurant] = (acc[vote.restaurant] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-
-      const winner = Object.entries(voteCounts).reduce((a, b) =>
-        voteCounts[a[0]] > voteCounts[b[0]] ? a : b
-      )[0];
+      // Calculate the winner using new multi-vote logic with tie-breaking
+      const voteCounts = calculateVoteCounts(votes);
+      const winner = determineWinnerWithTieBreaking(voteCounts);
 
       await updatePoll(pollId, {
         closed: true,
@@ -154,6 +187,13 @@ export function usePoll({ pollId, userId }: UsePollProps) {
       });
 
       setPoll({ ...poll, closed: true, selectedRestaurant: winner });
+
+      if (winner) {
+        toast({
+          title: "Głosowanie zakończone",
+          description: `Zwycięska restauracja: ${winner}`,
+        });
+      }
     } catch (error) {
       console.error("Error closing poll automatically:", error);
       toast({

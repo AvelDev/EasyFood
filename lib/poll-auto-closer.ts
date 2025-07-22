@@ -1,4 +1,9 @@
-import { updatePoll } from "./firestore";
+import {
+  updatePoll,
+  getVotes,
+  calculateVoteCounts,
+  determineWinnerWithTieBreaking,
+} from "./firestore";
 
 export interface AutoCloseConfig {
   enabled: boolean;
@@ -56,13 +61,25 @@ class PollAutoCloser {
    */
   private async closePoll(pollId: string, onClosed?: () => void) {
     try {
-      // Mark poll as closed in Firestore
-      await updatePoll(pollId, { closed: true });
-      
+      // Get current votes to determine winner
+      const votes = await getVotes(pollId);
+      const voteCounts = calculateVoteCounts(votes);
+      const winner = determineWinnerWithTieBreaking(voteCounts);
+
+      // Mark poll as closed in Firestore with winner
+      await updatePoll(pollId, {
+        closed: true,
+        selectedRestaurant: winner,
+      });
+
       // Execute callback if provided
       onClosed?.();
-      
-      console.log(`Poll ${pollId} has been automatically closed`);
+
+      console.log(
+        `Poll ${pollId} has been automatically closed with winner: ${
+          winner || "none"
+        }`
+      );
     } catch (error) {
       console.error(`Error automatically closing poll ${pollId}:`, error);
     }

@@ -73,10 +73,42 @@ service cloud.firestore {
 
       // Dostęp do głosów w ramach danego głosowania
       match /votes/{voteId} {
-        allow read, create: if request.auth != null;
-        // Pozwól użytkownikowi aktualizować i usuwać własne głosy
-        allow update, delete: if request.auth != null && 
-                              resource.data.userId == request.auth.uid;
+        // Funkcja sprawdzająca czy poll jest aktywny (czas głosowania nie minął)
+        function isPollActive() {
+          let poll = get(/databases/$(database)/documents/polls/$(pollId));
+          return poll.data.votingEndsAt > request.time && !poll.data.closed;
+        }
+        
+        // Walidacja danych głosu - sprawdź czy zawiera poprawne pola
+        function isValidVote(data) {
+          return data.keys().hasAll(['userId', 'createdAt']) && 
+                 (data.keys().hasAny(['restaurant', 'restaurants'])) &&
+                 data.userId is string &&
+                 data.createdAt is timestamp &&
+                 // userName jest opcjonalne ale jeśli istnieje, musi być stringiem
+                 (!('userName' in data.keys()) || data.userName is string) &&
+                 // Jeśli jest restaurants, musi być tablicą stringów (może być pusta do usuwania)
+                 (!('restaurants' in data.keys()) || data.restaurants is list) &&
+                 // Jeśli jest restaurant, musi być stringiem (backward compatibility)
+                 (!('restaurant' in data.keys()) || data.restaurant is string);
+        }
+        
+        allow read: if request.auth != null;
+        // Tworzenie głosów tylko gdy poll jest aktywny
+        allow create: if request.auth != null && 
+                      isPollActive() &&
+                      request.resource.data.userId == request.auth.uid &&
+                      isValidVote(request.resource.data);
+        // Pozwól użytkownikowi aktualizować własne głosy tylko gdy poll jest aktywny
+        allow update: if request.auth != null && 
+                      isPollActive() &&
+                      resource.data.userId == request.auth.uid &&
+                      request.resource.data.userId == request.auth.uid &&
+                      isValidVote(request.resource.data);
+        // Pozwól użytkownikowi usuwać własne głosy tylko gdy poll jest aktywny
+        allow delete: if request.auth != null && 
+                      isPollActive() &&
+                      resource.data.userId == request.auth.uid;
       }
 
       // Dostęp do zamówień w ramach danego głosowania

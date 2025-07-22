@@ -10,7 +10,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import AnimatedCounter from "@/components/animated-counter";
 import AnimatedProgressBar from "@/components/animated-progress-bar";
-import { normalizeRestaurantOptions } from "@/lib/firestore";
+import {
+  normalizeRestaurantOptions,
+  calculateVoteCounts,
+  getVotersByRestaurant,
+} from "@/lib/firestore";
 
 interface ResultsSectionProps {
   poll: Poll;
@@ -22,23 +26,36 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
   const normalizedOptions = normalizeRestaurantOptions(poll.restaurantOptions);
 
   const voteCounts = useMemo(() => {
-    return votes.reduce((acc, vote) => {
-      acc[vote.restaurant] = (acc[vote.restaurant] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    return calculateVoteCounts(votes);
+  }, [votes]);
+
+  const totalVotes = useMemo(() => {
+    return Object.values(voteCounts).reduce((sum, count) => sum + count, 0);
+  }, [voteCounts]);
+
+  const votersByRestaurant = useMemo(() => {
+    return getVotersByRestaurant(votes);
   }, [votes]);
 
   return (
     <Card className="bg-white/80 backdrop-blur-sm">
       <CardHeader>
         <CardTitle>Wyniki głosowania</CardTitle>
+        <div className="text-sm text-slate-600 space-y-1">
+          <p>Liczba głosujących: {votes.length}</p>
+          <p>Łączna liczba głosów: {totalVotes}</p>
+          {totalVotes > votes.length && (
+            <p className="text-blue-600 font-medium">
+              ⚡ Użytkownicy mogą głosować na kilka restauracji
+            </p>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           {normalizedOptions.map((option, index) => {
             const count = voteCounts[option.name] || 0;
-            const percentage =
-              votes.length > 0 ? (count / votes.length) * 100 : 0;
+            const percentage = totalVotes > 0 ? (count / totalVotes) * 100 : 0;
             const isWinner = poll.selectedRestaurant === option.name;
 
             return (
@@ -111,6 +128,29 @@ export default function ResultsSection({ poll, votes }: ResultsSectionProps) {
                       : "from-blue-500 to-purple-500"
                   }
                 />
+
+                {/* Lista użytkowników którzy głosowali na tę restaurację */}
+                {votersByRestaurant[option.name] &&
+                  votersByRestaurant[option.name].length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-slate-200">
+                      <p className="text-sm font-medium text-slate-700 mb-2">
+                        Głosowali ({votersByRestaurant[option.name].length}):
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {votersByRestaurant[option.name].map(
+                          (voterName, voterIndex) => (
+                            <Badge
+                              key={`${option.name}-${voterIndex}`}
+                              variant="secondary"
+                              className="text-xs px-2 py-1 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                            >
+                              {voterName}
+                            </Badge>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
               </motion.div>
             );
           })}
