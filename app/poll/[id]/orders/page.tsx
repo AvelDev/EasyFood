@@ -3,6 +3,7 @@
 import { usePrivacyProtection } from "@/hooks/use-privacy-protection";
 import { useRouter } from "next/navigation";
 import { useOrders } from "@/hooks/use-orders";
+import { normalizeRestaurantOptions } from "@/lib/firestore";
 import { Button } from "@/components/ui/button";
 import {
   OrderForm,
@@ -13,6 +14,7 @@ import {
   PollNotFound,
   PollStillActive,
   LoadingSpinner,
+  RestaurantMenuLink,
 } from "@/components/orders";
 import { Home, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
@@ -44,6 +46,7 @@ export default function OrdersPage({ params }: OrdersPageProps) {
     closeOrdering,
     deleteOrder,
     updateOrder,
+    updateMenuUrl,
   } = useOrders(params.id, user?.uid);
 
   if (loading) {
@@ -118,6 +121,26 @@ export default function OrdersPage({ params }: OrdersPageProps) {
             />
           </OrderSummary>
         </div>
+
+        {/* Restaurant Menu Link */}
+        {poll.selectedRestaurant && (
+          <div className="mb-6 sm:mb-8">
+            <RestaurantMenuLink
+              restaurantName={poll.selectedRestaurant}
+              menuUrl={(() => {
+                const normalizedOptions = normalizeRestaurantOptions(
+                  poll.restaurantOptions
+                );
+                const selectedRestaurant = normalizedOptions.find(
+                  (option) => option.name === poll.selectedRestaurant
+                );
+                return selectedRestaurant?.url;
+              })()}
+              isAdmin={user?.role === "admin"}
+              onUpdateMenuUrl={updateMenuUrl}
+            />
+          </div>
+        )}
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
           <OrderForm

@@ -6,3 +6,4 @@ export { AdminOrderManagement } from "./admin-order-management";
 export { PollNotFound } from "./poll-not-found";
 export { PollStillActive } from "./poll-still-active";
 export { LoadingSpinner } from "./loading-spinner";
+export { RestaurantMenuLink } from "./restaurant-menu-link";

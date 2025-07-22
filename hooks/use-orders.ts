@@ -249,6 +249,46 @@ export function useOrders(pollId: string, userId?: string) {
     }
   };
 
+  const updateMenuUrl = async (url: string) => {
+    if (!poll || !poll.selectedRestaurant) return;
+
+    try {
+      // Get current restaurant options and normalize them
+      const currentOptions = poll.restaurantOptions || [];
+      const normalizedOptions = currentOptions.map((option) => 
+        typeof option === "string" ? { name: option } : option
+      );
+
+      // Update the URL for the selected restaurant
+      const updatedOptions = normalizedOptions.map((option) => 
+        option.name === poll.selectedRestaurant 
+          ? { ...option, url: url || undefined }
+          : option
+      );
+
+      await updatePoll(pollId, {
+        restaurantOptions: updatedOptions,
+      });
+
+      setPoll({
+        ...poll,
+        restaurantOptions: updatedOptions,
+      });
+
+      toast({
+        title: "Link zaktualizowany",
+        description: "Link do menu został pomyślnie zaktualizowany.",
+      });
+    } catch (error) {
+      console.error("Error updating menu URL:", error);
+      toast({
+        title: "Błąd",
+        description: "Nie udało się zaktualizować linku do menu.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const orderingEnded =
     poll?.orderingEndsAt &&
     poll.orderingEndsAt instanceof Date &&
@@ -268,5 +308,6 @@ export function useOrders(pollId: string, userId?: string) {
     closeOrdering,
     deleteOrder,
     updateOrder,
+    updateMenuUrl,
   };
 }
