@@ -33,8 +33,8 @@ export function OrderSummary({
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 flex-shrink-0" />
                 <span className="text-sm sm:text-base">
-                  Zamówienia do {poll.orderingEndsAt.toLocaleDateString("pl-PL")}{" "}
-                  o{" "}
+                  Zamówienia do{" "}
+                  {poll.orderingEndsAt.toLocaleDateString("pl-PL")} o{" "}
                   {poll.orderingEndsAt.toLocaleTimeString("pl-PL", {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -47,9 +47,7 @@ export function OrderSummary({
 
         {/* Admin controls */}
         {children && (
-          <div className="flex justify-start lg:justify-end">
-            {children}
-          </div>
+          <div className="flex justify-start lg:justify-end">{children}</div>
         )}
       </div>
 

@@ -97,10 +97,13 @@ export function OrdersList({
                       {order.dish}
                     </h3>
                   </div>
-                  
+
                   {/* Cost badges - stacked on mobile */}
                   <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-                    <Badge variant="outline" className="text-xs text-green-600 flex-shrink-0">
+                    <Badge
+                      variant="outline"
+                      className="text-xs text-green-600 flex-shrink-0"
+                    >
                       {order.cost.toFixed(2)} zł
                     </Badge>
                     {order.costAdjustment && (
@@ -117,7 +120,7 @@ export function OrdersList({
                       <Badge className="text-xs text-blue-700 bg-blue-100 border-blue-200 flex-shrink-0">
                         <DollarSign className="w-3 h-3 mr-1" />
                         {(order.cost + (order.costAdjustment || 0)).toFixed(
-                          2,
+                          2
                         )}{" "}
                         zł
                       </Badge>
