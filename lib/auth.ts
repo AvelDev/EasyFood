@@ -1,11 +1,11 @@
 import { AuthProvider as FirebaseAuthProvider, User } from "firebase/auth";
-import { auth, googleProvider, discordProvider } from "./firebase";
+import { auth, googleProvider, discordProvider, microsoftProvider } from "./firebase";
 import { signInWithPopup, signOut as firebaseSignOut } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { User as AppUser } from "@/types";
 
-export type AuthProviderType = "google" | "discord";
+export type AuthProviderType = "google" | "discord" | "microsoft";
 
 export const getAuthProvider = (
   providerType: AuthProviderType
@@ -15,6 +15,8 @@ export const getAuthProvider = (
       return googleProvider;
     case "discord":
       return discordProvider;
+    case "microsoft":
+      return microsoftProvider;
     default:
       throw new Error(`Unsupported auth provider: ${providerType}`);
   }

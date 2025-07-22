@@ -27,3 +27,9 @@ discordProvider.addScope("email");
 discordProvider.setCustomParameters({
   hd: "discord.com", // opcjonalne: ograniczenie do domeny
 });
+
+// Microsoft Auth Provider
+export const microsoftProvider = new OAuthProvider("microsoft.com");
+microsoftProvider.addScope("email");
+microsoftProvider.addScope("profile");
+microsoftProvider.addScope("openid");
