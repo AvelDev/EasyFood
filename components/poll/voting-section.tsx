@@ -20,15 +20,8 @@ import {
 } from "@/lib/firestore";
 
 export default function VotingSection() {
-  const {
-    poll,
-    canVote,
-    userVote,
-    votes,
-    handleVote,
-    voting,
-    user,
-  } = usePollContext();
+  const { poll, canVote, userVote, votes, handleVote, voting, user } =
+    usePollContext();
 
   const [selectedRestaurants, setSelectedRestaurants] = useState<string[]>([]);
 

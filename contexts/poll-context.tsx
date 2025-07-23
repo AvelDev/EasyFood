@@ -9,16 +9,16 @@ interface PollContextType {
   poll: Poll | null;
   votes: Vote[];
   userVote: Vote | null;
-  
+
   // User data
   user: AuthUser | null;
-  
+
   // State
   loading: boolean;
   voting: boolean;
   isActive: boolean;
   canVote: boolean;
-  
+
   // Actions
   handleVote: (restaurants: string[]) => Promise<void>;
   handleClosePoll: () => Promise<void>;
@@ -33,11 +33,7 @@ interface PollProviderProps {
 }
 
 export function PollProvider({ children, value }: PollProviderProps) {
-  return (
-    <PollContext.Provider value={value}>
-      {children}
-    </PollContext.Provider>
-  );
+  return <PollContext.Provider value={value}>{children}</PollContext.Provider>;
 }
 
 export function usePollContext(): PollContextType {

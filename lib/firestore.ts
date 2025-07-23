@@ -49,7 +49,7 @@ export const createPoll = async (poll: Omit<Poll, "id">) => {
           normalizedOption.url = option.url.trim();
         }
         return normalizedOption;
-      },
+      }
     );
   }
 
@@ -59,7 +59,7 @@ export const createPoll = async (poll: Omit<Poll, "id">) => {
 
 export const getPolls = async (): Promise<Poll[]> => {
   const querySnapshot = await getDocs(
-    query(collection(db, "polls"), orderBy("votingEndsAt", "desc")),
+    query(collection(db, "polls"), orderBy("votingEndsAt", "desc"))
   );
   return querySnapshot.docs.map((doc) => ({
     id: doc.id,
@@ -108,7 +108,7 @@ export const getPoll = async (id: string): Promise<Poll | null> => {
 // Real-time poll listener
 export const subscribeToPoll = (
   id: string,
-  callback: (poll: Poll | null) => void,
+  callback: (poll: Poll | null) => void
 ) => {
   const docRef = doc(db, "polls", id);
 
@@ -136,7 +136,7 @@ export const updatePoll = async (
       votingEndsAt?: Date | TimestampType;
       orderingEndsAt?: Date | TimestampType;
     }
-  >,
+  >
 ) => {
   const docRef = doc(db, "polls", id);
   const updateData = { ...updates };
@@ -196,7 +196,7 @@ export const getVotes = async (pollId: string): Promise<Vote[]> => {
 // Real-time votes listener
 export const subscribeToVotes = (
   pollId: string,
-  callback: (votes: Vote[]) => void,
+  callback: (votes: Vote[]) => void
 ) => {
   const votesRef = collection(db, "polls", pollId, "votes");
 
@@ -220,11 +220,11 @@ export const subscribeToVotes = (
 
 export const getUserVote = async (
   pollId: string,
-  userId: string,
+  userId: string
 ): Promise<Vote | null> => {
   const q = query(
     collection(db, "polls", pollId, "votes"),
-    where("userId", "==", userId),
+    where("userId", "==", userId)
   );
   const querySnapshot = await getDocs(q);
 
@@ -249,11 +249,11 @@ export const updateUserVote = async (
   pollId: string,
   userId: string,
   newRestaurants: string[],
-  userName?: string,
+  userName?: string
 ) => {
   const q = query(
     collection(db, "polls", pollId, "votes"),
-    where("userId", "==", userId),
+    where("userId", "==", userId)
   );
   const querySnapshot = await getDocs(q);
 
@@ -272,7 +272,7 @@ export const updateUserVote = async (
 export const deleteUserVote = async (pollId: string, userId: string) => {
   const q = query(
     collection(db, "polls", pollId, "votes"),
-    where("userId", "==", userId),
+    where("userId", "==", userId)
   );
   const querySnapshot = await getDocs(q);
 
@@ -306,7 +306,7 @@ export const calculateVoteCounts = (votes: Vote[]): Record<string, number> => {
 
 // Find winner(s) with tie-breaking by random selection
 export const determineWinnerWithTieBreaking = (
-  voteCounts: Record<string, number>,
+  voteCounts: Record<string, number>
 ): string | null => {
   const restaurants = Object.keys(voteCounts);
   if (restaurants.length === 0) return null;
@@ -316,7 +316,7 @@ export const determineWinnerWithTieBreaking = (
 
   // Find all restaurants with maximum votes (potential winners)
   const winners = restaurants.filter(
-    (restaurant) => voteCounts[restaurant] === maxVotes,
+    (restaurant) => voteCounts[restaurant] === maxVotes
   );
 
   // If there's only one winner, return it
@@ -331,7 +331,7 @@ export const determineWinnerWithTieBreaking = (
 
 // Get vote details showing what users voted for
 export const getVoteDetails = (
-  votes: Vote[],
+  votes: Vote[]
 ): Array<{ userId: string; userName: string; restaurants: string[] }> => {
   return votes.map((vote) => ({
     userId: vote.userId,
@@ -342,7 +342,7 @@ export const getVoteDetails = (
 
 // Get users who voted for each restaurant
 export const getVotersByRestaurant = (
-  votes: Vote[],
+  votes: Vote[]
 ): Record<string, string[]> => {
   const votersByRestaurant: Record<string, string[]> = {};
 
@@ -373,7 +373,7 @@ export const addOrder = async (pollId: string, order: Order) => {
 
 export const getOrders = async (pollId: string): Promise<Order[]> => {
   const querySnapshot = await getDocs(
-    collection(db, "polls", pollId, "orders"),
+    collection(db, "polls", pollId, "orders")
   );
   return querySnapshot.docs.map((doc) => ({
     ...doc.data(),
@@ -384,7 +384,7 @@ export const getOrders = async (pollId: string): Promise<Order[]> => {
 // Real-time orders listener
 export const subscribeToOrders = (
   pollId: string,
-  callback: (orders: Order[]) => void,
+  callback: (orders: Order[]) => void
 ) => {
   const ordersRef = collection(db, "polls", pollId, "orders");
 
@@ -399,11 +399,11 @@ export const subscribeToOrders = (
 
 export const getUserOrder = async (
   pollId: string,
-  userId: string,
+  userId: string
 ): Promise<Order | null> => {
   const q = query(
     collection(db, "polls", pollId, "orders"),
-    where("userId", "==", userId),
+    where("userId", "==", userId)
   );
   const querySnapshot = await getDocs(q);
 
@@ -420,11 +420,11 @@ export const getUserOrder = async (
 export const updateUserOrder = async (
   pollId: string,
   userId: string,
-  orderData: Partial<Order> & { dish?: string; notes?: string; cost?: number },
+  orderData: Partial<Order> & { dish?: string; notes?: string; cost?: number }
 ) => {
   const q = query(
     collection(db, "polls", pollId, "orders"),
-    where("userId", "==", userId),
+    where("userId", "==", userId)
   );
   const querySnapshot = await getDocs(q);
 
@@ -464,7 +464,7 @@ export const updateUserOrder = async (
 export const deleteUserOrder = async (pollId: string, userId: string) => {
   const q = query(
     collection(db, "polls", pollId, "orders"),
-    where("userId", "==", userId),
+    where("userId", "==", userId)
   );
   const querySnapshot = await getDocs(q);
 
@@ -535,7 +535,7 @@ export const deletePoll = async (id: string) => {
 // Voting Option Proposals
 export const createVotingProposal = async (
   pollId: string,
-  proposal: Omit<VotingOptionProposal, "id" | "createdAt">,
+  proposal: Omit<VotingOptionProposal, "id" | "createdAt">
 ): Promise<string> => {
   const proposalData: any = {
     ...proposal,
@@ -551,19 +551,19 @@ export const createVotingProposal = async (
 
   const docRef = await addDoc(
     collection(db, "polls", pollId, "votingProposals"),
-    proposalData,
+    proposalData
   );
   return docRef.id;
 };
 
 export const getVotingProposals = async (
-  pollId: string,
+  pollId: string
 ): Promise<VotingOptionProposal[]> => {
   const querySnapshot = await getDocs(
     query(
       collection(db, "polls", pollId, "votingProposals"),
-      orderBy("createdAt", "desc"),
-    ),
+      orderBy("createdAt", "desc")
+    )
   );
   return querySnapshot.docs.map((doc) => ({
     id: doc.id,
@@ -576,7 +576,7 @@ export const getVotingProposals = async (
 // Real-time voting proposals listener
 export const subscribeToVotingProposals = (
   pollId: string,
-  callback: (proposals: VotingOptionProposal[]) => void,
+  callback: (proposals: VotingOptionProposal[]) => void
 ) => {
   const proposalsRef = collection(db, "polls", pollId, "votingProposals");
   const q = query(proposalsRef, orderBy("createdAt", "desc"));
@@ -595,7 +595,7 @@ export const subscribeToVotingProposals = (
 export const updateVotingProposal = async (
   pollId: string,
   proposalId: string,
-  updates: Partial<Omit<VotingOptionProposal, "id" | "createdAt" | "pollId">>,
+  updates: Partial<Omit<VotingOptionProposal, "id" | "createdAt" | "pollId">>
 ) => {
   const docRef = doc(db, "polls", pollId, "votingProposals", proposalId);
   const updateData = { ...updates };
@@ -609,7 +609,7 @@ export const updateVotingProposal = async (
 
 export const deleteVotingProposal = async (
   pollId: string,
-  proposalId: string,
+  proposalId: string
 ) => {
   const docRef = doc(db, "polls", pollId, "votingProposals", proposalId);
   await deleteDoc(docRef);
@@ -620,7 +620,7 @@ export const approveVotingProposal = async (
   proposalId: string,
   restaurantName: string,
   reviewedBy: string,
-  reviewedByName: string,
+  reviewedByName: string
 ) => {
   // 1. Update the proposal status
   await updateVotingProposal(pollId, proposalId, {
@@ -653,7 +653,7 @@ export const updatePollDetails = async (
     restaurantOptions?: Array<string | { name: string; url?: string }>;
     votingEndsAt?: Date;
     orderingEndsAt?: Date;
-  },
+  }
 ) => {
   const docRef = doc(db, "polls", pollId);
   const updateData: any = {};
@@ -689,16 +689,16 @@ export const updatePollDetails = async (
 
 // Helper function to normalize restaurant options for backward compatibility
 export const normalizeRestaurantOptions = (
-  options: string[] | Array<{ name: string; url?: string }>,
+  options: string[] | Array<{ name: string; url?: string }>
 ): Array<{ name: string; url?: string }> => {
   return options.map((option) =>
-    typeof option === "string" ? { name: option } : option,
+    typeof option === "string" ? { name: option } : option
   );
 };
 
 // Helper function to get restaurant name from option (for backward compatibility)
 export const getRestaurantName = (
-  option: string | { name: string; url?: string },
+  option: string | { name: string; url?: string }
 ): string => {
   return typeof option === "string" ? option : option.name;
 };

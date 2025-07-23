@@ -96,7 +96,7 @@ export default function PollPage({ params }: PollPageProps) {
   }
 
   return (
-    <PollProvider 
+    <PollProvider
       value={{
         poll,
         votes,
@@ -135,9 +135,7 @@ export default function PollPage({ params }: PollPageProps) {
           </motion.div>
         </motion.div>
 
-        <PollHeader
-          onPollDeleted={() => router.push("/")}
-        />
+        <PollHeader onPollDeleted={() => router.push("/")} />
 
         {/* Poll description */}
         {poll?.description && (

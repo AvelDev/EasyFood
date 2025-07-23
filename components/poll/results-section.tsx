@@ -34,7 +34,7 @@ export default function ResultsSection() {
   }, [votes]);
 
   if (!poll) return null;
-  
+
   const normalizedOptions = normalizeRestaurantOptions(poll.restaurantOptions);
 
   return (

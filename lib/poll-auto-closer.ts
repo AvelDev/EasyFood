@@ -69,7 +69,10 @@ class PollAutoCloser {
       }
     } catch (error) {
       // Silently ignore permission errors during build or when not authenticated
-      if (error instanceof Error && error.message.includes("permission-denied")) {
+      if (
+        error instanceof Error &&
+        error.message.includes("permission-denied")
+      ) {
         return;
       }
       console.error("Error checking expired polls:", error);
@@ -102,7 +105,11 @@ class PollAutoCloser {
     }, timeUntilEnd);
 
     this.timers.set(pollId, timer);
-    console.log(`Scheduled poll ${pollId} to close in ${Math.round(timeUntilEnd / 1000)} seconds`);
+    console.log(
+      `Scheduled poll ${pollId} to close in ${Math.round(
+        timeUntilEnd / 1000
+      )} seconds`
+    );
   }
 
   /**
@@ -138,7 +145,7 @@ class PollAutoCloser {
       console.log(
         `Poll ${pollId} has been automatically closed with winner: ${
           winner || "none"
-        }`,
+        }`
       );
     } catch (error) {
       console.error(`Error automatically closing poll ${pollId}:`, error);
@@ -150,9 +157,12 @@ class PollAutoCloser {
    */
   updateConfig(config: Partial<AutoCloseConfig>) {
     this.config = { ...this.config, ...config };
-    
+
     // Restart fallback checker if configuration changed
-    if (config.fallbackCheckEnabled !== undefined || config.checkIntervalMs !== undefined) {
+    if (
+      config.fallbackCheckEnabled !== undefined ||
+      config.checkIntervalMs !== undefined
+    ) {
       if (this.config.fallbackCheckEnabled) {
         this.startFallbackChecker();
       } else {

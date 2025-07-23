@@ -16,18 +16,10 @@ interface PollHeaderProps {
   onPollDeleted: () => void;
 }
 
-export default function PollHeader({
-  onPollDeleted,
-}: PollHeaderProps) {
-  const { 
-    poll, 
-    votes, 
-    isActive, 
-    user, 
-    handleTimeExpired, 
-    handleClosePoll 
-  } = usePollContext();
-  
+export default function PollHeader({ onPollDeleted }: PollHeaderProps) {
+  const { poll, votes, isActive, user, handleTimeExpired, handleClosePoll } =
+    usePollContext();
+
   const router = useRouter();
   const [linkCopied, setLinkCopied] = useState(false);
 
