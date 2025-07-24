@@ -235,12 +235,12 @@ export default function CreatePollDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white">
+        <Button className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white">
           <Plus className="w-4 h-4 mr-2" />
           Utwórz głosowanie
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px] lg:max-w-[700px]">
         <DialogHeader>
           <DialogTitle>Utwórz nowe głosowanie</DialogTitle>
         </DialogHeader>
@@ -253,9 +253,9 @@ export default function CreatePollDialog({
                 value={selectedTemplate}
                 onValueChange={handleTemplateSelect}
               >
-                <SelectTrigger>
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
+                <SelectTrigger className="w-full">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FileText className="w-4 h-4 flex-shrink-0" />
                     <SelectValue placeholder="Wybierz szablon lub utwórz od zera" />
                   </div>
                 </SelectTrigger>
@@ -268,11 +268,13 @@ export default function CreatePollDialog({
                   </SelectItem>
                   {templates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
-                      <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4" />
-                        <div>
-                          <div className="font-medium">{template.name}</div>
-                          <div className="text-xs text-slate-500">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <FileText className="w-4 h-4 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium truncate">
+                            {template.name}
+                          </div>
+                          <div className="text-xs text-slate-500 truncate">
                             {template.restaurantOptions.length} restauracji,
                             {template.votingDurationHours}h głosowania
                           </div>
@@ -313,12 +315,13 @@ export default function CreatePollDialog({
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
               <Label>Opcje restauracji</Label>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={() => append({ name: "", url: "" })}
               >
                 <Plus className="w-4 h-4 mr-1" />
@@ -329,11 +332,12 @@ export default function CreatePollDialog({
             {fields.map((field, index) => (
               <div
                 key={field.id}
-                className="space-y-2 p-4 border rounded-lg bg-slate-50"
+                className="space-y-3 p-4 border rounded-lg bg-slate-50"
               >
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Input
                     placeholder={`Restauracja ${index + 1}`}
+                    className="flex-1"
                     {...register(`restaurants.${index}.name`)}
                   />
                   {fields.length > 2 && (
@@ -341,14 +345,16 @@ export default function CreatePollDialog({
                       type="button"
                       variant="outline"
                       size="sm"
+                      className="w-full sm:w-auto"
                       onClick={() => remove(index)}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4 sm:mr-0 mr-2" />
+                      <span className="sm:hidden">Usuń restaurację</span>
                     </Button>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <LinkIcon className="w-4 h-4 text-slate-500" />
+                  <LinkIcon className="w-4 h-4 text-slate-500 flex-shrink-0" />
                   <Input
                     placeholder="Link do menu/strony restauracji (opcjonalny)"
                     type="url"
@@ -389,7 +395,7 @@ export default function CreatePollDialog({
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="votingTime" className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
@@ -443,19 +449,19 @@ export default function CreatePollDialog({
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              className="flex-1"
+              className="flex-1 order-2 sm:order-1"
             >
               Anuluj
             </Button>
             <Button
               type="submit"
               disabled={isLoading}
-              className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+              className="flex-1 order-1 sm:order-2 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
             >
               {isLoading ? "Tworzenie..." : "Utwórz głosowanie"}
             </Button>
