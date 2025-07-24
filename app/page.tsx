@@ -71,10 +71,10 @@ export default function Home() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">
             Głosowania na restauracje
           </h1>
           <p className="mt-1 text-slate-600">
@@ -82,7 +82,9 @@ export default function Home() {
           </p>
         </div>
         {user.role === "admin" && (
-          <CreatePollDialog onPollCreated={handlePollCreated} />
+          <div className="flex-shrink-0 w-full sm:w-auto">
+            <CreatePollDialog onPollCreated={handlePollCreated} />
+          </div>
         )}
       </div>
 
