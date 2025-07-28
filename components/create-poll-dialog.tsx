@@ -79,7 +79,7 @@ export default function CreatePollDialog({
     const today = getTodayDate();
     if (selectedDate === today) {
       const now = new Date();
-      now.setHours(now.getHours() + 1); // Minimum 1 godzina od teraz
+      // now.setHours(now.getHours() + 1); // Minimum 1 godzina od teraz
       return now.toTimeString().slice(0, 5); // HH:MM format
     }
     return "00:00";
