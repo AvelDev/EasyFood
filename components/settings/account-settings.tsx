@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown, User, Calendar, CheckCircle } from "lucide-react";
 import { AuthUser } from "@/hooks/use-auth";
+import { isEmailEffectivelyVerified } from "@/lib/auth";
 import UserProviderInfo from "@/components/user-provider-info";
 
 interface AccountSettingsProps {
@@ -13,6 +14,9 @@ interface AccountSettingsProps {
 
 export function AccountSettings({ user }: AccountSettingsProps) {
   const [showDetails, setShowDetails] = useState(false);
+
+  // Sprawdź, czy email jest efektywnie zweryfikowany (Firebase lub zaufany provider)
+  const emailVerified = isEmailEffectivelyVerified(user);
 
   const formatDate = (date: string | null) => {
     if (!date) return "Nieznana";
@@ -168,10 +172,10 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                   Email zweryfikowany:
                 </span>
                 <Badge
-                  variant={user.emailVerified ? "default" : "secondary"}
+                  variant={emailVerified ? "default" : "secondary"}
                   className="self-start sm:self-auto text-xs sm:text-sm"
                 >
-                  {user.emailVerified ? "Tak" : "Nie"}
+                  {emailVerified ? "Tak" : "Nie"}
                 </Badge>
               </div>
 

@@ -19,9 +19,17 @@ import {
   Shield,
   AlertTriangle,
   CheckCircle,
+  Mail,
+  RefreshCw,
 } from "lucide-react";
 import { AuthUser } from "@/hooks/use-auth";
-import { signOut } from "@/lib/auth";
+import {
+  signOut,
+  isEmailEffectivelyVerified,
+  sendEmailVerificationToUser,
+  reloadUserData,
+  isTrustedProvider,
+} from "@/lib/auth";
 import { deleteUserAccount } from "@/lib/user-settings";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
@@ -34,8 +42,63 @@ interface SecuritySettingsProps {
 export function SecuritySettings({ user }: SecuritySettingsProps) {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [isSendingVerification, setIsSendingVerification] = useState(false);
+  const [isReloadingData, setIsReloadingData] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+
+  // Sprawdź, czy email jest efektywnie zweryfikowany
+  const emailVerified = isEmailEffectivelyVerified(user);
+
+  // Sprawdź, czy użytkownik używa tylko zaufanych providerów
+  const onlyTrustedProviders =
+    user.providerData?.every((provider) =>
+      isTrustedProvider(provider.providerId)
+    ) || false;
+
+  const handleSendEmailVerification = async () => {
+    setIsSendingVerification(true);
+    try {
+      await sendEmailVerificationToUser();
+      toast({
+        title: "Email weryfikacyjny wysłany",
+        description:
+          "Sprawdź swoją skrzynkę pocztową i kliknij link weryfikacyjny.",
+      });
+    } catch (error: any) {
+      console.error("Error sending email verification:", error);
+      toast({
+        title: "Błąd wysyłania emaila",
+        description:
+          error.message || "Nie udało się wysłać emaila weryfikacyjnego.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSendingVerification(false);
+    }
+  };
+
+  const handleReloadUserData = async () => {
+    setIsReloadingData(true);
+    try {
+      await reloadUserData();
+      toast({
+        title: "Dane odświeżone",
+        description: "Status weryfikacji został zaktualizowany.",
+      });
+      // Przeładuj stronę, aby zaktualizować interfejs
+      window.location.reload();
+    } catch (error: any) {
+      console.error("Error reloading user data:", error);
+      toast({
+        title: "Błąd odświeżania",
+        description: error.message || "Nie udało się odświeżyć danych.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsReloadingData(false);
+    }
+  };
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -91,53 +154,62 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
           {/* Email Verification */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-5 lg:p-6 rounded-lg gap-3 sm:gap-4 lg:gap-6 bg-slate-50">
             <div className="flex items-center gap-3 sm:gap-4">
-              {user.emailVerified ? (
+              {emailVerified ? (
                 <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-green-600 flex-shrink-0" />
               ) : (
                 <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-yellow-600 flex-shrink-0" />
               )}
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="font-medium text-sm sm:text-base lg:text-lg text-slate-900">
                   Email zweryfikowany
                 </p>
                 <p className="text-xs sm:text-sm lg:text-base text-slate-600">
-                  {user.emailVerified
-                    ? "Twój adres email został potwierdzony"
+                  {emailVerified
+                    ? onlyTrustedProviders
+                      ? "Zweryfikowany przez zaufanego dostawcę uwierzytelniania"
+                      : "Twój adres email został potwierdzony"
                     : "Email wymaga weryfikacji"}
                 </p>
+                {!emailVerified && !onlyTrustedProviders && (
+                  <div className="mt-2 flex flex-col sm:flex-row gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleSendEmailVerification}
+                      disabled={isSendingVerification}
+                      className="text-xs"
+                    >
+                      <Mail className="w-4 h-4 mr-1" />
+                      {isSendingVerification
+                        ? "Wysyłanie..."
+                        : "Wyślij email weryfikacyjny"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleReloadUserData}
+                      disabled={isReloadingData}
+                      className="text-xs"
+                    >
+                      <RefreshCw className="w-4 h-4 mr-1" />
+                      {isReloadingData ? "Odświeżanie..." : "Odśwież status"}
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
             <div
               className={`px-3 py-2 rounded text-xs sm:text-sm font-medium self-start sm:self-auto ${
-                user.emailVerified
+                emailVerified
                   ? "bg-green-100 text-green-800"
                   : "bg-yellow-100 text-yellow-800"
               }`}
             >
-              {user.emailVerified ? "Zweryfikowany" : "Niezweryfikowany"}
+              {emailVerified ? "Zweryfikowany" : "Niezweryfikowany"}
             </div>
           </div>
 
           {/* Account Security */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-5 lg:p-6 rounded-lg gap-3 sm:gap-4 lg:gap-6 bg-slate-50">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <Shield className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-blue-600 flex-shrink-0" />
-              <div className="min-w-0">
-                <p className="font-medium text-sm sm:text-base lg:text-lg text-slate-900">
-                  Bezpieczeństwo konta
-                </p>
-                <p className="text-xs sm:text-sm lg:text-base text-slate-600">
-                  Konto zabezpieczone przez{" "}
-                  {user.providerData?.[0]?.providerId?.includes("google")
-                    ? "Google"
-                    : "Discord"}
-                </p>
-              </div>
-            </div>
-            <div className="px-3 py-2 text-xs sm:text-sm font-medium text-blue-800 bg-blue-100 rounded self-start sm:self-auto">
-              Zabezpieczone
-            </div>
-          </div>
         </div>
       </div>
 

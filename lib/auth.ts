@@ -11,12 +11,21 @@ import {
   fetchSignInMethodsForEmail,
   linkWithPopup,
   signInWithEmailAndPassword,
+  sendEmailVerification,
+  reload,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { User as AppUser } from "@/types";
 
 export type AuthProviderType = "google" | "discord" | "microsoft";
+
+// Providery, które są uważane za zaufane i nie wymagają weryfikacji emaila
+const TRUSTED_PROVIDERS = ["google.com", "microsoft.com", "oidc.discord"];
+
+export const isTrustedProvider = (providerId: string): boolean => {
+  return TRUSTED_PROVIDERS.includes(providerId);
+};
 
 export const getAuthProvider = (
   providerType: AuthProviderType
@@ -39,6 +48,31 @@ export const signInWithProvider = async (
   try {
     const provider = getAuthProvider(providerType);
     const result = await signInWithPopup(auth, provider);
+
+    // Sprawdź czy to zaufany provider
+    const primaryProvider = result.user.providerData[0];
+    const isTrusted =
+      primaryProvider && isTrustedProvider(primaryProvider.providerId);
+
+    // Jeśli email nie jest zweryfikowany, ale provider jest zaufany,
+    // oznacz email jako zweryfikowany w Firebase
+    if (!result.user.emailVerified && isTrusted) {
+      try {
+        // Przeładuj dane użytkownika, aby upewnić się, że mamy najnowsze informacje
+        await reload(result.user);
+
+        // Jeśli nadal nie jest zweryfikowany, możemy założyć, że jest zaufany
+        if (!result.user.emailVerified) {
+          console.log(
+            `Email automatically trusted for provider: ${primaryProvider.providerId}`
+          );
+          // Firebase nie pozwala na bezpośrednie ustawienie emailVerified,
+          // ale możemy to obsłużyć w logice aplikacji
+        }
+      } catch (verificationError) {
+        console.warn("Could not reload user data:", verificationError);
+      }
+    }
 
     // Sprawdź czy użytkownik istnieje w Firestore i czy zaakceptował politykę prywatności
     const userRef = doc(db, "users", result.user.uid);
@@ -189,4 +223,60 @@ export const getAvailableProvidersForEmail = async (
     console.error("Error fetching sign-in methods:", error);
     return [];
   }
+};
+
+export const sendEmailVerificationToUser = async (): Promise<void> => {
+  try {
+    if (!auth.currentUser) {
+      throw new Error("Musisz być zalogowany, aby wysłać email weryfikacyjny");
+    }
+
+    if (auth.currentUser.emailVerified) {
+      throw new Error("Email jest już zweryfikowany");
+    }
+
+    await sendEmailVerification(auth.currentUser);
+    console.log("Email verification sent to:", auth.currentUser.email);
+  } catch (error: any) {
+    console.error("Error sending email verification:", error);
+
+    if (error.code === "auth/too-many-requests") {
+      throw new Error(
+        "Zbyt wiele prób wysłania emaila weryfikacyjnego. Spróbuj ponownie później"
+      );
+    } else if (error.code === "auth/user-disabled") {
+      throw new Error("Konto zostało wyłączone");
+    } else {
+      throw new Error(
+        `Błąd wysyłania emaila weryfikacyjnego: ${error.message}`
+      );
+    }
+  }
+};
+
+export const reloadUserData = async (): Promise<void> => {
+  try {
+    if (!auth.currentUser) {
+      throw new Error("Brak zalogowanego użytkownika");
+    }
+
+    await reload(auth.currentUser);
+    console.log("User data reloaded");
+  } catch (error: any) {
+    console.error("Error reloading user data:", error);
+    throw new Error(`Błąd odświeżania danych użytkownika: ${error.message}`);
+  }
+};
+
+// Funkcja pomocnicza do sprawdzania, czy email powinien być uznany za zweryfikowany
+export const isEmailEffectivelyVerified = (user: User): boolean => {
+  // Jeśli Firebase mówi, że email jest zweryfikowany, to jest zweryfikowany
+  if (user.emailVerified) {
+    return true;
+  }
+
+  // Jeśli użytkownik loguje się przez zaufanego providera, uznajemy email za zweryfikowany
+  return user.providerData.some((provider) =>
+    isTrustedProvider(provider.providerId)
+  );
 };

@@ -4,6 +4,10 @@
 
 Ten błąd występuje, gdy użytkownik próbuje zalogować się za pomocą nowego dostawcy (np. Microsoft), ale konto o tym samym adresie e-mail już istnieje z innym dostawcą (np. Google).
 
+## Problem: Niezweryfikowany email przy logowaniu przez Microsoft
+
+Dodatkowo, Firebase domyślnie nie oznacza emaili jako zweryfikowane przy logowaniu przez niektórych dostawców OAuth, w tym Microsoft. Nasza aplikacja rozwiązuje ten problem automatycznie.
+
 ## Rozwiązanie
 
 ### 1. Automatyczne łączenie kont (REKOMENDOWANE)
@@ -23,7 +27,35 @@ Jeśli nie chcesz włączać automatycznego łączenia, nasza aplikacja obsługu
 2. W ustawieniach konta może dodać dodatkowe metody logowania
 3. Po połączeniu może logować się używając dowolnej z połączonych metod
 
-### 3. Kod implementacji
+### 3. Automatyczna weryfikacja emaili dla zaufanych providerów (NOWA FUNKCJA)
+
+Nasza aplikacja automatycznie uznaje emaile za zweryfikowane, gdy użytkownik loguje się przez zaufanych dostawców:
+
+#### Zaufani dostawcy:
+
+- **Google** (`google.com`)
+- **Microsoft** (`microsoft.com`)
+- **Discord** (`oidc.discord`)
+
+#### Jak to działa:
+
+1. **Funkcja `isEmailEffectivelyVerified()`** sprawdza:
+
+   - Czy Firebase oznaczył email jako zweryfikowany
+   - Czy użytkownik loguje się tylko przez zaufanych dostawców
+
+2. **Interfejs użytkownika** wyświetla odpowiedni status:
+
+   - "Zweryfikowany przez zaufanego dostawcę uwierzytelniania" dla OAuth
+   - "Zweryfikowany" dla standardowej weryfikacji Firebase
+   - "Niezweryfikowany" z opcjami weryfikacji dla niezweryfikowanych kont
+
+3. **Funkcje weryfikacji emaila**:
+   - `sendEmailVerificationToUser()` - wysyła email weryfikacyjny
+   - `reloadUserData()` - odświeża status weryfikacji
+   - Przyciski dostępne tylko dla użytkowników wymagających weryfikacji
+
+### 4. Kod implementacji
 
 #### W `lib/auth.ts`:
 
@@ -80,6 +112,8 @@ discordProvider.setCustomParameters({
 
 ## Testowanie
 
+### Test łączenia kont:
+
 1. Utwórz konto z Google
 2. Wyloguj się
 3. Spróbuj zalogować się z Microsoft używając tego samego emaila
@@ -87,6 +121,12 @@ discordProvider.setCustomParameters({
 5. Zaloguj się z Google
 6. Przejdź do ustawień i połącz konto Microsoft
 7. Wyloguj się i zaloguj ponownie z Microsoft - powinno działać
+
+### Test weryfikacji emaila:
+
+1. **Microsoft/Google/Discord**: Email automatycznie uznany za zweryfikowany
+2. **Inne metody**: Dostępne opcje weryfikacji w ustawieniach bezpieczeństwa
+3. **Status weryfikacji**: Sprawdź w Ustawienia > Konto i Ustawienia > Bezpieczeństwo
 
 ## Firebase Console - Dodatkowe konfiguracje
 
