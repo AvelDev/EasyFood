@@ -99,7 +99,7 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50"></div>
-        <div className="relative px-4 py-20 mx-auto max-w-7xl sm:py-24">
+        <div className="relative px-4 py-20 mx-auto max-w-7xl sm:px-6 lg:px-8 sm:py-24">
           <motion.div
             className="text-center"
             initial={{ opacity: 0, y: 20 }}
@@ -143,7 +143,7 @@ export default function LandingPage() {
 
       {/* Features Section */}
       <section className="py-20 bg-white">
-        <div className="px-4 mx-auto max-w-7xl">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold sm:text-4xl text-slate-900">
               Dlaczego warto wybrać EasyFood?
@@ -182,7 +182,7 @@ export default function LandingPage() {
 
       {/* How it works Section */}
       <section className="py-20 bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="px-4 mx-auto max-w-7xl">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold sm:text-4xl text-slate-900">
               Jak to działa?
@@ -217,7 +217,7 @@ export default function LandingPage() {
 
       {/* Benefits Section */}
       <section className="py-20 bg-white">
-        <div className="px-4 mx-auto max-w-7xl">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="items-center grid lg:grid-cols-2 gap-12">
             <div>
               <h2 className="mb-6 text-3xl font-bold sm:text-4xl text-slate-900">
@@ -271,7 +271,7 @@ export default function LandingPage() {
 
       {/* CTA Section */}
       <section className="py-20 text-white bg-gradient-to-br from-blue-600 to-purple-600">
-        <div className="max-w-4xl px-4 mx-auto text-center">
+        <div className="max-w-4xl px-4 mx-auto text-center sm:px-6 lg:px-8">
           <h2 className="mb-6 text-3xl font-bold sm:text-4xl">
             Gotowy na rozpoczęcie?
           </h2>

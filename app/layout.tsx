@@ -37,9 +37,7 @@ export default function RootLayout({
         <Providers>
           <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
             <Navbar />
-            <main className="container flex-grow px-4 py-8 mx-auto">
-              {children}
-            </main>
+            <main className="flex-grow">{children}</main>
             <Footer />
           </div>
         </Providers>
