@@ -58,12 +58,16 @@ export default function UserProviderInfo({ user }: UserProviderInfoProps) {
   }
 
   return (
-    <div className="flex items-center text-xs text-slate-500 gap-1">
+    <div className="flex flex-wrap items-center text-xs sm:text-sm text-slate-500 gap-1">
       <span>Zalogowano przez:</span>
       {providers.map((provider, index) => (
         <div key={provider.providerId} className="flex items-center gap-1">
-          {getProviderIcon(provider.providerId)}
-          <span>{getProviderName(provider.providerId)}</span>
+          <span className="flex-shrink-0">
+            {getProviderIcon(provider.providerId)}
+          </span>
+          <span className="break-words">
+            {getProviderName(provider.providerId)}
+          </span>
           {index < providers.length - 1 && <span>, </span>}
         </div>
       ))}

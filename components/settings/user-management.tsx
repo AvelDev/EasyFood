@@ -72,7 +72,7 @@ export function UserManagement() {
       filtered = filtered.filter(
         (user) =>
           user.name.toLowerCase().includes(query) ||
-          user.uid.toLowerCase().includes(query),
+          user.uid.toLowerCase().includes(query)
       );
     }
 
@@ -113,7 +113,7 @@ export function UserManagement() {
           user.role,
           user.createdAt ? user.createdAt.toISOString() : "",
           user.privacyPolicyAccepted ? "Zaakceptowana" : "Nie zaakceptowana",
-        ].join(","),
+        ].join(",")
       ),
     ].join("\n");
 
@@ -123,7 +123,7 @@ export function UserManagement() {
     link.setAttribute("href", url);
     link.setAttribute(
       "download",
-      `users_${new Date().toISOString().split("T")[0]}.csv`,
+      `users_${new Date().toISOString().split("T")[0]}.csv`
     );
     link.style.visibility = "hidden";
     document.body.appendChild(link);
@@ -138,13 +138,16 @@ export function UserManagement() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
         <div className="animate-pulse">
-          <div className="w-1/4 h-4 mb-4 rounded bg-slate-200"></div>
-          <div className="h-10 mb-4 rounded bg-slate-200"></div>
-          <div className="space-y-2">
+          <div className="w-1/4 h-4 sm:h-5 lg:h-6 mb-4 rounded bg-slate-200"></div>
+          <div className="h-10 sm:h-11 lg:h-12 mb-4 rounded bg-slate-200"></div>
+          <div className="space-y-2 sm:space-y-3">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-12 rounded bg-slate-200"></div>
+              <div
+                key={i}
+                className="h-12 sm:h-16 lg:h-20 rounded bg-slate-200"
+              ></div>
             ))}
           </div>
         </div>
@@ -153,66 +156,79 @@ export function UserManagement() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 sm:space-y-8 lg:space-y-10">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
         <div>
-          <h3 className="text-lg font-medium">Zarządzanie użytkownikami</h3>
-          <p className="text-sm text-slate-600">
+          <h3 className="text-lg sm:text-xl lg:text-2xl font-medium">
+            Zarządzanie użytkownikami
+          </h3>
+          <p className="text-sm sm:text-base lg:text-lg text-slate-600 mt-1">
             Przegląd wszystkich użytkowników aplikacji i ich statusów.
           </p>
         </div>
-        <Button onClick={exportUsers} className="gap-2">
+        <Button
+          onClick={exportUsers}
+          className="gap-2 w-full sm:w-auto h-10 sm:h-11"
+        >
           <Download className="w-4 h-4" />
           Eksportuj CSV
         </Button>
       </div>
 
       {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
-          <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-blue-600" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+        <div className="p-4 sm:p-5 lg:p-6 border border-blue-200 rounded-lg bg-blue-50">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Users className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-blue-600 flex-shrink-0" />
             <div>
-              <p className="text-2xl font-bold text-blue-900">{users.length}</p>
-              <p className="text-sm text-blue-700">Wszyscy użytkownicy</p>
+              <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-900">
+                {users.length}
+              </p>
+              <p className="text-sm sm:text-base lg:text-lg text-blue-700">
+                Wszyscy użytkownicy
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="p-4 border border-purple-200 rounded-lg bg-purple-50">
-          <div className="flex items-center gap-2">
-            <Crown className="w-5 h-5 text-purple-600" />
+        <div className="p-4 sm:p-5 lg:p-6 border border-purple-200 rounded-lg bg-purple-50">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Crown className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-purple-600 flex-shrink-0" />
             <div>
-              <p className="text-2xl font-bold text-purple-900">
+              <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-purple-900">
                 {users.filter((u) => u.role === "admin").length}
               </p>
-              <p className="text-sm text-purple-700">Administratorzy</p>
+              <p className="text-sm sm:text-base lg:text-lg text-purple-700">
+                Administratorzy
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="p-4 border border-green-200 rounded-lg bg-green-50">
-          <div className="flex items-center gap-2">
-            <UserIcon className="w-5 h-5 text-green-600" />
+        <div className="p-4 sm:p-5 lg:p-6 border border-green-200 rounded-lg bg-green-50">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <UserIcon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-green-600 flex-shrink-0" />
             <div>
-              <p className="text-2xl font-bold text-green-900">
+              <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-900">
                 {users.filter((u) => u.role === "user").length}
               </p>
-              <p className="text-sm text-green-700">Zwykli użytkownicy</p>
+              <p className="text-sm sm:text-base lg:text-lg text-green-700">
+                Zwykli użytkownicy
+              </p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 sm:gap-6">
         <div className="relative flex-1">
-          <Search className="absolute w-4 h-4 left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+          <Search className="absolute w-4 h-4 sm:w-5 sm:h-5 left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
           <Input
             placeholder="Szukaj po nazwie lub UID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-10 sm:pl-12 h-10 sm:h-11 text-sm sm:text-base"
           />
         </div>
 
@@ -222,7 +238,7 @@ export function UserManagement() {
             setRoleFilter(value)
           }
         >
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-full sm:w-48 lg:w-56 h-10 sm:h-11">
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4" />
               <SelectValue />
@@ -238,94 +254,121 @@ export function UserManagement() {
 
       {/* Users Table */}
       {filteredUsers.length === 0 ? (
-        <div className="py-8 text-center text-slate-500">
-          <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+        <div className="py-8 sm:py-12 lg:py-16 text-center text-slate-500 space-y-3 sm:space-y-4">
+          <Users className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 mx-auto mb-4 opacity-50" />
           {users.length === 0 ? (
             <div>
-              <p>Brak użytkowników w systemie</p>
-              <p className="text-sm">
+              <p className="text-base sm:text-lg lg:text-xl">
+                Brak użytkowników w systemie
+              </p>
+              <p className="text-sm sm:text-base lg:text-lg">
                 Zaloguj się jako pierwszy użytkownik, aby pojawić się na liście
               </p>
             </div>
           ) : (
             <div>
-              <p>Brak użytkowników spełniających kryteria</p>
+              <p className="text-base sm:text-lg lg:text-xl">
+                Brak użytkowników spełniających kryteria
+              </p>
               {searchQuery && (
-                <p className="text-sm">Spróbuj zmienić kryteria wyszukiwania</p>
+                <p className="text-sm sm:text-base lg:text-lg">
+                  Spróbuj zmienić kryteria wyszukiwania
+                </p>
               )}
             </div>
           )}
         </div>
       ) : (
-        <div className="border rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Użytkownik</TableHead>
-                <TableHead>UID</TableHead>
-                <TableHead>Rola</TableHead>
-                <TableHead>Data utworzenia</TableHead>
-                <TableHead>Polityka prywatności</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredUsers.map((user) => (
-                <TableRow key={user.uid}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {user.role === "admin" ? (
-                        <Crown className="w-4 h-4 text-yellow-500" />
-                      ) : (
-                        <UserIcon className="w-4 h-4 text-slate-400" />
-                      )}
-                      <span className="font-medium">{user.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <code className="px-2 py-1 text-xs rounded bg-slate-100">
-                      {user.uid}
-                    </code>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={user.role === "admin" ? "default" : "secondary"}
-                    >
-                      {user.role === "admin" ? "Administrator" : "Użytkownik"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center text-sm gap-1">
-                      <Calendar className="w-3 h-3 text-slate-400" />
-                      {formatDate(user.createdAt)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
+        <div className="border rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-sm sm:text-base font-medium">
+                    Użytkownik
+                  </TableHead>
+                  <TableHead className="text-sm sm:text-base font-medium hidden sm:table-cell">
+                    UID
+                  </TableHead>
+                  <TableHead className="text-sm sm:text-base font-medium">
+                    Rola
+                  </TableHead>
+                  <TableHead className="text-sm sm:text-base font-medium hidden lg:table-cell">
+                    Data utworzenia
+                  </TableHead>
+                  <TableHead className="text-sm sm:text-base font-medium">
+                    Polityka prywatności
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.map((user) => (
+                  <TableRow key={user.uid}>
+                    <TableCell>
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        {user.role === "admin" ? (
+                          <Crown className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 flex-shrink-0" />
+                        ) : (
+                          <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 flex-shrink-0" />
+                        )}
+                        <span className="font-medium text-sm sm:text-base">
+                          {user.name}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      <code className="px-2 py-1 text-xs sm:text-sm rounded bg-slate-100 break-all">
+                        {user.uid}
+                      </code>
+                    </TableCell>
+                    <TableCell>
                       <Badge
                         variant={
-                          user.privacyPolicyAccepted ? "default" : "destructive"
+                          user.role === "admin" ? "default" : "secondary"
                         }
-                        className="text-xs"
+                        className="text-xs sm:text-sm"
                       >
-                        {user.privacyPolicyAccepted
-                          ? "Zaakceptowana"
-                          : "Nie zaakceptowana"}
+                        {user.role === "admin" ? "Administrator" : "Użytkownik"}
                       </Badge>
-                      {user.privacyPolicyAcceptedAt && (
-                        <p className="text-xs text-slate-500">
-                          {formatDate(user.privacyPolicyAcceptedAt)}
-                        </p>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <div className="flex items-center text-sm gap-1">
+                        <Calendar className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                        <span className="text-xs sm:text-sm">
+                          {formatDate(user.createdAt)}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <Badge
+                          variant={
+                            user.privacyPolicyAccepted
+                              ? "default"
+                              : "destructive"
+                          }
+                          className="text-xs sm:text-sm"
+                        >
+                          {user.privacyPolicyAccepted
+                            ? "Zaakceptowana"
+                            : "Nie zaakceptowana"}
+                        </Badge>
+                        {user.privacyPolicyAcceptedAt && (
+                          <p className="text-xs text-slate-500">
+                            {formatDate(user.privacyPolicyAcceptedAt)}
+                          </p>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       )}
 
-      <div className="text-sm text-center text-slate-500">
+      <div className="text-sm sm:text-base text-center text-slate-500">
         Wyświetlane {filteredUsers.length} z {users.length} użytkowników
       </div>
     </div>

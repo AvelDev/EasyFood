@@ -80,27 +80,27 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       {/* Security Status */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-slate-900">
+      <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+        <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-slate-900">
           Status bezpieczeństwa
         </h3>
 
-        <div className="grid gap-3">
+        <div className="grid gap-3 sm:gap-4">
           {/* Email Verification */}
-          <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-5 lg:p-6 rounded-lg gap-3 sm:gap-4 lg:gap-6 bg-slate-50">
+            <div className="flex items-center gap-3 sm:gap-4">
               {user.emailVerified ? (
-                <CheckCircle className="w-5 h-5 text-green-600" />
+                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-green-600 flex-shrink-0" />
               ) : (
-                <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-yellow-600 flex-shrink-0" />
               )}
-              <div>
-                <p className="font-medium text-slate-900">
+              <div className="min-w-0">
+                <p className="font-medium text-sm sm:text-base lg:text-lg text-slate-900">
                   Email zweryfikowany
                 </p>
-                <p className="text-sm text-slate-600">
+                <p className="text-xs sm:text-sm lg:text-base text-slate-600">
                   {user.emailVerified
                     ? "Twój adres email został potwierdzony"
                     : "Email wymaga weryfikacji"}
@@ -108,7 +108,7 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
               </div>
             </div>
             <div
-              className={`px-2 py-1 rounded text-xs font-medium ${
+              className={`px-3 py-2 rounded text-xs sm:text-sm font-medium self-start sm:self-auto ${
                 user.emailVerified
                   ? "bg-green-100 text-green-800"
                   : "bg-yellow-100 text-yellow-800"
@@ -119,14 +119,14 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
           </div>
 
           {/* Account Security */}
-          <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50">
-            <div className="flex items-center gap-3">
-              <Shield className="w-5 h-5 text-blue-600" />
-              <div>
-                <p className="font-medium text-slate-900">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-5 lg:p-6 rounded-lg gap-3 sm:gap-4 lg:gap-6 bg-slate-50">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <Shield className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-blue-600 flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="font-medium text-sm sm:text-base lg:text-lg text-slate-900">
                   Bezpieczeństwo konta
                 </p>
-                <p className="text-sm text-slate-600">
+                <p className="text-xs sm:text-sm lg:text-base text-slate-600">
                   Konto zabezpieczone przez{" "}
                   {user.providerData?.[0]?.providerId?.includes("google")
                     ? "Google"
@@ -134,7 +134,7 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
                 </p>
               </div>
             </div>
-            <div className="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded">
+            <div className="px-3 py-2 text-xs sm:text-sm font-medium text-blue-800 bg-blue-100 rounded self-start sm:self-auto">
               Zabezpieczone
             </div>
           </div>
@@ -142,17 +142,19 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
       </div>
 
       {/* Session Management */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-slate-900">
+      <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+        <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-slate-900">
           Zarządzanie sesją
         </h3>
 
-        <div className="p-4 border rounded-lg border-slate-200">
-          <div className="flex items-start gap-3">
-            <LogOut className="w-5 h-5 text-slate-600 mt-0.5" />
-            <div className="flex-1">
-              <h4 className="font-medium text-slate-900">Wyloguj się</h4>
-              <p className="mt-1 text-sm text-slate-600">
+        <div className="p-4 sm:p-5 lg:p-6 border rounded-lg border-slate-200">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 lg:gap-6">
+            <LogOut className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-slate-600 mt-1 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <h4 className="font-medium text-sm sm:text-base lg:text-lg text-slate-900">
+                Wyloguj się
+              </h4>
+              <p className="mt-2 text-xs sm:text-sm lg:text-base text-slate-600">
                 Zakończ bieżącą sesję i wyloguj się z aplikacji na tym
                 urządzeniu.
               </p>
@@ -160,7 +162,7 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
                 onClick={handleSignOut}
                 disabled={isSigningOut}
                 variant="outline"
-                className="mt-3"
+                className="mt-4 w-full sm:w-auto min-w-[160px] h-10 sm:h-11"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 {isSigningOut ? "Wylogowywanie..." : "Wyloguj się"}
@@ -171,54 +173,62 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
       </div>
 
       {/* Danger Zone */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-red-600">
+      <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+        <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-red-600">
           Strefa niebezpieczna
         </h3>
 
-        <Alert variant="destructive">
-          <AlertTriangle className="w-4 h-4" />
-          <AlertDescription>
+        <Alert variant="destructive" className="border-red-200 bg-red-50">
+          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
+          <AlertDescription className="text-sm sm:text-base text-red-800">
             Operacje w tej sekcji są nieodwracalne. Upewnij się, że rozumiesz
             konsekwencje przed kontynuowaniem.
           </AlertDescription>
         </Alert>
 
-        <div className="p-4 border border-red-200 rounded-lg bg-red-50">
-          <div className="flex items-start gap-3">
-            <Trash2 className="w-5 h-5 text-red-600 mt-0.5" />
-            <div className="flex-1">
-              <h4 className="font-medium text-red-900">Usuń konto</h4>
-              <p className="mt-1 text-sm text-red-700">
+        <div className="p-4 sm:p-5 lg:p-6 border border-red-200 rounded-lg bg-red-50">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 lg:gap-6">
+            <Trash2 className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-red-600 mt-1 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <h4 className="font-medium text-sm sm:text-base lg:text-lg text-red-900">
+                Usuń konto
+              </h4>
+              <p className="mt-2 text-xs sm:text-sm lg:text-base text-red-700">
                 Trwale usuwa Twoje konto i wszystkie powiązane dane. Ta operacja
                 jest nieodwracalna.
               </p>
-              <div className="mt-3">
+              <div className="mt-4">
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive" disabled={isDeletingAccount}>
+                    <Button
+                      variant="destructive"
+                      disabled={isDeletingAccount}
+                      className="w-full sm:w-auto min-w-[140px] h-10 sm:h-11"
+                    >
                       <Trash2 className="w-4 h-4 mr-2" />
                       Usuń konto
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
+                  <AlertDialogContent className="mx-4 sm:mx-6 lg:mx-auto max-w-lg lg:max-w-xl">
+                    <AlertDialogHeader className="space-y-3">
+                      <AlertDialogTitle className="text-base sm:text-lg lg:text-xl">
                         Czy na pewno chcesz usunąć konto?
                       </AlertDialogTitle>
-                      <AlertDialogDescription>
+                      <AlertDialogDescription className="text-sm sm:text-base text-slate-600">
                         Ta operacja jest nieodwracalna. Wszystkie Twoje dane, w
                         tym głosy i utworzone ankiety, zostaną trwale usunięte.
                         Po usunięciu konta nie będzie możliwości jego
                         odzyskania.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Anuluj</AlertDialogCancel>
+                    <AlertDialogFooter className="flex-col sm:flex-row gap-3 sm:gap-2 pt-4">
+                      <AlertDialogCancel className="w-full sm:w-auto min-w-[100px] h-10 sm:h-11">
+                        Anuluj
+                      </AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleDeleteAccount}
                         disabled={isDeletingAccount}
-                        className="bg-red-600 hover:bg-red-700"
+                        className="bg-red-600 hover:bg-red-700 w-full sm:w-auto min-w-[140px] h-10 sm:h-11"
                       >
                         {isDeletingAccount ? "Usuwanie..." : "Tak, usuń konto"}
                       </AlertDialogAction>
