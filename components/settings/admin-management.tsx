@@ -170,7 +170,7 @@ export function AdminManagement({ users, onUserUpdate }: AdminManagementProps) {
               {admins.map((admin) => (
                 <div
                   key={admin.uid}
-                  className="flex items-center justify-between p-3 border rounded-lg bg-yellow-50 border-yellow-200"
+                  className="flex flex-wrap gap-2 items-center justify-between p-3 border rounded-lg bg-yellow-50 border-yellow-200"
                 >
                   <div className="flex items-center gap-3">
                     <Crown className="w-5 h-5 text-yellow-600" />

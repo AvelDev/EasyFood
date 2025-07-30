@@ -343,7 +343,7 @@ export default function CreatePollDialog({
                       <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
                       <p className="text-xs text-amber-700">
                         Brak szablonów w systemie. Administrator może utworzyć
-                        szablony w ustawieniach ogólnych.
+                        szablony w ustawieniach aplikacji.
                       </p>
                     </div>
                   </div>

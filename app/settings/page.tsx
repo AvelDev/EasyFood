@@ -22,8 +22,8 @@ export default function SettingsPage() {
         <div className="container max-w-4xl py-4 sm:py-6 lg:py-8 mx-auto">
           <div className="animate-pulse space-y-4 sm:space-y-6 lg:space-y-8">
             <div className="space-y-2">
-              <div className="w-1/3 h-8 sm:h-10 lg:h-12 rounded bg-slate-200"></div>
-              <div className="w-2/3 h-4 sm:h-5 lg:h-6 rounded bg-slate-200"></div>
+              <div className="w-1/3 h-5 sm:h-6 lg:h-7 rounded bg-slate-200"></div>
+              <div className="w-2/3 h-3 sm:h-3 lg:h-4 rounded bg-slate-200"></div>
             </div>
             <div className="w-full h-px bg-slate-200"></div>
             <div className="grid gap-4 sm:gap-6 lg:gap-8">
@@ -51,10 +51,10 @@ export default function SettingsPage() {
         <div className="space-y-4 sm:space-y-6 lg:space-y-8">
           {/* Header */}
           <div className="space-y-2">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-slate-900">
               Ustawienia Konta
             </h1>
-            <p className="text-sm sm:text-base lg:text-lg text-slate-600">
+            <p className="text-sm sm:text-sm lg:text-sm text-slate-600">
               Zarządzaj swoim kontem i preferencjami aplikacji
             </p>
           </div>
@@ -66,10 +66,10 @@ export default function SettingsPage() {
             {/* Profile Settings */}
             <Card className="overflow-hidden">
               <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6 lg:px-8">
-                <CardTitle className="text-lg sm:text-xl lg:text-2xl">
+                <CardTitle className="text-sm sm:text-base lg:text-lg">
                   Profil
                 </CardTitle>
-                <CardDescription className="text-sm sm:text-base">
+                <CardDescription className="text-xs sm:text-sm lg:text-sm">
                   Zarządzaj informacjami o swoim profilu
                 </CardDescription>
               </CardHeader>
@@ -81,10 +81,10 @@ export default function SettingsPage() {
             {/* Account Settings */}
             <Card className="overflow-hidden">
               <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6 lg:px-8">
-                <CardTitle className="text-lg sm:text-xl lg:text-2xl">
+                <CardTitle className="text-sm sm:text-base lg:text-lg">
                   Konto
                 </CardTitle>
-                <CardDescription className="text-sm sm:text-base">
+                <CardDescription className="text-xs sm:text-sm lg:text-sm">
                   Ustawienia związane z Twoim kontem
                 </CardDescription>
               </CardHeader>
@@ -96,10 +96,10 @@ export default function SettingsPage() {
             {/* Security Settings */}
             <Card className="overflow-hidden">
               <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6 lg:px-8">
-                <CardTitle className="text-lg sm:text-xl lg:text-2xl">
+                <CardTitle className="text-sm sm:text-base lg:text-lg">
                   Bezpieczeństwo
                 </CardTitle>
-                <CardDescription className="text-sm sm:text-base">
+                <CardDescription className="text-xs sm:text-sm lg:text-sm">
                   Zarządzaj bezpieczeństwem swojego konta
                 </CardDescription>
               </CardHeader>
