@@ -17,6 +17,9 @@ export const auth = getAuth(app);
 
 // Google Auth Provider
 export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: "select_account",
+});
 
 // Discord OIDC Provider
 export const discordProvider = new OAuthProvider("oidc.discord");
@@ -33,3 +36,6 @@ export const microsoftProvider = new OAuthProvider("microsoft.com");
 microsoftProvider.addScope("email");
 microsoftProvider.addScope("profile");
 microsoftProvider.addScope("openid");
+microsoftProvider.setCustomParameters({
+  prompt: "select_account",
+});

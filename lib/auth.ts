@@ -5,7 +5,13 @@ import {
   discordProvider,
   microsoftProvider,
 } from "./firebase";
-import { signInWithPopup, signOut as firebaseSignOut } from "firebase/auth";
+import {
+  signInWithPopup,
+  signOut as firebaseSignOut,
+  fetchSignInMethodsForEmail,
+  linkWithPopup,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { User as AppUser } from "@/types";
@@ -13,7 +19,7 @@ import { User as AppUser } from "@/types";
 export type AuthProviderType = "google" | "discord" | "microsoft";
 
 export const getAuthProvider = (
-  providerType: AuthProviderType,
+  providerType: AuthProviderType
 ): FirebaseAuthProvider => {
   switch (providerType) {
     case "google":
@@ -28,7 +34,7 @@ export const getAuthProvider = (
 };
 
 export const signInWithProvider = async (
-  providerType: AuthProviderType,
+  providerType: AuthProviderType
 ): Promise<{ user: User; needsPrivacyConsent: boolean }> => {
   try {
     const provider = getAuthProvider(providerType);
@@ -62,6 +68,28 @@ export const signInWithProvider = async (
       throw new Error("Błąd sieci. Sprawdź połączenie internetowe");
     } else if (error.code === "auth/invalid-oauth-provider") {
       throw new Error("Nieprawidłowa konfiguracja providera OAuth");
+    } else if (error.code === "auth/account-exists-with-different-credential") {
+      // Sprawdź jakie metody logowania są dostępne dla tego emaila
+      const email = error.customData?.email;
+      if (email) {
+        const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+        const providerNames = signInMethods
+          .map((method) => {
+            if (method.includes("google")) return "Google";
+            if (method.includes("microsoft")) return "Microsoft";
+            if (method.includes("discord")) return "Discord";
+            return method;
+          })
+          .join(", ");
+
+        throw new Error(
+          `Konto z tym adresem e-mail już istnieje. Zaloguj się używając: ${providerNames}, a następnie w ustawieniach możesz połączyć konta.`
+        );
+      } else {
+        throw new Error(
+          "Konto z tym adresem e-mail już istnieje z innym dostawcą uwierzytelniania. Zaloguj się używając pierwotnego dostawcy."
+        );
+      }
     } else {
       throw new Error(`Błąd logowania: ${error.message}`);
     }
@@ -97,7 +125,7 @@ export const acceptPrivacyPolicy = async (user: User): Promise<void> => {
   } catch (error: any) {
     console.error("Error accepting privacy policy:", error);
     throw new Error(
-      `Błąd podczas akceptacji polityki prywatności: ${error.message}`,
+      `Błąd podczas akceptacji polityki prywatności: ${error.message}`
     );
   }
 };
@@ -120,4 +148,45 @@ export const getProviderData = (user: User) => {
     email: provider.email,
     photoURL: provider.photoURL,
   }));
+};
+
+export const linkProviderToAccount = async (
+  providerType: AuthProviderType
+): Promise<User> => {
+  try {
+    if (!auth.currentUser) {
+      throw new Error("Musisz być zalogowany, aby połączyć konta");
+    }
+
+    const provider = getAuthProvider(providerType);
+    const result = await linkWithPopup(auth.currentUser, provider);
+
+    console.log(`Provider ${providerType} linked to account:`, result.user.uid);
+    return result.user;
+  } catch (error: any) {
+    console.error(`Error linking ${providerType} provider:`, error);
+
+    if (error.code === "auth/popup-closed-by-user") {
+      throw new Error("Łączenie kont zostało anulowane przez użytkownika");
+    } else if (error.code === "auth/provider-already-linked") {
+      throw new Error(`Konto ${providerType} jest już połączone z tym kontem`);
+    } else if (error.code === "auth/credential-already-in-use") {
+      throw new Error(
+        `To konto ${providerType} jest już używane przez innego użytkownika`
+      );
+    } else {
+      throw new Error(`Błąd łączenia kont: ${error.message}`);
+    }
+  }
+};
+
+export const getAvailableProvidersForEmail = async (
+  email: string
+): Promise<string[]> => {
+  try {
+    return await fetchSignInMethodsForEmail(auth, email);
+  } catch (error: any) {
+    console.error("Error fetching sign-in methods:", error);
+    return [];
+  }
 };
