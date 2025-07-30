@@ -64,9 +64,21 @@ export default function CreatePollDialog({
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [templates, setTemplates] = useState<PollTemplate[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+  const [selectedTemplate, setSelectedTemplate] = useState<string>(
+    "create-from-scratch"
+  );
   const { user } = useAuthContext();
   const router = useRouter();
+
+  // Debug templates state
+  useEffect(() => {
+    console.log(
+      "Templates state changed:",
+      templates,
+      "Length:",
+      templates.length
+    );
+  }, [templates]);
 
   // Funkcja do uzyskania dzisiejszej daty w formacie YYYY-MM-DD
   const getTodayDate = () => {
@@ -133,6 +145,7 @@ export default function CreatePollDialog({
 
   // Wczytaj szablony przy otwieraniu dialogu
   useEffect(() => {
+    console.log("Dialog opened:", open);
     if (open) {
       loadTemplates();
     }
@@ -150,7 +163,7 @@ export default function CreatePollDialog({
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplate(templateId);
 
-    if (templateId === "") {
+    if (templateId === "create-from-scratch" || templateId === "no-templates") {
       // Reset to default values
       reset({
         title: "",
@@ -169,25 +182,10 @@ export default function CreatePollDialog({
     const template = templates.find((t) => t.id === templateId);
     if (!template) return;
 
-    // Calculate end times based on template duration
-    const now = new Date();
-    const votingEndTime = new Date(
-      now.getTime() + template.votingDurationHours * 60 * 60 * 1000
-    );
-    const orderingEndTime = new Date(
-      votingEndTime.getTime() +
-        (template.orderingDurationHours || 0) * 60 * 60 * 1000
-    );
-
     // Apply template values
-    setValue("title", template.name);
-    setValue(
-      "restaurants",
-      template.restaurantOptions.map((name) => ({ name, url: "" }))
-    );
-    setValue("votingDate", votingEndTime.toISOString().split("T")[0]);
-    setValue("votingTime", votingEndTime.toTimeString().slice(0, 5));
-    setValue("orderingTime", orderingEndTime.toTimeString().slice(0, 5));
+    setValue("title", template.title);
+    setValue("description", template.description || "");
+    setValue("restaurants", template.restaurants);
   };
 
   const onSubmit = async (data: PollFormData) => {
@@ -245,28 +243,35 @@ export default function CreatePollDialog({
           <DialogTitle>Utwórz nowe głosowanie</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Template Selection */}
-          {templates.length > 0 && (
-            <div className="space-y-2">
-              <Label htmlFor="template">Użyj szablonu (opcjonalne)</Label>
-              <Select
-                value={selectedTemplate}
-                onValueChange={handleTemplateSelect}
-              >
-                <SelectTrigger className="w-full">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <FileText className="w-4 h-4 flex-shrink-0" />
-                    <SelectValue placeholder="Wybierz szablon lub utwórz od zera" />
+          {/* Template Selection - zawsze widoczne */}
+          <div className="space-y-2">
+            <Label htmlFor="template">Użyj szablonu (opcjonalne)</Label>
+            <Select
+              value={selectedTemplate}
+              onValueChange={handleTemplateSelect}
+            >
+              <SelectTrigger className="w-full">
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileText className="w-4 h-4 flex-shrink-0" />
+                  <SelectValue placeholder="Wybierz szablon lub utwórz od zera" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="create-from-scratch">
+                  <div className="flex items-center gap-2">
+                    <Plus className="w-4 h-4" />
+                    Utwórz od zera
                   </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">
-                    <div className="flex items-center gap-2">
-                      <Plus className="w-4 h-4" />
-                      Utwórz od zera
+                </SelectItem>
+                {templates.length === 0 ? (
+                  <SelectItem value="no-templates" disabled>
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <FileText className="w-4 h-4" />
+                      Brak dostępnych szablonów
                     </div>
                   </SelectItem>
-                  {templates.map((template) => (
+                ) : (
+                  templates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
                       <div className="flex items-center gap-2 min-w-0">
                         <FileText className="w-4 h-4 flex-shrink-0" />
@@ -275,17 +280,22 @@ export default function CreatePollDialog({
                             {template.name}
                           </div>
                           <div className="text-xs text-slate-500 truncate">
-                            {template.restaurantOptions.length} restauracji,
-                            {template.votingDurationHours}h głosowania
+                            {template.restaurants.length} restauracji
                           </div>
                         </div>
                       </div>
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+            {templates.length === 0 && (
+              <p className="text-xs text-slate-500">
+                Brak szablonów w systemie. Administrator może utworzyć szablony
+                w ustawieniach ogólnych.
+              </p>
+            )}
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="title">Tytuł głosowania</Label>

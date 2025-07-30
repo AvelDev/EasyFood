@@ -50,9 +50,9 @@ export type User = {
 export type PollTemplate = {
   id: string;
   name: string;
-  restaurantOptions: string[];
-  votingDurationHours: number;
-  orderingDurationHours?: number;
+  title: string;
+  description?: string;
+  restaurants: RestaurantOption[];
   createdBy: string;
   createdAt: Date;
   isActive: boolean;

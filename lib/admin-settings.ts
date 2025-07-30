@@ -17,7 +17,7 @@ import { PollTemplate, AppSettings, User } from "@/types";
 
 // Szablony głosowań
 export async function createPollTemplate(
-  template: Omit<PollTemplate, "id" | "createdAt">,
+  template: Omit<PollTemplate, "id" | "createdAt">
 ): Promise<string> {
   try {
     const templateData = {
@@ -35,7 +35,7 @@ export async function createPollTemplate(
 
 export async function updatePollTemplate(
   templateId: string,
-  updates: Partial<Omit<PollTemplate, "id" | "createdAt" | "createdBy">>,
+  updates: Partial<Omit<PollTemplate, "id" | "createdAt" | "createdBy">>
 ): Promise<void> {
   try {
     const templateRef = doc(db, "pollTemplates", templateId);
@@ -60,7 +60,7 @@ export async function getPollTemplates(): Promise<PollTemplate[]> {
   try {
     const q = query(
       collection(db, "pollTemplates"),
-      orderBy("createdAt", "desc"),
+      orderBy("createdAt", "desc")
     );
 
     const querySnapshot = await getDocs(q);
@@ -71,9 +71,9 @@ export async function getPollTemplates(): Promise<PollTemplate[]> {
       templates.push({
         id: doc.id,
         name: data.name,
-        restaurantOptions: data.restaurantOptions,
-        votingDurationHours: data.votingDurationHours,
-        orderingDurationHours: data.orderingDurationHours,
+        title: data.title,
+        description: data.description,
+        restaurants: data.restaurants || [],
         createdBy: data.createdBy,
         createdAt: data.createdAt.toDate(),
         isActive: data.isActive,
@@ -89,10 +89,10 @@ export async function getPollTemplates(): Promise<PollTemplate[]> {
 
 export async function getActivePollTemplates(): Promise<PollTemplate[]> {
   try {
+    // Pobierz tylko aktywne szablony (bez orderBy żeby uniknąć potrzeby indeksu)
     const q = query(
       collection(db, "pollTemplates"),
-      where("isActive", "==", true),
-      orderBy("name", "asc"),
+      where("isActive", "==", true)
     );
 
     const querySnapshot = await getDocs(q);
@@ -103,14 +103,17 @@ export async function getActivePollTemplates(): Promise<PollTemplate[]> {
       templates.push({
         id: doc.id,
         name: data.name,
-        restaurantOptions: data.restaurantOptions,
-        votingDurationHours: data.votingDurationHours,
-        orderingDurationHours: data.orderingDurationHours,
+        title: data.title,
+        description: data.description,
+        restaurants: data.restaurants || [],
         createdBy: data.createdBy,
         createdAt: data.createdAt.toDate(),
         isActive: data.isActive,
       });
     });
+
+    // Sortuj w JavaScript zamiast w Firestore
+    templates.sort((a, b) => a.name.localeCompare(b.name));
 
     return templates;
   } catch (error) {
@@ -144,7 +147,7 @@ export async function getAppSettings(): Promise<AppSettings | null> {
 
 export async function updateAppSettings(
   updates: Partial<Pick<AppSettings, "discordWebhookUrl">>,
-  updatedBy: string,
+  updatedBy: string
 ): Promise<void> {
   try {
     const settingsRef = doc(db, "appSettings", "main");

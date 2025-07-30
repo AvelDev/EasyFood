@@ -21,8 +21,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Edit, Trash2, Clock, MapPin, Save, X } from "lucide-react";
-import { PollTemplate } from "@/types";
+import { Plus, Edit, Trash2, Save, X } from "lucide-react";
+import { PollTemplate, RestaurantOption } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -39,17 +39,21 @@ export function PollTemplateSettings() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<PollTemplate | null>(
-    null,
+    null
   );
   const [formData, setFormData] = useState({
     name: "",
-    restaurantOptions: "",
-    votingDurationHours: 2,
-    orderingDurationHours: 1,
+    title: "",
+    description: "",
+    restaurants: [
+      { name: "", url: "" },
+      { name: "", url: "" },
+    ] as RestaurantOption[],
     isActive: true,
   });
-  const { toast } = useToast();
+
   const { user } = useAuthContext();
+  const { toast } = useToast();
 
   const loadTemplates = useCallback(async () => {
     try {
@@ -60,7 +64,7 @@ export function PollTemplateSettings() {
       console.error("Error loading templates:", error);
       toast({
         title: "Błąd",
-        description: "Nie udało się załadować szablonów.",
+        description: "Nie udało się wczytać szablonów.",
         variant: "destructive",
       });
     } finally {
@@ -77,18 +81,27 @@ export function PollTemplateSettings() {
       setEditingTemplate(template);
       setFormData({
         name: template.name,
-        restaurantOptions: template.restaurantOptions.join("\n"),
-        votingDurationHours: template.votingDurationHours,
-        orderingDurationHours: template.orderingDurationHours || 1,
+        title: template.title,
+        description: template.description || "",
+        restaurants:
+          template.restaurants.length > 0
+            ? template.restaurants
+            : [
+                { name: "", url: "" },
+                { name: "", url: "" },
+              ],
         isActive: template.isActive,
       });
     } else {
       setEditingTemplate(null);
       setFormData({
         name: "",
-        restaurantOptions: "",
-        votingDurationHours: 2,
-        orderingDurationHours: 1,
+        title: "",
+        description: "",
+        restaurants: [
+          { name: "", url: "" },
+          { name: "", url: "" },
+        ],
         isActive: true,
       });
     }
@@ -100,19 +113,53 @@ export function PollTemplateSettings() {
     setEditingTemplate(null);
   };
 
+  const addRestaurant = () => {
+    setFormData({
+      ...formData,
+      restaurants: [...formData.restaurants, { name: "", url: "" }],
+    });
+  };
+
+  const removeRestaurant = (index: number) => {
+    if (formData.restaurants.length > 2) {
+      const newRestaurants = formData.restaurants.filter((_, i) => i !== index);
+      setFormData({
+        ...formData,
+        restaurants: newRestaurants,
+      });
+    }
+  };
+
+  const updateRestaurant = (
+    index: number,
+    field: "name" | "url",
+    value: string
+  ) => {
+    const newRestaurants = [...formData.restaurants];
+    newRestaurants[index] = { ...newRestaurants[index], [field]: value };
+    setFormData({
+      ...formData,
+      restaurants: newRestaurants,
+    });
+  };
+
   const handleSaveTemplate = async () => {
     if (!user) return;
 
     try {
-      const restaurantOptions = formData.restaurantOptions
-        .split("\n")
-        .map((option) => option.trim())
-        .filter((option) => option.length > 0);
+      const validRestaurants = formData.restaurants.filter(
+        (restaurant) => restaurant.name.trim().length > 0
+      );
 
-      if (!formData.name.trim() || restaurantOptions.length === 0) {
+      if (
+        !formData.name.trim() ||
+        !formData.title.trim() ||
+        validRestaurants.length < 2
+      ) {
         toast({
           title: "Błąd",
-          description: "Nazwa szablonu i lista restauracji są wymagane.",
+          description:
+            "Nazwa szablonu, tytuł i co najmniej 2 restauracje są wymagane.",
           variant: "destructive",
         });
         return;
@@ -121,17 +168,17 @@ export function PollTemplateSettings() {
       if (editingTemplate) {
         await updatePollTemplate(editingTemplate.id, {
           name: formData.name.trim(),
-          restaurantOptions,
-          votingDurationHours: formData.votingDurationHours,
-          orderingDurationHours: formData.orderingDurationHours,
+          title: formData.title.trim(),
+          description: formData.description.trim() || undefined,
+          restaurants: validRestaurants,
           isActive: formData.isActive,
         });
       } else {
         await createPollTemplate({
           name: formData.name.trim(),
-          restaurantOptions,
-          votingDurationHours: formData.votingDurationHours,
-          orderingDurationHours: formData.orderingDurationHours,
+          title: formData.title.trim(),
+          description: formData.description.trim() || undefined,
+          restaurants: validRestaurants,
           isActive: formData.isActive,
           createdBy: user.uid,
         });
@@ -156,19 +203,13 @@ export function PollTemplateSettings() {
     }
   };
 
-  const handleDeleteTemplate = async (template: PollTemplate) => {
-    if (!confirm(`Czy na pewno chcesz usunąć szablon "${template.name}"?`)) {
-      return;
-    }
-
+  const handleDeleteTemplate = async (templateId: string) => {
     try {
-      await deletePollTemplate(template.id);
-
+      await deletePollTemplate(templateId);
       toast({
         title: "Sukces",
-        description: "Szablon został usunięty",
+        description: "Szablon został usunięty.",
       });
-
       loadTemplates();
     } catch (error) {
       console.error("Error deleting template:", error);
@@ -183,14 +224,11 @@ export function PollTemplateSettings() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="animate-pulse">
-          <div className="w-1/4 h-4 mb-4 rounded bg-slate-200"></div>
-          <div className="space-y-2">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 rounded bg-slate-200"></div>
-            ))}
-          </div>
+        <div className="flex items-center justify-between">
+          <div className="animate-pulse bg-gray-200 h-6 w-32 rounded"></div>
+          <div className="animate-pulse bg-gray-200 h-9 w-32 rounded"></div>
         </div>
+        <div className="animate-pulse bg-gray-200 h-48 rounded-lg"></div>
       </div>
     );
   }
@@ -198,22 +236,16 @@ export function PollTemplateSettings() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-medium">Szablony głosowań</h3>
-          <p className="text-sm text-slate-600">
-            Utwórz szablony z predefiniowanymi restauracjami, które można szybko
-            użyć przy tworzeniu nowych głosowań.
-          </p>
-        </div>
-        <Button onClick={() => handleOpenDialog()} className="gap-2">
-          <Plus className="w-4 h-4" />
+        <h3 className="text-lg font-medium">Szablony głosowań</h3>
+        <Button onClick={() => handleOpenDialog()}>
+          <Plus className="w-4 h-4 mr-2" />
           Dodaj szablon
         </Button>
       </div>
 
       {templates.length === 0 ? (
-        <div className="py-8 text-center text-slate-500">
-          <MapPin className="w-12 h-12 mx-auto mb-4 opacity-50" />
+        <div className="text-center py-12 text-muted-foreground space-y-2">
+          <Plus className="w-12 h-12 mx-auto mb-4 opacity-50" />
           <p>Brak szablonów głosowań</p>
           <p className="text-sm">
             Utwórz pierwszy szablon, aby szybko tworzyć głosowania.
@@ -225,9 +257,8 @@ export function PollTemplateSettings() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nazwa</TableHead>
+                <TableHead>Tytuł</TableHead>
                 <TableHead>Restauracje</TableHead>
-                <TableHead>Czas głosowania</TableHead>
-                <TableHead>Czas zamówień</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Akcje</TableHead>
               </TableRow>
@@ -237,8 +268,18 @@ export function PollTemplateSettings() {
                 <TableRow key={template.id}>
                   <TableCell className="font-medium">{template.name}</TableCell>
                   <TableCell>
+                    <div>
+                      <div className="font-medium">{template.title}</div>
+                      {template.description && (
+                        <div className="text-sm text-muted-foreground">
+                          {template.description}
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
                     <div className="flex flex-wrap gap-1">
-                      {template.restaurantOptions
+                      {template.restaurants
                         .slice(0, 3)
                         .map((restaurant, index) => (
                           <Badge
@@ -246,26 +287,14 @@ export function PollTemplateSettings() {
                             variant="outline"
                             className="text-xs"
                           >
-                            {restaurant}
+                            {restaurant.name}
                           </Badge>
                         ))}
-                      {template.restaurantOptions.length > 3 && (
+                      {template.restaurants.length > 3 && (
                         <Badge variant="outline" className="text-xs">
-                          +{template.restaurantOptions.length - 3}
+                          +{template.restaurants.length - 3}
                         </Badge>
                       )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {template.votingDurationHours}h
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {template.orderingDurationHours || 0}h
                     </div>
                   </TableCell>
                   <TableCell>
@@ -287,7 +316,7 @@ export function PollTemplateSettings() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDeleteTemplate(template)}
+                        onClick={() => handleDeleteTemplate(template.id)}
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>
@@ -300,21 +329,19 @@ export function PollTemplateSettings() {
         </div>
       )}
 
-      {/* Dialog for creating/editing templates */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>
               {editingTemplate ? "Edytuj szablon" : "Nowy szablon"}
             </DialogTitle>
             <DialogDescription>
-              {editingTemplate
-                ? "Zaktualizuj istniejący szablon głosowania"
-                : "Utwórz nowy szablon głosowania z predefiniowanymi restauracjami"}
+              Szablon pozwala na szybkie tworzenie głosowań z predefiniowanymi
+              restauracjami.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 py-4">
             <div>
               <Label htmlFor="name">Nazwa szablonu</Label>
               <Input
@@ -323,59 +350,81 @@ export function PollTemplateSettings() {
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                placeholder="np. Obiad w centrum"
+                placeholder="np. Lunch w biurze"
               />
             </div>
 
             <div>
-              <Label htmlFor="restaurants">Restauracje (jedna na linię)</Label>
-              <Textarea
-                id="restaurants"
-                value={formData.restaurantOptions}
+              <Label htmlFor="title">Tytuł głosowania</Label>
+              <Input
+                id="title"
+                value={formData.title}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    restaurantOptions: e.target.value,
-                  })
+                  setFormData({ ...formData, title: e.target.value })
                 }
-                placeholder="McDonald's&#10;KFC&#10;Subway&#10;Pizza Hut"
-                rows={6}
+                placeholder="np. Gdzie zamawiamy lunch?"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="votingHours">Czas głosowania (godz.)</Label>
-                <Input
-                  id="votingHours"
-                  type="number"
-                  min="1"
-                  max="24"
-                  value={formData.votingDurationHours}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      votingDurationHours: parseInt(e.target.value) || 2,
-                    })
-                  }
-                />
+            <div>
+              <Label htmlFor="description">Opis (opcjonalny)</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                placeholder="Dodatkowe informacje o głosowaniu..."
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <Label>Restauracje (minimum 2)</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addRestaurant}
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                  Dodaj
+                </Button>
               </div>
 
-              <div>
-                <Label htmlFor="orderingHours">Czas zamówień (godz.)</Label>
-                <Input
-                  id="orderingHours"
-                  type="number"
-                  min="0"
-                  max="24"
-                  value={formData.orderingDurationHours}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      orderingDurationHours: parseInt(e.target.value) || 1,
-                    })
-                  }
-                />
+              <div className="space-y-3">
+                {formData.restaurants.map((restaurant, index) => (
+                  <div key={index} className="flex gap-2 items-start">
+                    <div className="flex-1">
+                      <Input
+                        placeholder="Nazwa restauracji"
+                        value={restaurant.name}
+                        onChange={(e) =>
+                          updateRestaurant(index, "name", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <Input
+                        placeholder="Link do menu (opcjonalny)"
+                        value={restaurant.url || ""}
+                        onChange={(e) =>
+                          updateRestaurant(index, "url", e.target.value)
+                        }
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeRestaurant(index)}
+                      disabled={formData.restaurants.length <= 2}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ))}
               </div>
             </div>
 
