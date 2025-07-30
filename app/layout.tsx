@@ -8,7 +8,7 @@ import Footer from "@/components/footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Aplikacja do głosowania na restauracje",
+  title: "EasyFood - Głosowanie i zamówienia dla zespołów",
   description: "Głosuj na restauracje i składaj zamówienia ze swoim zespołem",
   icons: {
     icon: [
