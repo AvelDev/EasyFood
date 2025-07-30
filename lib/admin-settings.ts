@@ -211,6 +211,46 @@ export async function getAllUsers(): Promise<User[]> {
   }
 }
 
+// Zarządzanie rolami użytkowników
+export async function updateUserRole(
+  uid: string,
+  newRole: "admin" | "user"
+): Promise<void> {
+  try {
+    const userRef = doc(db, "users", uid);
+    await updateDoc(userRef, {
+      role: newRole,
+    });
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    throw new Error("Nie udało się zaktualizować roli użytkownika");
+  }
+}
+
+export async function getUser(uid: string): Promise<User | null> {
+  try {
+    const userRef = doc(db, "users", uid);
+    const userDoc = await getDoc(userRef);
+
+    if (!userDoc.exists()) {
+      return null;
+    }
+
+    const data = userDoc.data();
+    return {
+      uid: userDoc.id,
+      name: data.name || "Nieznany użytkownik",
+      role: data.role || "user",
+      privacyPolicyAccepted: data.privacyPolicyAccepted || false,
+      privacyPolicyAcceptedAt: data.privacyPolicyAcceptedAt?.toDate(),
+      createdAt: data.createdAt?.toDate(),
+    };
+  } catch (error) {
+    console.error("Error getting user:", error);
+    throw new Error("Nie udało się pobrać danych użytkownika");
+  }
+}
+
 // Test webhook Discord
 export async function testDiscordWebhook(webhookUrl: string): Promise<void> {
   try {

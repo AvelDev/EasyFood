@@ -198,7 +198,7 @@ export function UserManagement() {
               <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-purple-900">
                 {users.filter((u) => u.role === "admin").length}
               </p>
-              <p className="text-sm sm:text-base lg:text-lg text-purple-700">
+              <p className="text-sm sm:text-base lg:text-lg text-purple-700 font-semibold">
                 Administratorzy
               </p>
             </div>
@@ -307,13 +307,29 @@ export function UserManagement() {
                     <TableCell>
                       <div className="flex items-center gap-2 sm:gap-3">
                         {user.role === "admin" ? (
-                          <Crown className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 flex-shrink-0" />
+                          <div className="relative">
+                            <Crown className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 flex-shrink-0 animate-pulse" />
+                            <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-ping"></div>
+                          </div>
                         ) : (
                           <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 flex-shrink-0" />
                         )}
-                        <span className="font-medium text-sm sm:text-base">
-                          {user.name}
-                        </span>
+                        <div className="flex flex-col">
+                          <span
+                            className={`font-medium text-sm sm:text-base ${
+                              user.role === "admin"
+                                ? "text-yellow-700 font-bold"
+                                : "text-slate-900"
+                            }`}
+                          >
+                            {user.name}
+                          </span>
+                          {user.role === "admin" && (
+                            <span className="text-xs text-yellow-600 font-medium">
+                              Administrator
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
@@ -326,7 +342,11 @@ export function UserManagement() {
                         variant={
                           user.role === "admin" ? "default" : "secondary"
                         }
-                        className="text-xs sm:text-sm"
+                        className={`text-xs sm:text-sm ${
+                          user.role === "admin"
+                            ? "bg-gradient-to-r from-yellow-400 to-yellow-600 text-yellow-900 font-bold shadow-lg border-yellow-300"
+                            : ""
+                        }`}
                       >
                         {user.role === "admin" ? "Administrator" : "Użytkownik"}
                       </Badge>

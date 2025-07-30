@@ -29,7 +29,16 @@ service cloud.firestore {
       allow read: if request.auth != null;
       
       // Tworzenie i aktualizacja tylko własnych danych
-      allow create, update: if request.auth != null && request.auth.uid == userId;
+      // WYJĄTEK: Administratorzy mogą aktualizować pole 'role' innych użytkowników
+      allow create: if request.auth != null && request.auth.uid == userId;
+      
+      allow update: if request.auth != null && 
+                    (request.auth.uid == userId || 
+                     (isAdmin() && 
+                      // Administratorzy mogą zmieniać tylko pole 'role'
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role']) &&
+                      // Nowa rola musi być 'admin' lub 'user'
+                      request.resource.data.role in ['admin', 'user']));
       
       // Pozwól użytkownikowi usunąć własne konto
       allow delete: if request.auth != null && request.auth.uid == userId;

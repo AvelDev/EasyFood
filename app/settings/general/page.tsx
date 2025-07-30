@@ -11,11 +11,41 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { PollTemplateSettings } from "@/components/settings/poll-template-settings";
 import { UserManagement } from "@/components/settings/user-management";
+import { AdminManagement } from "@/components/settings/admin-management";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { getAllUsers } from "@/lib/admin-settings";
+import { User } from "@/types";
+import { useToast } from "@/hooks/use-toast";
 
 export default function GeneralSettingsPage() {
   const { user, loading } = usePrivacyProtection("/settings/general");
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const { toast } = useToast();
+
+  const loadUsers = useCallback(async () => {
+    setIsLoadingUsers(true);
+    try {
+      const usersData = await getAllUsers();
+      setUsers(usersData);
+    } catch (error) {
+      toast({
+        title: "Błąd",
+        description: "Nie udało się załadować listy użytkowników.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    if (user && user.role === "admin") {
+      loadUsers();
+    }
+  }, [user, loadUsers]);
 
   if (loading) {
     return (
@@ -80,9 +110,32 @@ export default function GeneralSettingsPage() {
           <Separator className="my-4 sm:my-6" />
 
           {/* Settings Sections */}
-          <div className="grid gap-4 sm:gap-6 lg:gap-8 lg:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+          <div className="grid gap-4 sm:gap-6 lg:gap-8 lg:grid-cols-1 xl:grid-cols-1 2xl:grid-cols-1">
+            {/* Admin Management */}
+            <Card className="overflow-hidden">
+              <CardHeader className="p-4 sm:p-6 lg:p-8">
+                <CardTitle className="text-lg sm:text-xl lg:text-2xl">
+                  Zarządzanie administratorami
+                </CardTitle>
+                <CardDescription className="text-sm sm:text-base lg:text-lg">
+                  Nadawaj i odbieraj rangi administratora konkretnym
+                  użytkownikom
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6 lg:p-8 pt-0">
+                {isLoadingUsers ? (
+                  <div className="animate-pulse space-y-4">
+                    <div className="h-20 bg-slate-200 rounded"></div>
+                    <div className="h-16 bg-slate-200 rounded"></div>
+                  </div>
+                ) : (
+                  <AdminManagement users={users} onUserUpdate={loadUsers} />
+                )}
+              </CardContent>
+            </Card>
+
             {/* Poll Templates */}
-            <Card className="lg:col-span-2 xl:col-span-1 2xl:col-span-2 overflow-hidden">
+            <Card className="overflow-hidden">
               <CardHeader className="p-4 sm:p-6 lg:p-8">
                 <CardTitle className="text-lg sm:text-xl lg:text-2xl">
                   Szablony głosowań
@@ -98,7 +151,7 @@ export default function GeneralSettingsPage() {
             </Card>
 
             {/* User Management */}
-            <Card className="lg:col-span-2 xl:col-span-1 2xl:col-span-2 overflow-hidden">
+            <Card className="overflow-hidden">
               <CardHeader className="p-4 sm:p-6 lg:p-8">
                 <CardTitle className="text-lg sm:text-xl lg:text-2xl">
                   Zarządzanie użytkownikami
@@ -108,7 +161,14 @@ export default function GeneralSettingsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-4 sm:p-6 lg:p-8 pt-0">
-                <UserManagement />
+                {isLoadingUsers ? (
+                  <div className="animate-pulse space-y-4">
+                    <div className="h-32 bg-slate-200 rounded"></div>
+                    <div className="h-64 bg-slate-200 rounded"></div>
+                  </div>
+                ) : (
+                  <UserManagement />
+                )}
               </CardContent>
             </Card>
           </div>
