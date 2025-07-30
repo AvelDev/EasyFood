@@ -8,7 +8,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Crown, Settings, ChevronDown } from "lucide-react";
+import {
+  User,
+  LogOut,
+  Crown,
+  Settings,
+  ChevronDown,
+  AppWindowMacIcon,
+} from "lucide-react";
 import { useAuthContext } from "@/contexts/auth-context";
 import { signOut } from "@/lib/auth";
 import { useRouter } from "next/navigation";
@@ -68,15 +75,15 @@ export default function Navbar() {
                       className="flex items-center cursor-pointer gap-2"
                     >
                       <Settings className="w-4 h-4" />
-                      Ustawienia
+                      Ustawienia Konta
                     </DropdownMenuItem>
                     {user.role === "admin" && (
                       <DropdownMenuItem
                         onClick={() => router.push("/settings/general")}
                         className="flex items-center cursor-pointer gap-2"
                       >
-                        <Crown className="w-4 h-4" />
-                        Ustawienia ogólne
+                        <AppWindowMacIcon className="w-4 h-4" />
+                        Ustawienia Aplikacji
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />

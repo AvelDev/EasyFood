@@ -117,7 +117,7 @@ export const signInWithProvider = async (
           .join(", ");
 
         throw new Error(
-          `Konto z tym adresem e-mail już istnieje. Zaloguj się używając: ${providerNames}, a następnie w ustawieniach możesz połączyć konta.`
+          `Konto z tym adresem e-mail już istnieje. Zaloguj się używając: ${providerNames}, a następnie w ustawieniach konta możesz połączyć konta.`
         );
       } else {
         throw new Error(

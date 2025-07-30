@@ -52,7 +52,7 @@ export default function SettingsPage() {
           {/* Header */}
           <div className="space-y-2">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900">
-              Ustawienia
+              Ustawienia Konta
             </h1>
             <p className="text-sm sm:text-base lg:text-lg text-slate-600">
               Zarządzaj swoim kontem i preferencjami aplikacji
