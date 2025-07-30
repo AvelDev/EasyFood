@@ -10,6 +10,20 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Aplikacja do głosowania na restauracje",
   description: "Głosuj na restauracje i składaj zamówienia ze swoim zespołem",
+  icons: {
+    icon: [
+      { url: "/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon/favicon.ico", sizes: "any" }
+    ],
+    apple: "/favicon/apple-touch-icon.png",
+    other: [
+      {
+        rel: "manifest",
+        url: "/favicon/site.webmanifest"
+      }
+    ]
+  },
 };
 
 export default function RootLayout({
