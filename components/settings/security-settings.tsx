@@ -21,6 +21,7 @@ import {
   CheckCircle,
   Mail,
   RefreshCw,
+  Key,
 } from "lucide-react";
 import { AuthUser } from "@/hooks/use-auth";
 import {
@@ -29,11 +30,14 @@ import {
   sendEmailVerificationToUser,
   reloadUserData,
   isTrustedProvider,
+  hasPasswordProvider,
 } from "@/lib/auth";
 import { deleteUserAccount } from "@/lib/user-settings";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import AddPasswordForm from "@/components/auth/add-password-form";
+import ChangePasswordForm from "@/components/auth/change-password-form";
 
 interface SecuritySettingsProps {
   user: AuthUser;
@@ -44,11 +48,16 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [isSendingVerification, setIsSendingVerification] = useState(false);
   const [isReloadingData, setIsReloadingData] = useState(false);
+  const [showAddPasswordForm, setShowAddPasswordForm] = useState(false);
+  const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
   // Sprawdź, czy email jest efektywnie zweryfikowany
   const emailVerified = isEmailEffectivelyVerified(user);
+
+  // Sprawdź, czy użytkownik ma hasło
+  const userHasPassword = hasPasswordProvider(user);
 
   // Sprawdź, czy użytkownik używa tylko zaufanych providerów
   const onlyTrustedProviders =
@@ -212,6 +221,111 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
           {/* Account Security */}
         </div>
       </div>
+
+      {/* Password Management */}
+      <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+        <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-slate-900">
+          Zarządzanie hasłem
+        </h3>
+
+        <div className="p-4 sm:p-5 lg:p-6 border rounded-lg border-slate-200">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 lg:gap-6">
+            <Key className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-slate-600 mt-1 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <h4 className="font-medium text-sm sm:text-base lg:text-lg text-slate-900">
+                {userHasPassword ? "Hasło konta" : "Dodaj hasło"}
+              </h4>
+              <p className="mt-2 text-xs sm:text-sm lg:text-base text-slate-600">
+                {userHasPassword
+                  ? "Twoje konto ma ustawione hasło. Możesz je zmienić w ustawieniach bezpieczeństwa."
+                  : "Dodaj hasło do swojego konta, aby móc logować się bez external providerów i zwiększyć bezpieczeństwo."}
+              </p>
+
+              {!userHasPassword && (
+                <>
+                  <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-xs sm:text-sm text-blue-800">
+                      <strong>Korzyści z dodania hasła:</strong>
+                    </p>
+                    <ul className="mt-1 text-xs sm:text-sm text-blue-700 space-y-1">
+                      <li>
+                        • Możliwość logowania bez Google/Microsoft/Discord
+                      </li>
+                      <li>• Dodatkowa warstwa bezpieczeństwa</li>
+                      <li>• Backup w przypadku problemów z OAuth</li>
+                    </ul>
+                  </div>
+
+                  <Button
+                    onClick={() => setShowAddPasswordForm(true)}
+                    variant="outline"
+                    className="mt-4 w-full sm:w-auto min-w-[160px] h-10 sm:h-11"
+                  >
+                    <Key className="w-4 h-4 mr-2" />
+                    Dodaj hasło
+                  </Button>
+                </>
+              )}
+
+              {userHasPassword && (
+                <>
+                  <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex items-center">
+                      <CheckCircle className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm text-green-800">
+                        Hasło jest skonfigurowane
+                      </span>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={() => setShowChangePasswordForm(true)}
+                    variant="outline"
+                    className="mt-4 w-full sm:w-auto min-w-[160px] h-10 sm:h-11"
+                  >
+                    <Key className="w-4 h-4 mr-2" />
+                    Zmień hasło
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Show Add Password Form */}
+      {showAddPasswordForm && (
+        <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+          <AddPasswordForm
+            onSuccess={() => {
+              setShowAddPasswordForm(false);
+              toast({
+                title: "Hasło dodane pomyślnie",
+                description: "Możesz teraz logować się używając email i hasło.",
+              });
+              // Przeładuj stronę, aby zaktualizować status
+              setTimeout(() => window.location.reload(), 2000);
+            }}
+            onCancel={() => setShowAddPasswordForm(false)}
+          />
+        </div>
+      )}
+
+      {/* Show Change Password Form */}
+      {showChangePasswordForm && (
+        <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+          <ChangePasswordForm
+            onSuccess={() => {
+              setShowChangePasswordForm(false);
+              toast({
+                title: "Hasło zmienione pomyślnie",
+                description: "Twoje hasło zostało zaktualizowane.",
+              });
+            }}
+            onCancel={() => setShowChangePasswordForm(false)}
+          />
+        </div>
+      )}
 
       {/* Session Management */}
       <div className="space-y-3 sm:space-y-4 lg:space-y-6">
